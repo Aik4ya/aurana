@@ -1,3 +1,33 @@
+document.getElementById('bulle').addEventListener('click', function() {
+  var form = document.getElementById('ticket-form');
+  if (form.style.display === 'none') {
+      form.style.display = 'block';
+  } else {
+      form.style.display = 'none';
+  }
+});
+
+var swiper = new Swiper('.swiper-container', {
+  slidesPerView: 1,
+  spaceBetween: 20,
+  effect: 'fade',
+  loop: true,
+  speed: 300,
+  mousewheel: {
+    invert: false,
+  },
+  pagination: {
+    el: '.swiper-pagination',
+    clickable: true,
+    dynamicBullets: true
+  },
+  // Navigation arrows
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  }
+});
+
 (function() {
   "use strict";
 
@@ -118,4 +148,6 @@
     });
   }
 })()
+
+
 

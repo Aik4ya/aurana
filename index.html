@@ -56,8 +56,19 @@
     </div>
   </header>
 
-  <!--Premiere section-->
+  <!--Hero Section-->
   <section id="hero" class="d-flex align-items-center">
+    <div class="waveWrapper waveAnimation">
+      <div class="waveWrapperInner bgTop">
+        <div class="wave waveTop" style="background-image: url(/img/wave-bot.png)"></div>
+      </div>
+      <div class="waveWrapperInner bgMiddle">
+        <div class="wave waveMiddle" style="background-image: url(/img/wave-bot.png)"></div>
+      </div>
+      <div class="waveWrapperInner bgBottom">
+        <div class="wave waveBottom" style="background-image: url(/img/wave-bot.png)"></div>
+      </div>
+    </div>
     <div class="container-fluid" data-aos="fade-up">
       <div class="row justify-content-center">
         <div class="col-xl-5 col-lg-6 pt-3 pt-lg-0 order-2 order-lg-1 d-flex flex-column justify-content-center">
@@ -73,7 +84,6 @@
   </section>
 
   <!--Seconde Section /// Caroussel -->
-
   
   <footer class="footer">
     <div class="footer__addr">
@@ -158,18 +168,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
   <!--JS-->
   <script src="js/main.js"></script>
-
-  <script>
-      document.getElementById('bulle').addEventListener('click', function() {
-        var form = document.getElementById('ticket-form');
-        if (form.style.display === 'none') {
-            form.style.display = 'block';
-        } else {
-            form.style.display = 'none';
-        }
-    });
-  </script>
-
 </body>
 
 </html>
