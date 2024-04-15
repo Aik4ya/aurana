@@ -173,7 +173,7 @@ h6 {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: -20px;
   top: 0;
   margin: auto;
 }
@@ -259,6 +259,7 @@ h6 {
   }
 }
 
+
 @keyframes up-down {
   0% {
     transform: translateY(10px);
@@ -267,6 +268,167 @@ h6 {
   100% {
     transform: translateY(-10px);
   }
+}
+
+#secondsection{
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#secondsection h1{
+  font-size: 30px;
+  position: relative;
+  margin-bottom: 80px;
+}
+
+#secondsection h1::after{
+  content: '';
+  width: 150px;
+  height: 3px;
+  background: linear-gradient(to right, #007bff, #0051a7);
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#secondsection .s-box{
+  width: 90%;
+  max-width: 700px;
+  height: 300px;
+  border-radius: 10px;
+  box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+#secondsection .card-s{
+  height: 300px;
+  padding: 40px;
+  color: #fff;
+  line-height: 22px;
+  box-sizing: border-box;
+  background: #fff;
+  position: relative;
+}
+
+#secondsection .profile{
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+#secondsection h3{
+  font-size: 26px;
+  color: #2C74B3;
+  margin-bottom: 8px;
+}
+#secondsection p{
+  color: #000;
+}
+
+#secondsection #slide {
+  width: 100%;
+  padding-right: 60px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#secondsection .sidebar{
+  width: 60px;
+  height: 100%;
+  padding: 15px 0;
+  box-sizing: border-box;
+  background: #2C74B3;
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#troisimesection {
+    background-color: #006CDB;
+    color: white;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    margin-bottom: 100px;
+}
+#troisimesection .container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px 20px;
+}
+#troisimesection .categories {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+#troisimesection .test {
+    display: flex;
+    align-items: flex-end;
+}
+#troisimesection .category {
+    cursor: pointer;
+    border-bottom: 1px solid #ccc;
+    flex-grow: 1; 
+    text-align: center; 
+    margin-right: 10px; 
+    margin-left: 10px; 
+}
+#troisimesection .selected {
+    border-bottom: 2px solid gray; 
+}
+#troisimesection .category:hover {
+    border-bottom: 1px solid gray; 
+}
+#troisimesection .category-description {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Deux colonnes égales */
+    grid-gap: 20px; /* Espacement entre les colonnes */
+    align-items: start; /* Alignement en haut */
+    margin-top: 20px;
+}
+#troisimesection .features {
+    grid-column: 1; /* Span sur la première colonne */
+    margin-bottom: 200px;
+}
+#troisimesection .feature {
+    margin-bottom: 5px; /* Ajustement de la marge inférieure */
+    padding: 5px 10px;
+    border-radius: 15px; /* Réduction du rayon de bordure */
+    border: 1px solid #ccc;
+    display: inline-block; /* Affichage en ligne pour occuper moins d'espace */
+    font-size: 12px; /* Réduction de la taille de la police */
+}
+#troisimesection .feature-list {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de liste de passer à la ligne si nécessaire */
+    justify-content: flex-start;
+    list-style-type: none; /* Supprime les puces de liste */
+    padding: 0; /* Supprime les marges intérieures de la liste */
+}
+#troisimesection .feature-list li {
+    margin: 5px; /* Espacement entre les éléments de liste */
+}
+#troisimesection .img-container {
+    grid-column: 2; /* Image sur la deuxième colonne */
+    align-self: center; /* Centre verticalement */
+}
+#troisimesection img {
+    max-width: 300px;
+    height: auto;
+}
+#troisimesection .img-fluid {
+    max-width: 170%;
+    height: auto;
 }
 
 .footer {
