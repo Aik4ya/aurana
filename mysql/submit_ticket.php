@@ -1,24 +1,10 @@
 <?php
-function connexion_bdd()
-{
-    $bdd_login = 'aurana';
-    $bdd_password = 'aurana2024';
 
-    try {
-        $dbh = new PDO('mysql:host=localhost;dbname=Aurana_bdd', $bdd_login, $bdd_password);
-        return $dbh;
-
-    } catch (PDOException $e) {
-        var_dump($e);
-        return null;
-    }
-}
-
+require_once '../mysql/connexion_bdd.php';
 require '../mysql/cookies_uid.php';
 
-$page = 'main';
-$uid = lecture_cookie_uid();
-ecriture_log($uid, $page);
+session_start();
+$uid = $_SESSION['uid'];
 
 // Vérifier si la méthode de requête est POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -1,3 +1,21 @@
+<?php
+
+session_start();
+if (isset($_SESSION['expiration']) && time() < $_SESSION['expiration'])
+{
+    if (isset($_SESSION['page_precedente']))
+                {
+                    $path = $_SESSION['page_precedente'];
+                    header("Location: $path");
+                    exit();
+                }
+                
+    header("Location: ../pages/main.php");
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

@@ -1,9 +1,10 @@
 <?php
+
 require_once '../mysql/cookies_uid.php';
 
-$page = 'main_task';
-$uid = lecture_cookie_uid();
-ecriture_log($uid,$page);
+ecriture_log('main_task');
+verif_session();
+$_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
 ?>
 
 <!DOCTYPE html>
@@ -82,7 +83,11 @@ ecriture_log($uid,$page);
             <div class="top">
                 <!-- début de l'utilisateur -->
                 <div class="user">
-                    <h2>BDD_Pseudo<br><span>BDD_Droit</span></h2>
+                    <?php
+                        session_start();
+                        echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+                        echo "<span>" . $_SESSION['Droit'] . "</span></h2>";
+                    ?>
                     <div class="arrow">
                         <span class="material-symbols-outlined">
                             expand_more
@@ -166,7 +171,4 @@ ecriture_log($uid,$page);
         </div>
         <!-- fin de droite -->
     </div>
-    
-    
-    <script src="../js/aurana.js"></script>
 </body>

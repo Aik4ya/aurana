@@ -25,7 +25,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(#DFF5FF, #c5caff);
+    background: linear-gradient(#9fa7d621, #c5caff40);
 }
 
 ::-webkit-scrollbar{
@@ -47,25 +47,13 @@ body {
         'opsz'48
 }
 
-
-
-
 /* container start */
 .container {
     position: relative;
     width: 95%;
     height: 95vh;
-    background: rgba(199, 210, 255, 0.4);
-    border-radius: 25px;
-    backdrop-filter: blur(10px);
-    border: 5px solid rgba(255, 255, 255, .4);
-    box-shadow: 0 0 5px rgba(0, 0, 0, .1),
-        0 0 10px rgba(0, 0, 0, .2),
-        0 0 15px rgba(0, 0, 0, .2);
-    padding: 20px;
     display: flex;
     gap: 20px;
-    overflow: hidden;
 }
 /* left start */
 .container .left {
@@ -190,13 +178,10 @@ body {
 
 
 
-/* upgrade start */
-.container .upgrade {
+/* disconnect start */
+.container .disconnect {
     position: relative;
     width: calc(100% - 30px);
-    height: 180px;
-    background: linear-gradient(145deg, #d488ea, #8389f9);
-    border-radius: 20px;
     text-align: center;
     display: flex;
     justify-content: space-between;
@@ -206,21 +191,11 @@ body {
     z-index: -1;
     overflow: hidden;
 }
-.container .upgrade h4 {
-    color: #fff;
-    font-size: 1.2em;
-    font-weight: 400;
-    margin-top: 25px;
-}
-.container .upgrade .upBtn {
-    position: relative;
-    width: 100%;
+.container .disconnect .decoBtn {
     height: 40px;
     background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
 }
-.container .upgrade .upBtn button {
+.container .disconnect .decoBtn button {
     position: absolute;
     top: 0;
     left: 0;
@@ -234,7 +209,7 @@ body {
     font-weight: 500;
     cursor: pointer;
 }
-/* upgrade end */
+/* disconnect end */
 /* left end */
 /* right start */
 .container .right {
@@ -251,7 +226,7 @@ body {
     width: 100%;
     height: 70px;
     display: flex;
-    justify-content: right;
+    justify-content: space-between;
     align-items: center;
     padding: 20px;
     background: #fff;
@@ -1031,4 +1006,34 @@ body {
     .container .right .top .user h2 {
         display: none;
     }
+}
+
+.createTaskMenu {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 9999;
+}
+
+.createTaskMenu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.createTaskMenu ul li a {
+    display: block;
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+}
+
+.createTaskMenu ul li a:hover {
+    background-color: #f1f1f1;
+}
+
+.show {
+    display: block;
 }

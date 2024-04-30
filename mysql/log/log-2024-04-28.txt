@@ -1,0 +1,19 @@
+2024-04-28 13:02:54 - Utilisateur  a visité la page 20
+2024-04-28 13:02:54 - Utilisateur  a visité la page BackOffice
+2024-04-28 13:03:00 - Utilisateur 22 a visité la page main
+2024-04-28 13:03:06 - Utilisateur 22 a visité la page 20
+2024-04-28 13:03:06 - Utilisateur 22 a visité la page BackOffice
+2024-04-28 13:03:07 - Utilisateur 22 a visité la page 20
+2024-04-28 13:03:07 - Utilisateur 22 a visité la page BackOffice
+2024-04-28 13:03:20 - Utilisateur 22 a visité la page 20
+2024-04-28 13:03:20 - Utilisateur 22 a visité la page BackOffice
+2024-04-28 13:20:20 - Utilisateur 22 a visité la page 20
+2024-04-28 13:20:20 - Utilisateur 22 a visité la page BackOffice
+2024-04-28 13:20:26 - Utilisateur 22 a visité la page main
+2024-04-28 16:50:12 - Utilisateur 28 a visité la page main
+2024-04-28 16:50:33 - Utilisateur 28 a visité la page main_task
+2024-04-28 16:50:35 - Utilisateur 28 a visité la page main_chat
+2024-04-28 16:51:05 - Utilisateur 28 a visité la page main_chat
+2024-04-28 16:51:16 - Utilisateur 28 a visité la page main_chat
+2024-04-28 16:51:18 - Utilisateur 28 a visité la page main_task
+2024-04-28 16:51:19 - Utilisateur 28 a visité la page main

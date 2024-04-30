@@ -285,6 +285,18 @@ h6 {
   margin-bottom: 80px;
 }
 
+.arrow-right {
+  width: 20px;
+  height: 20px;
+  background-color: #2C74B3; /* Couleur de fond de la flèche */
+  position: absolute;
+  right: -10px; /* Ajustez la position horizontale selon vos besoins */
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg); /* Rotation de la flèche */
+  cursor: pointer;
+}
+
+
 #secondsection h1::after{
   content: '';
   width: 150px;
@@ -359,11 +371,9 @@ h6 {
     margin: 0;
     padding: 0;
     border: 0;
-    margin-bottom: 100px;
 }
 #troisimesection .container {
     max-width: 800px;
-    margin: 50px auto;
     padding: 20px 20px;
 }
 #troisimesection .categories {

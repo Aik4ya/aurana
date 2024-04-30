@@ -1,9 +1,14 @@
 <?php
-require '../mysql/cookies_uid.php';
+require_once '../mysql/cookies_uid.php';
+require_once '../mysql/connexion_bdd.php';
 
-$page = 'main';
-$uid = lecture_cookie_uid();
-ecriture_log($uid,$page);
+session_start();
+$_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
+
+ecriture_log('main');
+verif_session();
+
+
 ?>
 
 <!DOCTYPE html>
@@ -14,6 +19,7 @@ ecriture_log($uid,$page);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aurana - Dashboard</title>
     <link rel="stylesheet" href="../css/main.css">
+    <script type="text/javascript" src="../js/aurana.js"></script>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
@@ -74,15 +80,59 @@ ecriture_log($uid,$page);
                 <!-- nav end -->
             </header>
             <!-- header end -->
+            <div class="disconnect">
+                <div class="decoBtn">
+                    <button>Deconnexion</button>
+                </div>
+            </div>
         </div>
         <!-- left end -->
         <!-- right start -->
         <div class="right">
             <!-- top start -->
             <div class="top">
+                <!-- searchBx start -->
+                <div class="searchBx">
+                    <h2>Nom du Groupe</h2>
+                    <!-- <div class="inputBx">
+                        <input type="text" placeholder="Search...">
+                        <span class="material-symbols-outlined searchClose">
+                            close
+                        </span>
+                    </div> -->
+                </div>
+                <!-- searchBx end -->
                 <!-- user start -->
                 <div class="user">
-                    <h2>BDD_Utilisateur<br><span>BDD_Rank</span></h2>
+                    <?php
+                    session_start();
+                    $conn = connexion_bdd();
+                    // Afficher le pseudo et le droit de l'utilisateur
+                    echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+
+                    if ($_SESSION['Droit'] == 0) {
+                        echo "<span>User</span></h2>";
+                    } elseif ($_SESSION['Droit'] == 1) {
+                        echo "<span>Admin</span></h2>";
+                    }
+
+                    $user_id = $_SESSION['Utilisateur_ID'];
+                    $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = $user_id";
+                    $result = $conn->query($sql);
+
+                    if ($result->rowCount() > 0) {
+                        echo "<p>Groupe(s): ";
+                        $groupes = [];
+                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            $groupes[] = $row["Nom"];
+                        }
+                        echo implode("; ", $groupes);
+                        echo "</p>";
+                    } else {
+                        // Si l'utilisateur n'est associé à aucun groupe, afficher "No Group"
+                        echo "<p>Aucun Groupe</p>";
+                    }
+                    ?>
                     <div class="arrow">
                         <span class="material-symbols-outlined">
                             expand_more
@@ -106,7 +156,7 @@ ecriture_log($uid,$page);
                 <div class="projectCard">
                     <!-- projectTop start -->
                     <div class="projectTop">
-                        <h2>Project Name<br><span>Company Name</span></h2>
+                        <h2>Nom Projet<br><span>Nom Entreprise</span></h2>
                         <div class="projectDots">
                             <span class="material-symbols-outlined">
                                 more_horiz
@@ -117,44 +167,22 @@ ecriture_log($uid,$page);
                     <!-- projectProgress start -->
                     <div class="projectProgress">
                         <div class="process">
-                            <h2>In Progress</h2>
+                            <h2>En Cours</h2>
                         </div>
                         <div class="priority">
-                            <h2>High Priority</h2>
+                            <h2>Priorité haute</h2>
                         </div>
                     </div>
                     <!-- projectProgress end -->
-                    <!-- groupImg start -->
-                    <div class="groupImg">
-                        <a href="#">
-                            <img src="./groupImg/img1.jpg" alt="img1">
-                        </a>
-                        <a href="#" style="--left: -10px;">
-                            <img src="./groupImg/img2.jpg" alt="img2">
-                        </a>
-                        <a href="#" style="--left: -20px;">
-                            <img src="./groupImg/img3.jpg" alt="img3">
-                        </a>
-                        <a href="#" style="--left: -30px;">
-                            <img src="./groupImg/img4.jpg" alt="img4">
-                        </a>
-                        <a href="#" style="--left: -40px;">
-                            <img src="./groupImg/img5.jpg" alt="img5">
-                        </a>
-                        <a href="#" style="--left: -50px;">
-                            <span class="number">+3</span>
-                        </a>
-                    </div>
-                    <!-- groupImg end -->
                     <!-- task start -->
                     <div class="task">
-                        <h2>Task Done: <bold>35</bold> / 50</h2>
+                        <h2>Tâches faite: <bold>35</bold> / 50</h2>
                         <span class="line"></span>
                     </div>
                     <!-- task end -->
                     <!-- due start -->
                     <div class="due">
-                        <h2>Due Date: 25 August</h2>
+                        <h2>Date de rendu: 25 Août</h2>
                     </div>
                     <!-- due end -->
                 </div>
@@ -162,7 +190,7 @@ ecriture_log($uid,$page);
                 <!-- projectCard2 start -->
                 <div class="projectCard projectCard2">
                     <div class="projectTop">
-                        <h2>Project Name<br><span>Company Name</span></h2>
+                        <h2>Nom Projet<br><span>Nom Entreprise</span></h2>
                         <div class="projectDots">
                             <span class="material-symbols-outlined">
                                 more_horiz
@@ -171,13 +199,13 @@ ecriture_log($uid,$page);
                     </div>
                     <div class="projectProgress">
                         <div class="process">
-                            <h2>In Progress</h2>
+                            <h2>En cours</h2>
                         </div>
                         <div class="priority">
-                            <h2>High Priority</h2>
+                            <h2>Priorité Haute</h2>
                         </div>
                     </div>
-                    <div class="groupImg">
+                    <!-- <div class="groupImg">
                         <a href="#">
                             <img src="./groupImg/img1.jpg" alt="img1">
                         </a>
@@ -196,144 +224,100 @@ ecriture_log($uid,$page);
                         <a href="#" style="--left: -50px;">
                             <span class="number">+3</span>
                         </a>
-                    </div>
+                    </div> -->
                     <div class="task">
-                        <h2>Task Done: <bold>35</bold> / 50</h2>
+                        <h2>Tâches faites: <bold>35</bold> / 50</h2>
                         <span class="line"></span>
                     </div>
                     <div class="due">
-                        <h2>Due Date: 25 August</h2>
+                        <h2>Date de rendu: 25 Août</h2>
                     </div>
                 </div>
                 <!-- projectCard2 end -->
-                <!-- myTasks start -->
-                <div class="myTasks">
-                    <!-- tasksHead start -->
-                    <div class="tasksHead">
-                        <h2>My Tasks</h2>
-                        <div class="tasksDots">
-                            <span class="material-symbols-outlined">
-                                more_horiz
-                            </span>
+                    <!-- myTasks start -->
+                    <div class="myTasks">
+                        <!-- tasksHead start -->
+                        <div class="tasksHead">
+                            <h2>Mes tâches</h2>
+                            <div class="tasksDots" onclick="toggleCreateTaskMenu()">
+                                <span class="material-symbols-outlined">
+                                    more_horiz
+                                </span>
+                                <!-- Menu "Créer une Tâche" -->
+                                <div id="createTaskMenu" class="createTaskMenu">
+                                    <ul>
+                                    <button id="createTaskBtn">Créer une tâche</button>
+                                    </ul>
+                                </div>
+                                <!--<div id="taskModal" class="modal">
+                                <h2>Créer une nouvelle tâche</h2>
+                                <form id="taskForm">
+                                    <label for="taskName">Nom de la tâche:</label><br>
+                                    <input type="text" id="taskName" name="taskName" required><br><br>
+
+                                    <label for="assignee">Assignée à:</label><br>
+                                    <input type="text" id="assignee" name="assignee"><br><br>
+
+                                    <label for="priority">Priorité:</label><br>
+                                    <select id="priority" name="priority">
+                                        <option value="low">Basse</option>
+                                        <option value="medium">Moyenne</option>
+                                        <option value="high">Haute</option>
+                                    </select><br><br>
+
+                                    <label for="dueDate">Date de fin:</label><br>
+                                    <input type="date" id="dueDate" name="dueDate"><br><br>
+
+                                    <input type="submit" value="Créer">
+                                </form>
+                            </div>-->
+
+                            </div>
                         </div>
+                        <!-- tasksHead end -->
+                        <!-- tasks start -->
+                        <div class="tasks">
+                            <ul>
+                                <?php
+                               // Recuperer les taches assigner a l'utilisateur -->
+                               $stmt_tasks = $conn->prepare("SELECT TACHE.Tache_ID, TACHE.Texte 
+                                                             FROM es_assigner 
+                                                             INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
+                                                             WHERE es_assigner.Utilisateur_ID = :user_id");
+                               $stmt_tasks->bindParam(':user_id', $user_id);
+                               $stmt_tasks->execute();
+                               
+                               // - Faire une boucle pour chaque resultat -->
+                               while ($row_tasks = $stmt_tasks->fetch(PDO::FETCH_ASSOC)) {
+                                   $task_id = $row_tasks['Tache_ID'];
+                                   $task_text = $row_tasks['Texte'];
+                               
+                                  // Afficher la tâche -->
+                                   echo "<li>";
+                                   echo "<span class=\"tasksIconName\">";
+                                   echo "<span class=\"tasksIcon notDone\" onclick=\"TaskIcon(this)\">";
+                                   echo "<span class=\"material-symbols-outlined\"></span>";
+                                   echo "</span>";
+                                   echo "<span class=\"tasksName\">" . $task_text . "</span>";
+                                   echo "</span>";
+                                   echo "<span class=\"tasksStar half\" onclick=\"toggleStarCompletion(this)\">";
+                                   echo "<span class=\"material-symbols-outlined\">star</span>";
+                                   echo "</span>";
+                                   echo "</li>";
+                               }
+                                ?>
+                            </ul>
+                        </div>
+                        <!-- tasks end -->
                     </div>
-                    <!-- tasksHead end -->
-                    <!-- tasks start -->
-                    <div class="tasks">
-                        <ul>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon done">
-                                        <span class="material-symbols-outlined">
-                                            check
-                                        </span>
-                                    </span>
-                                    <span class="tasksName">
-                                        My Task 1
-                                    </span>
-                                </span>
-                                <span class="tasksStar full">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
-                                    <span class="tasksName">
-                                        My Task 2
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
-                                    <span class="tasksName">
-                                        My Task 3
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon done">
-                                        <span class="material-symbols-outlined">
-                                            check
-                                        </span>
-                                    </span>
-                                    <span class="tasksName tasksLine">
-                                        <underline>My Task 4</underline>
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon done">
-                                        <span class="material-symbols-outlined">
-                                            check
-                                        </span>
-                                    </span>
-                                    <span class="tasksName tasksLine">
-                                        My Task 5
-                                    </span>
-                                </span>
-                                <span class="tasksStar full">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
-                                    <span class="tasksName">
-                                        My Task 6
-                                    </span>
-                                </span>
-                                <span class="tasksStar full">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
-                                    <span class="tasksName">
-                                        My Task 7
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- tasks ens -->
-                </div>
+                    <!-- myTasks end -->
+
                 <!-- myTasks end -->
                 <!-- calendar start -->
                 <div class="calendar">
                     <!-- calendarHead start -->
                     <div class="calendarHead">
-                        <h2>October 2022</h2>
+                        <h2>Octobre 2022</h2>
                         <div class="calendarIcon">
                             <span class="material-symbols-outlined">
                                 chevron_left
@@ -347,13 +331,13 @@ ecriture_log($uid,$page);
                     <!-- calendarData start -->
                     <div class="calendarData">
                         <ul class="weeks">
-                            <li>Sun</li>
-                            <li>Mon</li>
-                            <li>Tue</li>
-                            <li>Wed</li>
-                            <li>Thu</li>
-                            <li>Fri</li>
-                            <li>Sat</li>
+                            <li>Lun</li>
+                            <li>Mar</li>
+                            <li>Mer</li>
+                            <li>Jeu</li>
+                            <li>Ven</li>
+                            <li>Sam</li>
+                            <li>Dim</li>
                         </ul>
                         <ul class="days">
                             <li class="inactive">25</li>
@@ -458,6 +442,29 @@ ecriture_log($uid,$page);
         <!-- right end -->
     </div>
     <!-- container end -->
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const taskModal = document.getElementById('taskModal');
+        const taskForm = document.getElementById('taskForm');
+
+        taskForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Empêche la soumission du formulaire par défaut
+
+            // Récupérer les valeurs saisies par l'utilisateur
+            const taskName = document.getElementById('taskName').value;
+            const assignee = document.getElementById('assignee').value;
+            const priority = document.getElementById('priority').value;
+            const dueDate = document.getElementById('dueDate').value;
+
+            // Vous pouvez ajouter ici le code pour enregistrer les données du formulaire
+
+            // Fermer la fenêtre modale
+            taskModal.style.display = 'none';
+        });
+    });
+</script>
+
 </body>
 
 </html>

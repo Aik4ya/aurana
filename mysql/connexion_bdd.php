@@ -1,5 +1,4 @@
 <?php
-
 function connexion_bdd()
 {
     $bdd_login = 'aurana';
@@ -10,7 +9,9 @@ function connexion_bdd()
         return $dbh;
 
     } catch (PDOException $e) {
-        var_dump($e);
+        echo "Erreur de connexion à la base de données : " . $e->getMessage();
         return null;
     }
 }
+
+connexion_bdd();

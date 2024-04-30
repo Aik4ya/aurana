@@ -1,10 +1,9 @@
 <?php
 require '../mysql/cookies_uid.php';
 
-$page = 'main';
-$uid = lecture_cookie_uid();
-echo($uid);
-ecriture_log($page,$uid);
+ecriture_log('main_chat');
+verif_session();
+$_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +82,11 @@ ecriture_log($page,$uid);
             <div class="top">
                 <!-- user start -->
                 <div class="user">
-                    <h2>BDD_Utilisateur<br><span>BDD_Rank</span></h2>
+                <?php
+                        session_start();
+                        echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+                        echo "<span>" . $_SESSION['Droit'] . "</span></h2>";
+                    ?>
                     <div class="arrow">
                         <span class="material-symbols-outlined">
                             expand_more
@@ -107,64 +110,50 @@ ecriture_log($page,$uid);
                 <div class="projectCard">
                     <!-- projectTop start -->
                     <div class="projectTop">
-                        <h2>Project Name<br><span>Company Name</span></h2>
-                        <div class="projectDots">
-                            <span class="material-symbols-outlined">
-                                more_horiz
-                            </span>
-                        </div>
+                        <h2>Pseudo<br><span>Groupe</span></h2>*
                     </div>
                     <!-- projectTop end -->
-                    <!-- projectProgress start -->
-                    <div class="projectProgress">
-                        <div class="process">
-                            <h2>In Progress</h2>
-                        </div>
-                        <div class="priority">
-                            <h2>High Priority</h2>
-                        </div>
+                    <div class="chat_messages">
+                        <?php
+                        // Afficher les messages existants
+                        /*
+
+
+                        $stmt_messages = $conn->query("SELECT * FROM MESSAGE");
+                        while ($row_message = $stmt_messages->fetch(PDO::FETCH_ASSOC)) {
+                            $message_id = $row_message['Message_ID'];
+                            $message_text = $row_message['Texte'];
+                            $auteur_id = $row_message['Auteur_ID'];
+                            $destinataire_id = $row_message['Destinataire_ID'];
+
+                            // Vérifier si l'utilisateur a le droit de supprimer le message
+                            $delete_permission = ($_SESSION['Droit'] == 0 && $auteur_id == $_SESSION['Utilisateur_ID']);
+
+                            // Afficher le message avec l'option de suppression si autorisé
+                            echo "<div class='message'>";
+                            echo "<p>$message_text</p>";
+                            if ($delete_permission) {
+                                echo "<span class='delete'>Demander à l'admin de le supprimer</span>";
+                            }
+                            echo "</div>";
+                        }
+
+
+                        */
+                        ?>
+                        <!-- Formulaire pour ajouter un nouveau message avec AJAX -->
+                        <form id="newMessageForm">
+                            <textarea id="newMessageInput" name="nouveau_message" placeholder="Ajouter un nouveau message"></textarea>
+                            <button type="submit">Envoyer</button>
+                        </form>
                     </div>
-                    <!-- projectProgress end -->
-                    <!-- groupImg start -->
-                    <div class="groupImg">
-                        <a href="#">
-                            <img src="./groupImg/img1.jpg" alt="img1">
-                        </a>
-                        <a href="#" style="--left: -10px;">
-                            <img src="./groupImg/img2.jpg" alt="img2">
-                        </a>
-                        <a href="#" style="--left: -20px;">
-                            <img src="./groupImg/img3.jpg" alt="img3">
-                        </a>
-                        <a href="#" style="--left: -30px;">
-                            <img src="./groupImg/img4.jpg" alt="img4">
-                        </a>
-                        <a href="#" style="--left: -40px;">
-                            <img src="./groupImg/img5.jpg" alt="img5">
-                        </a>
-                        <a href="#" style="--left: -50px;">
-                            <span class="number">+3</span>
-                        </a>
-                    </div>
-                    <!-- groupImg end -->
-                    <!-- task start -->
-                    <div class="task">
-                        <h2>Task Done: <bold>35</bold> / 50</h2>
-                        <span class="line"></span>
-                    </div>
-                    <!-- task end -->
-                    <!-- due start -->
-                    <div class="due">
-                        <h2>Due Date: 25 August</h2>
-                    </div>
-                    <!-- due end -->
                 </div>
                 <!-- projectCard end -->
                 <!-- myTasks start -->
                 <div class="myTasks">
                     <!-- tasksHead start -->
                     <div class="tasksHead">
-                        <h2>My Tasks</h2>
+                        <h2>Messages</h2>
                         <div class="tasksDots">
                             <span class="material-symbols-outlined">
                                 more_horiz
@@ -177,13 +166,37 @@ ecriture_log($page,$uid);
                         <ul>
                             <li>
                                 <span class="tasksIconName">
-                                    <span class="tasksIcon done">
-                                        <span class="material-symbols-outlined">
-                                            check
-                                        </span>
-                                    </span>
                                     <span class="tasksName">
-                                        My Task 1
+                                        Pseudo
+                                    </span>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="tasksIconName">
+                                    <span class="tasksName">
+                                        Pseudo 2
+                                    </span>
+                                </span>
+
+                            </li>
+                            <li>
+                                <span class="tasksIconName">
+                                    <span class="tasksName">
+                                        Pseudo 3
+                                    </span>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="tasksIconName">
+                                    <span class="tasksName">
+                                        <underline>Pseudo 4</underline>
+                                    </span>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="tasksIconName">
+                                    <span class="tasksName">
+                                        Pseudo 5
                                     </span>
                                 </span>
                                 <span class="tasksStar full">
@@ -194,56 +207,8 @@ ecriture_log($page,$uid);
                             </li>
                             <li>
                                 <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
                                     <span class="tasksName">
-                                        My Task 2
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
-                                    <span class="tasksName">
-                                        My Task 3
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon done">
-                                        <span class="material-symbols-outlined">
-                                            check
-                                        </span>
-                                    </span>
-                                    <span class="tasksName tasksLine">
-                                        <underline>My Task 4</underline>
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon done">
-                                        <span class="material-symbols-outlined">
-                                            check
-                                        </span>
-                                    </span>
-                                    <span class="tasksName tasksLine">
-                                        My Task 5
+                                        Pseudo 6
                                     </span>
                                 </span>
                                 <span class="tasksStar full">
@@ -254,35 +219,19 @@ ecriture_log($page,$uid);
                             </li>
                             <li>
                                 <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
                                     <span class="tasksName">
-                                        My Task 6
+                                        Pseudo 7
                                     </span>
                                 </span>
-                                <span class="tasksStar full">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="tasksIconName">
-                                    <span class="tasksIcon notDone"></span>
-                                    <span class="tasksName">
-                                        My Task 7
-                                    </span>
-                                </span>
-                                <span class="tasksStar half">
-                                    <span class="material-symbols-outlined">
-                                        star
-                                    </span>
-                                </span>
+
                             </li>
                         </ul>
                     </div>
                     <!-- tasks ens -->
                 </div>
                 <!-- myTasks end -->
+            </main>
+            <script src="../js/main_chat.js"></script>
 </body>
 
 </html>

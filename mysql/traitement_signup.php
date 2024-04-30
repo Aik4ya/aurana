@@ -28,9 +28,14 @@ function creation_utilisateur($dbh) {
 
         $sql->execute();
         
-        $expiration = $expiration = time() + (30 * 24 * 60 * 60); #trouver un truc pour back
+        $expiration = time() + (5*60); #trouver un truc pour back
         $Utilisateur_ID = $dbh->lastInsertID();
-        creation_cookie_uid($Utilisateur_ID,$expiration);
+
+        session_start();
+        $_SESSION['expiration'] = $expiration;
+        $_SESSION['Utilisateur_ID'] = $Utilisateur_ID;
+        $_SESSION['Droit'] = $Droits;
+        $_SESSION['Pseudo'] = $Username;
 
         header("Location: ../pages/main.php?status=success");     
         exit();

@@ -1,24 +1,17 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Inclusion des fichiers de PHPMailer
+require '../vendor/PHPMailer/src/Exception.php';
+require '../vendor/PHPMailer/src/PHPMailer.php';
+require '../vendor/PHPMailer/src/SMTP.php';
 require '../mysql/cookies_uid.php';
+require '../mysql/connexion_bdd.php';
 
 $page = 'main';
 $uid = lecture_cookie_uid();
 ecriture_log($uid, $page);
-
-function connexion_bdd()
-{
-    $bdd_login = 'aurana';
-    $bdd_password = 'aurana2024';
-
-    try {
-        $dbh = new PDO('mysql:host=localhost;dbname=Aurana_bdd', $bdd_login, $bdd_password);
-        return $dbh;
-
-    } catch (PDOException $e) {
-        var_dump($e);
-        return null;
-    }
-}
 
 function afficher_tickets($dbh, $uid, $isAdmin)
 {
@@ -75,6 +68,9 @@ function afficher_tickets($dbh, $uid, $isAdmin)
     }
 }
 
+
+
+// Votre fonction repondre_ticket modifiée avec PHPMailer
 function repondre_ticket($dbh, $ticketId, $reponse)
 {
     try {
@@ -83,13 +79,25 @@ function repondre_ticket($dbh, $ticketId, $reponse)
         $stmt->execute([$ticketId]);
         $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        // Envoyer la réponse par email à chaque demandeur de ticket
-        foreach ($emails as $email) {
-            $subject = "Réponse à votre ticket";
-            $message = "Votre ticket a reçu une réponse. Veuillez vous connecter pour consulter la réponse.";
-            $headers = "From: staff.aurana@gmail.com";
+        // Configuration de PHPMailer
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = 'smtp.example.com'; // Configurez l'hôte SMTP
+        $mail->SMTPAuth = true;
+        $mail->Username = 'your_email@example.com'; // Entrez votre adresse email
+        $mail->Password = 'your_password'; // Entrez votre mot de passe email
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
 
-            mail($email, $subject, $message, $headers);
+        // Envoi de la réponse par email à chaque demandeur de ticket
+        foreach ($emails as $email) {
+            $mail->setFrom('your_email@example.com', 'Votre Nom');
+            $mail->addAddress($email); // Ajoutez l'adresse email du destinataire
+            $mail->Subject = "Réponse à votre ticket";
+            $mail->Body = "Votre ticket a reçu une réponse. Veuillez vous connecter pour consulter la réponse.";
+
+            $mail->send();
+            $mail->clearAddresses(); // Effacez les adresses email précédentes
         }
 
         // Mettre à jour la base de données avec la réponse
@@ -99,30 +107,8 @@ function repondre_ticket($dbh, $ticketId, $reponse)
         echo "Réponse envoyée avec succès.";
     } catch (PDOException $e) {
         echo "Erreur lors de la réponse au ticket : " . $e->getMessage();
+    } catch (Exception $e) {
+        echo "Erreur lors de l'envoi de l'email : " . $mail->ErrorInfo;
     }
-}
-
-$dbh = connexion_bdd();
-
-if ($dbh) {
-    try {
-        $stmt = $dbh->prepare("SELECT Droit FROM UTILISATEUR WHERE Utilisateur_ID = ?");
-        $stmt->execute([$uid]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $isAdmin = ($row['Droit'] == 1);
-
-        afficher_tickets($dbh, $uid, $isAdmin);
-    } catch (PDOException $e) {
-        echo "Erreur lors de l'exécution de la requête : " . $e->getMessage();
-    }
-} else {
-    echo "Erreur de connexion à la base de données.";
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ticketId = $_POST['ticketId'];
-    $reponse = $_POST['reponse'];
-
-    repondre_ticket($dbh, $ticketId, $reponse);
 }
 ?>
