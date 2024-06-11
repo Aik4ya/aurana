@@ -49,7 +49,7 @@ if (isset($_GET['groupe']) && !($_GET['groupe'] == "none")) {
     }
 }
 
-// avancer / reculer dans le calendrier 
+// avancer / reculer dans le calendrier
 
 if (isset($_GET['cal'])) {
     if ($_GET['cal'] == "'prev'") {
@@ -74,14 +74,19 @@ if (isset($_GET['cal'])) {
 } elseif (!isset($_SESSION['mois']) || !isset($_SESSION['annee'])){
     $_SESSION['mois'] = date('m');
     $_SESSION['annee'] = date('Y');
-} 
+}
 
-$stmt_tasks_dates = $conn->prepare("SELECT Date_Tache FROM TACHE WHERE Tache_ID IN (SELECT Tache_ID FROM es_assigner WHERE Utilisateur_ID = :user_id) AND Groupe_ID = :groupe_id
-");
+$stmt_tasks_dates = $conn->prepare("SELECT Date_Tache FROM TACHE WHERE Tache_ID IN (SELECT Tache_ID FROM es_assigner WHERE Utilisateur_ID = :user_id) AND Groupe_ID = :groupe_id");
 $stmt_tasks_dates->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
 $stmt_tasks_dates->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
 $stmt_tasks_dates->execute();
 $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
+
+$stmt_projet_dates = $conn->prepare("SELECT deadline FROM PROJET JOIN est_membre_projet ON PROJET.ID = est_membre_projet.Projet_ID WHERE est_membre_projet.Utilisateur_ID = :user_id AND PROJET.id_groupe = :groupe_id");
+$stmt_projet_dates->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
+$stmt_projet_dates->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
+$stmt_projet_dates->execute();
+$projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
 
 ?>
 
@@ -133,16 +138,16 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
 }
 
 .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1; 
+    display: none;
+    position: fixed;
+    z-index: 1;
     left: 0;
     top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgb(0,0,0); 
-    background-color: rgba(0,0,0,0.4); 
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
 }
 
 .close {
@@ -202,7 +207,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
     .dropdown-toggle:focus +.dropdown-menu {
     display: block;
     }
-    
+
 </style>
 
 <body>
@@ -267,7 +272,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                     <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
                     <?php endif; ?>
                 </div>
-                
+
                 <div class="user">
                     <?php
 
@@ -306,7 +311,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
 
-                        <?php 
+                        <?php
                                 $sql="SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
                                 $result = $conn->query($sql);
                                 if ($result->rowCount() > 0) {
@@ -334,7 +339,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                         $stmt1->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
                         $stmt1->execute();
                         $rowcount = $stmt1->rowCount();
-                        
+
                         if ($rowcount > 0) { // si projet
                             while ($row = $stmt1->fetch(PDO::FETCH_ASSOC)) {
                                 $id = $row['ID'];
@@ -343,8 +348,8 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                                 $priorite = $row['priorite'];
                                 $deadline = $row['deadline'];
                                 $groupe = $_GET['groupe'];
-                                
-                        
+
+
                                 $sql="SELECT count(*) FROM tache_assignee_projet INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID WHERE tache_assignee_projet.id_projet = :id_projet AND TACHE.done = 1"; //nombre detache fini
                                 $stmt2 = $conn->prepare($sql);
                                 $stmt2->bindParam(':id_projet', $id);
@@ -359,7 +364,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                                 $row = $stmt3->fetch(PDO::FETCH_ASSOC);
                                 $tachetotal = $row['count(*)'];
 
-                                
+
                                 echo "<li>";
                                 echo "<div>";
                                 echo "<div class=\"projectTop\">";
@@ -378,7 +383,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                                 echo "<h2>$priorite</h2>";
                                 echo "</div>";
                                 echo "</div>";
-                                
+
                                 echo "<div class=\"task\">";
                                 echo "<h2>Tâches faites: <strong>" . $tachefin . "</strong> / " . $tachetotal . "</h2>";
                                 if ($tachetotal == 0) {
@@ -392,7 +397,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                                 echo "</div>";
                                 echo "</div>";
                             }
-                            
+
                         } else { // si pas de projet
                             echo "<li>";
                             echo "<div class=\"projectCard\">";
@@ -402,8 +407,8 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                         }
 
 
-                            
-                        
+
+
 
                     ?>
                     </ul>
@@ -424,8 +429,8 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                         <?php
                         if ($_SESSION['groupe']="none"){
                             $stmt_tasks = $conn->prepare("
-                                SELECT TACHE.Tache_ID, TACHE.Texte 
-                                FROM es_assigner 
+                                SELECT TACHE.Tache_ID, TACHE.Texte
+                                FROM es_assigner
                                 INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
                                 WHERE es_assigner.Utilisateur_ID = :user_id AND TACHE.Groupe_ID = :groupe_id
                             ");
@@ -434,20 +439,20 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                             $stmt_tasks->execute();
                         } else {
                             $stmt_tasks = $conn->prepare("
-                                SELECT TACHE.Tache_ID, TACHE.Texte 
-                                FROM es_assigner 
+                                SELECT TACHE.Tache_ID, TACHE.Texte
+                                FROM es_assigner
                                 INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
-                                WHERE es_assigner.Utilisateur_ID = :user_id AND TACHE.Date_Tache. <= :date_tache 
+                                WHERE es_assigner.Utilisateur_ID = :user_id AND TACHE.Date_Tache. <= :date_tache
                             ");
                             $stmt_tasks->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
                             $stmt_tasks->bindParam(':date_tache', (date('Y-m-d') + 10));
                             $stmt_tasks->execute();
                         }
-                        
+
                         while ($row_tasks = $stmt_tasks->fetch(PDO::FETCH_ASSOC)) {
                             $task_id = $row_tasks['Tache_ID'];
                             $task_text = $row_tasks['Texte'];
-                        
+
                             echo "<li>";
                             echo "<span class=\"tasksIconName\">";
                             echo "<span class=\"tasksIcon notDone\" onclick=\"TaskIcon(this)\">";
@@ -464,7 +469,7 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                     </ul>
                     </div>
                 </div>
-                
+
                 <!-- debut calendrier -->
 
                 <div class="calendar">
@@ -545,34 +550,34 @@ $task_dates = $stmt_tasks_dates->fetchAll(PDO::FETCH_COLUMN);
                             for ($i = 1; $i <= $daysInMonth; $i++) {
                                 $currentDate = sprintf("%04d-%02d-%02d", $selectedYear, $selectedMonth, $i);
                                 $hasTasks = in_array($currentDate, $task_dates);
-                            
-                                if ($hasTasks){
-                                    $dayClass = 'has-tasks';
-                                } else {
-                                    $dayClass = '';
+                                $hasProjet = in_array($currentDate, $projet_dates);
+
+                                $dayClass = ''; // Initialize day class
+
+                                if ($hasTasks) {
+                                    $dayClass .= ' has-tasks'; // Append task class
                                 }
-                                
-                                // affichage taches
-                            
+
+                                // if ($hasProjet) {
+                                //     $dayClass .= ' has-projet'; // Append project class
+                                // }
+
+                                // Date comparison and CSS class assignment
                                 if ($i == date('d') && $currentYear == $selectedYear) {
                                     if ($currentMonth == $selectedMonth) {
-                                        echo "<li class='active'>$i</li>";
+                                        echo "<li class='active$dayClass'>$i</li>";
                                     }
                                 } elseif ($currentMonth > $selectedMonth || $currentYear > $selectedYear) {
-                                    if ($currentYear >= $selectedYear){
-                                        echo "<li class='inactive'>$i</li>";
-                                    } else {
-                                        echo "<li class=$dayClass>$i</li>";
-                                    }
+                                    echo "<li class='inactive$dayClass'>$i</li>";
                                 } elseif ($currentMonth == $selectedMonth && $i < date('d')) {
-                                    echo "<li class='inactive'>$i</li>";
+                                    echo "<li class='inactive$dayClass'>$i</li>";
                                 } else {
-                                    echo "<li class=$dayClass>$i</li>";
+                                    echo "<li class='$dayClass'>$i</li>";
                                 }
                             }
-                            
                             ?>
                         </ul>
+
                     </div>
                 </div>
 

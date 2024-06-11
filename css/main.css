@@ -689,6 +689,11 @@ li {
     background-color: rgb(49, 234, 255);
     color: black;
 }
+
+.container .right main .calendar .calendarData .days .has-Projet{
+    background-color: rgb(167, 35, 35);
+    color: rgb(255, 255, 255);
+}
 .container .right main .calendar .calendarData .days li {
     position: relative;
     width: 30px;
