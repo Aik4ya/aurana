@@ -1,0 +1,587 @@
+@font-face {
+  font-family: 'Dunkin';
+  src: url('../fonts/DunkinSansBold.otf');
+  font-weight: bold;
+  font-style: normal;
+}
+
+.outfit {
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
+
+/*
+# General
+*/
+
+body {
+  font-family: "Outfit", sans-serif;
+  color: #444444;
+}
+
+
+a {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: "Outfit ", sans-serif;
+}
+
+a:hover {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: "Outfit", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Outfit", sans-serif;
+}
+
+/*
+# Header
+*/
+
+#header {
+  transition: all 0.5s;
+  z-index: 997;
+  padding: 20px 0;
+}
+
+#header.header-scrolled {
+  background: #0A2647;
+  padding: 12px 0;
+}
+
+#header .logo {
+  font-size: 20px;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: "Dunkin", sans-serif;
+  margin: 0px;
+  padding: 0;
+  line-height: 1;
+  font-weight: 200;
+  letter-spacing: 2px;
+}
+
+#header .logo a {
+  color: #ffffff;
+}
+
+#header .logo img {
+  max-height: 60px;
+}
+
+/*
+# Navigation Menu
+*/
+
+/** Desktop Navigation **/
+.navbar {
+  padding: 0;
+}
+
+.navbar .getstarted,
+.navbar .getstarted:focus {
+  padding: 8px 25px;
+  margin-left: 30px;
+  border-radius: 5px;
+  color: #ffffff;
+  transition: 0.3s;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.navbar .getstarted:hover,
+.navbar .getstarted:focus:hover {
+  background: #fff;
+  color: #0015ff;
+}
+
+/** Mobile Navigation **/
+.mobile-nav-toggle {
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  display: none;
+  line-height: 0;
+  transition: 0.5s;
+}
+
+/*
+# Hero Section
+*/
+#hero {
+  width: 100%;
+  height: 100vh;
+  background-image: linear-gradient(to top, #2C74B3 20%, #144272 80%);
+  background-size: cover;
+}
+
+#hero .container,
+#hero .container-fluid {
+  padding-top: 84px;
+  z-index: 100;
+}
+
+#hero h1 {
+  margin: 0;
+  font-size: 52px;
+  line-height: 64px;
+  color: rgba(255, 255, 255, 1);
+}
+
+#hero h2 {
+  color: rgba(255, 255, 255, 1);
+  margin: 10px 0 0 0;
+  font-size: 20px;
+}
+
+#hero .btn-get-started {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 1px;
+  display: inline-block;
+  padding: 11px 18px;
+  border-radius: 5px;
+  transition: 0.5s;
+  margin-top: 30px;
+  color: #fff;
+  border: 2px solid #fff;
+  background: #333654;
+}
+
+#hero .btn-get-started:hover {
+  background: #fff;
+  color: #333654;
+}
+
+#hero .animated {
+  animation: up-down 2s ease-in-out infinite alternate-reverse both;
+}
+
+#hero .waveWrapper {
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -20px;
+  top: 0;
+  margin: auto;
+}
+#hero .bgTop {
+  z-index: 15;
+  opacity: 0.5;
+}
+#hero .bgMiddle {
+  z-index: 10;
+  opacity: 0.75;
+}
+#hero .bgBottom {
+  z-index: 5;
+}
+#hero .wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background-repeat: repeat no-repeat;
+  background-position: 0 bottom;
+  transform-origin: center bottom;
+}
+#hero .waveTop {
+  background-size: 70% 140px;
+}
+#hero .waveMiddle {
+  background-size: 50% 120px;
+}
+#hero .waveBottom {
+  background-size: 70% 100px;
+}
+
+@media (max-width: 991px) {
+  #hero {
+    text-align: center;
+  }
+
+  #hero .container,
+  #hero .container-fluid {
+    padding-top: 68px;
+  }
+
+  #hero .animated {
+    animation: none;
+  }
+
+  #hero .hero-img {
+    text-align: center;
+  }
+
+  #hero .hero-img img {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  #hero h1 {
+    font-size: 26px;
+    line-height: 36px;
+  }
+
+  #hero h2 {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  #hero .hero-img img {
+    width: 60%;
+  }
+}
+
+@media (max-width: 575px) {
+  #hero .hero-img img {
+    width: 80%;
+  }
+}
+
+@media (max-width: 575px),
+(max-height: 600px) {
+  #hero {
+    height: auto;
+  }
+}
+
+
+@keyframes up-down {
+  0% {
+    transform: translateY(10px);
+  }
+
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+#secondsection{
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#secondsection h1{
+  font-size: 30px;
+  position: relative;
+  margin-bottom: 80px;
+}
+
+.arrow-right {
+  width: 20px;
+  height: 20px;
+  background-color: #2C74B3; /* Couleur de fond de la flèche */
+  position: absolute;
+  right: -10px; /* Ajustez la position horizontale selon vos besoins */
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg); /* Rotation de la flèche */
+  cursor: pointer;
+}
+
+
+#secondsection h1::after{
+  content: '';
+  width: 150px;
+  height: 3px;
+  background: linear-gradient(to right, #007bff, #0051a7);
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#secondsection .s-box{
+  width: 90%;
+  max-width: 700px;
+  height: 300px;
+  border-radius: 10px;
+  box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+#secondsection .card-s{
+  height: 300px;
+  padding: 40px;
+  color: #fff;
+  line-height: 22px;
+  box-sizing: border-box;
+  background: #fff;
+  position: relative;
+}
+
+#secondsection .profile{
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+#secondsection h3{
+  font-size: 26px;
+  color: #2C74B3;
+  margin-bottom: 8px;
+}
+#secondsection p{
+  color: #000;
+}
+
+#secondsection #slide {
+  width: 100%;
+  padding-right: 60px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#secondsection .sidebar{
+  width: 60px;
+  height: 100%;
+  padding: 15px 0;
+  box-sizing: border-box;
+  background: #2C74B3;
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#troisimesection {
+    background-color: #006CDB;
+    color: white;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+#troisimesection .container {
+    max-width: 800px;
+    padding: 20px 20px;
+}
+#troisimesection .categories {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+#troisimesection .test {
+    display: flex;
+    align-items: flex-end;
+}
+#troisimesection .category {
+    cursor: pointer;
+    border-bottom: 1px solid #ccc;
+    flex-grow: 1; 
+    text-align: center; 
+    margin-right: 10px; 
+    margin-left: 10px; 
+}
+#troisimesection .selected {
+    border-bottom: 2px solid gray; 
+}
+#troisimesection .category:hover {
+    border-bottom: 1px solid gray; 
+}
+#troisimesection .category-description {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Deux colonnes égales */
+    grid-gap: 20px; /* Espacement entre les colonnes */
+    align-items: start; /* Alignement en haut */
+    margin-top: 20px;
+}
+#troisimesection .features {
+    grid-column: 1; /* Span sur la première colonne */
+    margin-bottom: 200px;
+}
+#troisimesection .feature {
+    margin-bottom: 5px; /* Ajustement de la marge inférieure */
+    padding: 5px 10px;
+    border-radius: 15px; /* Réduction du rayon de bordure */
+    border: 1px solid #ccc;
+    display: inline-block; /* Affichage en ligne pour occuper moins d'espace */
+    font-size: 12px; /* Réduction de la taille de la police */
+}
+#troisimesection .feature-list {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de liste de passer à la ligne si nécessaire */
+    justify-content: flex-start;
+    list-style-type: none; /* Supprime les puces de liste */
+    padding: 0; /* Supprime les marges intérieures de la liste */
+}
+#troisimesection .feature-list li {
+    margin: 5px; /* Espacement entre les éléments de liste */
+}
+#troisimesection .img-container {
+    grid-column: 2; /* Image sur la deuxième colonne */
+    align-self: center; /* Centre verticalement */
+}
+#troisimesection img {
+    max-width: 300px;
+    height: auto;
+}
+#troisimesection .img-fluid {
+    max-width: 170%;
+    height: auto;
+}
+
+.footer {
+  display: flex;
+  flex-flow: row wrap;
+  padding: 30px 30px 20px 30px;
+  color: #2f2f2f;
+  background-color: #fff;
+  border-top: 1px solid #e5e5e5;
+}
+
+.footer > * {
+  flex:  1 100%;
+}
+
+.footer__addr {
+  margin-right: 1.25em;
+  margin-bottom: 2em;
+}
+
+.footer__logo {
+  font-family: 'Dunkin', sans-serif;
+  font-weight: 400;
+  text-transform: lowercase;
+  font-size: 1.5rem;
+}
+
+.footer__addr h2 {
+  margin-top: 1.3em;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.nav__title {
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.footer address {
+  font-style: normal;
+  color: #999;
+}
+
+.footer ul {
+  list-style: none;
+  padding-left: 0;
+  text-align: left;
+}
+
+.footer li {
+  line-height: 2em;
+}
+
+.footer a {
+  text-decoration: none;
+}
+
+.footer__nav {
+  display: flex;
+	flex-flow: row wrap;
+}
+
+.footer__nav > * {
+  flex: 1 50%;
+  margin-right: 1.25em;
+}
+
+.nav__ul a {
+  color: #999;
+}
+
+.nav__ul--extra {
+  column-count: 2;
+  column-gap: 1.25em;
+}
+
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  color: #999;
+}
+  
+.legal__links {
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (min-width: 24.375em) {
+  .legal .legal__links {
+    margin-left: auto;
+  }
+}
+
+@media screen and (min-width: 40.375em) {
+  .footer__nav > * {
+    flex: 1;
+  }
+  
+  .nav__item--extra {
+    flex-grow: 2;
+  }
+  
+  .footer__addr {
+    flex: 1 0px;
+  }
+  
+  .footer__nav {
+    flex: 2 0px;
+  }
+}
+
+/* Style pour la bulle */
+.bulle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    z-index: 999;
+}
+
+/* Style pour l'icône dans la bulle */
+.bulle i {
+    font-size: 24px;
+}
+
+/* Style pour le formulaire */
+#ticket-form {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+    max-width: 300px;
+    display: none; /* Par défaut, le formulaire est caché */
+    z-index: 998; /* Z-index inférieur à celui de la bulle */
+    font-variant: all-petite-caps;
+}

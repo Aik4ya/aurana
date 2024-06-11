@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page non trouvée</title>
+    <!-- Liens vers les fichiers Bootstrap CSS et JavaScript -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Styles personnalisés -->
+    <style>
+        body {
+            background-image: url('../img/background-404.jpeg'); /* Insérez le chemin de votre image de fond */
+            backdrop-filter: blur(5px);
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgb(0, 0, 0);
+            text-align: center;
+        }
+        h1 {
+            color: #007bff;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 50px;
+        }
+
+        .content {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 89px;
+            border-radius: 10px;
+        }
+
+        .rotate-image {
+            animation: rotate 5s linear infinite;
+            transform-origin: center;
+            margin-bottom: 30px;
+            width: 200px;
+        }
+
+        .btn {
+        
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="content">
+                    <img src="../img/spinner.png" class="rotate-image" alt="Rotating Image">
+                    <h1>Erreur 404</h1>
+                    <p>Petite grenouille tu es perdu dans le marais ?</p>
+                    <a href="../pages/main.php"><button class="btn btn-primary">Retour à la page d'accueil</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
