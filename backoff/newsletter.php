@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Newsletter Backoffice</title>
+    <meta charset="UTF-8">
+    <title>Backoffice Newsletter</title>
 </head>
 <body>
-    <h1>Newsletter Backoffice</h1>
-
-    <form method="POST" action="../mysql/newletters.php">
-        <label for="subject">Subject:</label><br>
+    <h1>Backoffice Newsletter</h1>
+    <form method="POST">
+        <label for="subject">Sujet :</label><br>
         <input type="text" id="subject" name="subject" required><br><br>
-
-        <label for="message">Message:</label><br>
+        <label for="message">Message :</label><br>
         <textarea id="message" name="message" required></textarea><br><br>
-
-        <input type="submit" value="Send Newsletter">
+        <input type="submit" name="preview" value="Prévisualiser">
+        <input type="submit" name="send" value="Envoyer la Newsletter">
     </form>
 </body>
 </html>

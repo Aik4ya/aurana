@@ -1,10 +1,9 @@
 <?php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Importer les classes PHPMailer
+// Importation des classes PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -12,65 +11,56 @@ require "../vendor/PHPMailer/src/PHPMailer.php";
 require "../vendor/PHPMailer/src/SMTP.php";
 require "../vendor/PHPMailer/src/Exception.php";
 
-$mail = new PHPMailer(true);
-
-// Connexion à la base de données
 require_once '../mysql/connexion_bdd.php';
-
-// Démarrer la session
 session_start();
 
-// Fonction pour récupérer les abonnés
-function getAllSubscribers()
-{
+$mail = new PHPMailer(true);
+$conn = connexion_bdd();
+
+function getAllSubscribers($conn) {
     $subscribers = [];
-    $conn = connexion_bdd();
-    if (!$conn) {
-        die("Connection failed: " . mysqli_connect_error());
-    }
-    
-    $sql = $conn->prepare("SELECT Email FROM UTILISATEUR WHERE Abonnement_NL = 1");
-    $sql->execute();
-    
-    while($row = $sql->fetch(PDO::FETCH_ASSOC)) {
-        $subscribers[] = $row;
+    $sql = "SELECT Email FROM UTILISATEUR WHERE derniere_connexion <= DATE_SUB(NOW(), INTERVAL 30 DAY) AND Abonnement_NL = 1";
+    if ($result = $conn->query($sql)) {
+        while($row = $result->fetch_assoc()) {
+            $subscribers[] = $row['Email'];
+        }
     }
     return $subscribers;
 }
 
-// Vérifier si le formulaire est soumis
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $subject = $_POST['subject'];
-    $message = $_POST['message'];
-    
-    $subscribers = getAllSubscribers();
-
-    // Configurer PHPMailer
+function sendNewsletter($conn, $mail, $subject, $message) {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = "staff.aurana@gmail.com";
-    $mail->Password = "bphm shjn sdpq erno";
+    $mail->Username = getenv('SMTP_USERNAME');
+    $mail->Password = getenv('SMTP_PASSWORD');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
-    $mail->SMTPDebug = 2;
     
-    $mail->setFrom('staff.aurana@gmail.com', 'Aurana Staff');
+    $mail->setFrom('staff.aurana@gmail.com', 'Équipe Aurana');
     $mail->isHTML(true);
-    
-    foreach ($subscribers as $subscriber) {
-        $email = $subscriber['Email'];
+    $mail->Subject = $subject;
+    $mail->Body = $message;
+
+    $subscribers = getAllSubscribers($conn);
+    foreach ($subscribers as $email) {
         $mail->addAddress($email);
-        $mail->Subject = $subject;
-        $mail->Body = $message;
-        
         if (!$mail->send()) {
-            echo "Une erreur est survenue lors de l'envoi à " . $email . ": " . $mail->ErrorInfo;
+            echo "Erreur d'envoi à $email: " . $mail->ErrorInfo . "<br>";
         } else {
-            echo "Email envoyé à " . $email . "<br>";
+            echo "Email envoyé avec succès à $email<br>";
         }
-        
         $mail->clearAddresses();
     }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview'])) {
+    // Logique de prévisualisation
+    echo "<h2>Prévisualisation :</h2>";
+    echo "<p><strong>Sujet :</strong> " . $_POST['subject'] . "</p>";
+    echo "<p><strong>Message :</strong> " . nl2br($_POST['message']) . "</p>";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send'])) {
+    // Logique d'envoi
+    sendNewsletter($conn, $mail, $_POST['subject'], $_POST['message']);
 }
 ?>

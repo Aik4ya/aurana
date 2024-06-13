@@ -175,41 +175,6 @@ body {
 }
 /* nav end */
 
-
-
-
-/* disconnect start */
-.container .disconnect {
-    position: relative;
-    width: calc(100% - 30px);
-    text-align: center;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    padding: 10px;
-    z-index: -1;
-    overflow: hidden;
-}
-.container .disconnect .decoBtn {
-    height: 40px;
-    background: #fff;
-}
-.container .disconnect .decoBtn button {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    outline: none;
-    border: none;
-    font-size: 1.2em;
-    color: #000;
-    font-weight: 500;
-    cursor: pointer;
-}
-/* disconnect end */
 /* left end */
 /* right start */
 .container .right {
@@ -1018,3 +983,24 @@ body {
     padding: 20px;
     border-radius: 15px;
 }
+
+.message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.message p {
+    margin: 0;
+    padding: 0;
+}
+
+.message strong {
+    color: #333;
+}
+
+.message em {
+    color: #777;
+    font-size: 0.8em;
+}
+

@@ -1,0 +1,41 @@
+.container .disconnect {
+  position: relative;
+  width: calc(100% - 30px);
+  text-align: center;
+  /* display: flex; */
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  padding: 10px;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.container .disconnect .decoBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  background: linear-gradient(135deg, #6eb1e7 0%, #4689c1 100%);
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.container .disconnect .decoBtn:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
+
+.container .disconnect .decoBtn button {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  outline: none;
+  border: none;
+  font-size: 1.2em;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}

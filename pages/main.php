@@ -49,6 +49,21 @@ if (isset($_GET['groupe']) && !($_GET['groupe'] == "none")) {
     }
 }
 
+if ($_GET['groupe'] != "none"){
+    $sql="SELECT droit FROM est_membre WHERE Utilisateur_ID = :utilisateur_id AND GROUPE = :groupe_id";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':utilisateur_id', $_SESSION['Utilisateur_ID']);
+    $stmt->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
+    $stmt->execute();
+    if ($stmt->fetch(PDO::FETCH_ASSOC)['droit'] == 1){
+        $_SESSION['Droit_groupe'] = 1;
+    } else {
+        $_SESSION['Droit_groupe'] = 0;
+    }
+} else {
+    $_SESSION['Droit_groupe'] = 0;
+}
+
 // avancer / reculer dans le calendrier
 
 if (isset($_GET['cal'])) {
@@ -76,6 +91,8 @@ if (isset($_GET['cal'])) {
     $_SESSION['annee'] = date('Y');
 }
 
+
+
 $stmt_tasks_dates = $conn->prepare("SELECT Date_Tache FROM TACHE WHERE Tache_ID IN (SELECT Tache_ID FROM es_assigner WHERE Utilisateur_ID = :user_id) AND Groupe_ID = :groupe_id");
 $stmt_tasks_dates->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
 $stmt_tasks_dates->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
@@ -88,6 +105,28 @@ $stmt_projet_dates->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
 $stmt_projet_dates->execute();
 $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
 
+function fetchTasksWithProjects($dbh) {
+    $userID = $_SESSION['Utilisateur_ID'];
+    $groupeID = isset($_SESSION['Groupe_ID']) ? $_SESSION['Groupe_ID'] : 0;
+
+    // Inclure les tâches sans projet (personnelles) et celles liées à un projet
+    $sql = "SELECT t.Tache_ID, t.Texte, p.nom AS NomProjet
+            FROM es_assigner ea
+            JOIN TACHE t ON ea.Tache_ID = t.Tache_ID
+            LEFT JOIN tache_assignee_projet tap ON t.Tache_ID = tap.id_tache
+            LEFT JOIN PROJET p ON tap.id_projet = p.ID
+            WHERE ea.Utilisateur_ID = :userID AND (t.Groupe_ID = :groupeID OR t.Groupe_ID IS NULL)
+            ORDER BY p.nom ASC, t.Date_Tache DESC";
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':userID', $userID);
+    $stmt->bindParam(':groupeID', $groupeID);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+$tasks = fetchTasksWithProjects(connexion_bdd());
+
 ?>
 
 <!DOCTYPE html>
@@ -98,6 +137,8 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aurana - Dashboard</title>
     <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/modals.css">
     <script type="text/javascript" src="../js/aurana.js"></script>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -136,37 +177,34 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
 .menu li a:hover {
     background-color: #ddd;
 }
-
-.modal {
-    display: none;
+/* Style du fond du modal */
+.modal-background {
     position: fixed;
-    z-index: 1;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0, 0, 0, 0.5); /* Couleur d'arrière-plan semi-transparente */
+    z-index: 999; /* Assure que le modal est au-dessus de tout le reste */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
+/* Style du bouton de fermeture */
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     cursor: pointer;
+    font-size: 20px;
+    color: #888;
 }
 
-.modal.show {
-    display: block;
+.close-modal:hover {
+    color: #555; /* Couleur de survol légèrement plus foncée */
 }
+
 .popup {
     display: none;
     position: fixed;
@@ -193,20 +231,34 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
     margin: 20px;
 }
 
-.dropdown-menu {
-    display: none;
+.group-menu {
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
+    right: 0;
+    top: 100%;  /* Ajustez selon la position de votre bouton 'Sélectionner un groupe' */
+    background-color: white;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 999;
-    padding: 5px 0;
-    }
+    z-index: 1000;
+    width: 200px; /* ou la largeur que vous préférez */
+    display: none; /* Important pour que le menu ne soit pas visible par défaut */
+}
 
-    .dropdown-toggle:hover +.dropdown-menu,
-    .dropdown-toggle:focus +.dropdown-menu {
+.group-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.group-menu li a {
     display: block;
-    }
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+}
+
+.group-menu li a:hover {
+    background-color: #f0f0f0;
+}
+
 
 </style>
 
@@ -259,10 +311,12 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                     </ul>
                 </nav>
             </header>
-                <div class="decoBtn">
-                    <form action="logout.php">
-                        <button id='deconnexion'>Deconnexion</button>
-                    </form>
+                <div class="disconnect">
+                    <div class="decoBtn">
+                        <form action="logout.php">
+                            <button id='deconnexion'>Deconnexion</button>
+                        </form>
+                    </div>
                 </div>
         </div>
         <div class="right">
@@ -282,25 +336,14 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                     $conn = connexion_bdd();
                     echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
 
-                    if ($_SESSION['Droit'] == 0) {
-                        echo "<span>User</span></h2>";
-                    } elseif ($_SESSION['Droit'] == 1) {
-                        echo "<span>Admin</span></h2>";
+                    if ($_SESSION['Droit_groupe'] == 2) {
+                        echo "<span>Administrateur du Groupe</span></h2>";
+                    } elseif ($_SESSION['Droit_groupe'] == 1) {
+                        echo "<span>Propriétaire du Groupe</span></h2>";
                     }
-
-                    $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
-                    $result = $conn->query($sql);
-
-                    if ($result->rowCount() > 0) {
-                        echo "<p>Groupe(s): ";
-                        $groupes = [];
-                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                            $groupes[] = $row["Nom"];
-                        }
-                        echo implode("; ", $groupes);
-                        echo "</p>";
-                    } else {
-                        echo "<p>Aucun Groupe</p>";
+                    
+                    if ($_SESSION['Droit'] == 1) {
+                        echo "<span>Admin</span></h2>";
                     }
                     ?>
                     <div class="arrow" onclick="toggleMenu()">
@@ -310,6 +353,7 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                     </div>
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
+                            <li><a href="../pages/main_profile.php">Profil</a></li>
 
                         <?php
                                 $sql="SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
@@ -323,20 +367,33 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                         <li><a href="#" id="openCreateGroupModal">Créer un groupe</a></li>
                         <li><a href="#" id="openJoinGroupModal">Rejoindre un groupe</a></li>
                         <li><a href="#" id="openManageGroupModalBtn" onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo $nom_groupe; ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
+                        
                         </ul>
                     </div>
                 </div>
             </div>
             <main>
                 <div class="projectCard">
+                    <h2>Projets</h2>
+                    <?php 
+                        if ($_SESSION['Droit_groupe'] == 1){
+                                echo "<button id=\"createTaskBtn\">Créer un projet</button>";
+                            }
+                    ?>
+                    <br>
                     <ul>
                     <?php
 
                     // affichage projets
 
-                        $sql="SELECT ID, nom, status, priorite, deadline FROM PROJET WHERE id_groupe = :id_groupe"; //nombre de projet dans grupe actuel
+                        $sql = "SELECT ID, nom, status, priorite, deadline 
+                            FROM PROJET 
+                            WHERE id_groupe = :id_groupe 
+                            AND ID IN (SELECT Projet_ID FROM est_membre_projet WHERE Utilisateur_ID = :id_utilisateur)
+                            ORDER BY deadline ASC LIMIT 3";
                         $stmt1 = $conn->prepare($sql);
                         $stmt1->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
+                        $stmt1->bindParam(':id_utilisateur', $_SESSION['Utilisateur_ID']);
                         $stmt1->execute();
                         $rowcount = $stmt1->rowCount();
 
@@ -364,9 +421,35 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                                 $row = $stmt3->fetch(PDO::FETCH_ASSOC);
                                 $tachetotal = $row['count(*)'];
 
+                                if ($tachefin == $tachetotal){ // si toutes les taches sont finies
+                                    $css_status = "processFini";
+                                    $css_line = "lineFini";
+                                    $css_due = "dueFini";
+                                } elseif (strtotime($deadline) <= strtotime('-7 days') || strtotime($deadline) < strtotime('today')) { // si deadline dans moins de 7 jours ou déjà dépassé
+                                    $css_status = "processRetard";
+                                    $css_line = "lineRetard";
+                                    $css_due = "dueRetard";
+                                } else { // sinon taches en cours normales
+                                    $css_status = "process";
+                                    $css_line = "line";
+                                    $css_due = "due";
+
+                                }
+
+                                switch ($priorite) {
+                                    case "Basse":
+                                        $css_priorite = "priorityBasse";
+                                        break;
+                                    case "Moyenne":
+                                        $css_priorite = "priorityMoyenne";
+                                        break;
+                                    case "Haute":
+                                        $css_priorite = "priorityHaute";
+                                        break;
+                                }
 
                                 echo "<li>";
-                                echo "<div>";
+                                echo "<div class=\"projetBox\">";
                                 echo "<div class=\"projectTop\">";
                                 echo "<h2>$nom<br><span>$groupe</span></h2>";
                                 echo "<div class=\"projectDots\">";
@@ -376,10 +459,10 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                                 echo "</div>";
                                 echo "</div>";
                                 echo "<div class=\"projectProgress\">";
-                                echo "<div class=\"process\">";
+                                echo "<div class=$css_status>";
                                 echo "<h2>$status</h2>";
                                 echo "</div>";
-                                        echo "<div class=\"priority\">";
+                                echo "<div class=$css_priorite>";
                                 echo "<h2>$priorite</h2>";
                                 echo "</div>";
                                 echo "</div>";
@@ -387,21 +470,22 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                                 echo "<div class=\"task\">";
                                 echo "<h2>Tâches faites: <strong>" . $tachefin . "</strong> / " . $tachetotal . "</h2>";
                                 if ($tachetotal == 0) {
-                                    echo "<span class=\"line\" style=\"width: 0%;\"></span>"; // éviter division par 0
+                                    echo "<span class=$css_line style=\"width: 0%;\"></span>"; // éviter division par 0
                                 } else {
-                                    echo "<span class=\"line\" style=\"width: " . ($tachefin / $tachetotal) * 100 . "%;\"></span>";
+                                    echo "<span class=$css_line style=\"width: " . ($tachefin / $tachetotal) * 100 . "%;\"></span>";
                                 }
                                 echo "</div>";
-                                echo "<div class=\"due\">";
+                                echo "<div class=$css_due>";
                                 echo "<h2>Du pour le : $deadline</h2>";
                                 echo "</div>";
                                 echo "</div>";
+                                echo "<br>";
                             }
 
                         } else { // si pas de projet
                             echo "<li>";
                             echo "<div class=\"projectCard\">";
-                            echo "<p> Aucun projet </p>";
+                            echo "<p> Aucun projet assigné</p>";
                             echo "</div>";
                             echo "</li>";
                         }
@@ -433,6 +517,8 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                                 FROM es_assigner
                                 INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
                                 WHERE es_assigner.Utilisateur_ID = :user_id AND TACHE.Groupe_ID = :groupe_id
+                                ORDER BY TACHE.Date_Tache
+                                LIMIT 7
                             ");
                             $stmt_tasks->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
                             $stmt_tasks->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
@@ -558,9 +644,9 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
                                     $dayClass .= ' has-tasks'; // Append task class
                                 }
 
-                                // if ($hasProjet) {
-                                //     $dayClass .= ' has-projet'; // Append project class
-                                // }
+                                if ($hasProjet) {
+                                    $dayClass .= ' has-projet'; // Append project class
+                                }
 
                                 // Date comparison and CSS class assignment
                                 if ($i == date('d') && $currentYear == $selectedYear) {
@@ -580,8 +666,8 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
 
                     </div>
                 </div>
-
-                <div class="messages">
+                <!-- affichage messages -->
+                <div class="messages">  
                     <div class="messagesHead">
                         <h2>Messages</h2>
                     </div>
@@ -681,172 +767,173 @@ $projet_dates = $stmt_projet_dates->fetchAll(PDO::FETCH_COLUMN);
         <span class="close" id="closeModal">&times;</span>
         <h2>Créer une nouvelle tâche</h2>
         <form action="../mysql/creation_tache.php" method="POST" id="taskForm">
-    <input type="hidden" name="groupeID" value="<?php echo $_SESSION['Groupe_ID']; ?>">
-    <label for="text">Nom de la tâche :</label><br>
-    <input type="text" id="text" name="text" required><br><br>
+            <input type="hidden" name="groupeID" value="<?php echo $_SESSION['Groupe_ID']; ?>">
 
-    <label for="categorie">Catégorie :</label><br>
-    <input type="text" id="categorie" name="categorie" required><br><br>
+            <label for="text">Nom de la tâche :</label><br>
+            <input type="text" id="text" name="text" required><br><br>
 
-    <label for="priority">Priorité :</label><br>
-    <select id="priority" name="priority" required>
-        <option value="">Sélectionnez une priorité</option>
-        <option value="low">Basse</option>
-        <option value="medium">Moyenne</option>
-        <option value="high">Haute</option>
-    </select><br><br>
+            <label for="categorie">Catégorie :</label><br>
+            <input type="text" id="categorie" name="categorie" required><br><br>
 
-    <label for="date_tache">Date de la tâche :</label><br>
-    <input type="date" id="date_tache" name="date_tache" required><br><br>
+            <label for="priority">Priorité :</label><br>
+            <select id="priority" name="priority" required>
+                <option value="">Sélectionnez une priorité</option>
+                <option value="low">Basse</option>
+                <option value="medium">Moyenne</option>
+                <option value="high">Haute</option>
+            </select><br><br>
 
-    <input type="submit" value="Créer">
-</form>
+            <label for="project">Projet :</label><br>
+            <select id="project" name="project">
+                <option value="">Personnel (aucun projet)</option>
+                <?php
+                $sql = "SELECT PROJET.ID, PROJET.nom FROM PROJET
+                        JOIN est_membre_projet ON PROJET.ID = est_membre_projet.Projet_ID
+                        WHERE est_membre_projet.Utilisateur_ID = :user_id";
+                $stmt = $conn->prepare($sql);
+                $stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
+                $stmt->execute();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    echo "<option value='" . $row['ID'] . "'>" . htmlspecialchars($row['nom']) . "</option>";
+                }
+                ?>
+            </select><br><br>
 
+            <label for="date_tache">Date de la tâche :</label><br>
+            <input type="date" id="date_tache" name="date_tache" required><br><br>
 
+            <input type="submit" value="Créer">
+        </form>
     </div>
 </div>
+
 </body>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Définir toggleMenu en premier
-    window.toggleMenu = () => {
-        const menu = document.querySelector('.menu');
-        menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    var createTaskModal = document.getElementById("CreateModalTask");
+    var taskDetailModal = document.getElementById("TaskDetailModal");
+    var closeCreateModal = document.getElementById("closeModal");
+    var closeDetailModal = document.getElementById("closeDetailModal");
+    var taskDetailsElement = document.getElementById("taskDetails");
+
+    var createTaskBtn = document.getElementById("createTaskBtn");
+if (createTaskBtn) {
+    createTaskBtn.onclick = function(event) {
+        event.stopPropagation();
+        createTaskModal.classList.add("show");
+    }
+}
+
+
+    closeCreateModal.onclick = function() {
+        createTaskModal.classList.remove("show");
+    }
+
+    closeDetailModal.onclick = function() {
+        taskDetailModal.classList.remove("show");
+    }
+
+    window.onclick = function(event) {
+        if (event.target == createTaskModal) {
+            createTaskModal.classList.remove("show");
+        } else if (event.target == taskDetailModal) {
+            taskDetailModal.classList.remove("show");
+        } else if (event.target == createGroupModal) {
+            createGroupModal.classList.remove("show");
+        } else if (event.target == joinGroupModal) {
+            joinGroupModal.classList.remove("show");
+        }
     };
-
-    const toggle = document.querySelector('.toggle');
-    const left = document.querySelector('.left');
-    const right = document.querySelector('.right');
-    const body = document.querySelector('body');
-    const searchBx = document.querySelector('.searchBx');
-    const modals = document.querySelectorAll('.modal');
-    const calendarHead = document.querySelector('.calendarHead h2');
-    const daysList = document.querySelector('.days');
-    const taskDetailsElement = document.getElementById("taskDetails");
-
-    const toggleClass = (element, className) => element.classList.toggle(className);
-
-    toggle.addEventListener('click', () => {
-        toggleClass(toggle, 'active');
-        toggleClass(left, 'active');
-        toggleClass(right, 'overlay');
-        body.style.overflow = 'hidden';
-    });
-
-    const closeElements = () => {
-        toggle.classList.remove('active');
-        left.classList.remove('active');
-        right.classList.remove('overlay');
-        body.style.overflow = '';
-    };
-
-    document.querySelectorAll('.close').forEach(btn => btn.onclick = closeElements);
-    right.onclick = (e) => e.target == right && closeElements();
-
-    document.querySelector('.searchOpen').onclick = () => searchBx.classList.add('active');
-    document.querySelector('.searchClose').onclick = () => searchBx.classList.remove('active');
-
-    const updateCalendar = () => {
-        let date = new Date();
-        let month = date.getMonth();
-        let year = date.getFullYear();
-        let daysInMonth = new Date(year, month + 1, 0).getDate();
-        let startDay = new Date(year, month, 1).getDay();
-        let monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-
-        calendarHead.textContent = `${monthNames[month]} ${year}`;
-        daysList.innerHTML = '';
-
-        for (let i = 0; i < startDay - 1; i++) daysList.appendChild(createDayElement('inactive'));
-        for (let i = 1; i <= daysInMonth; i++) daysList.appendChild(createDayElement(i === date.getDate() ? 'active' : '', i));
-        for (let i = new Date(year, month, daysInMonth).getDay(); i < 7; i++) daysList.appendChild(createDayElement('inactive'));
-    };
-
-    const createDayElement = (className, text = '') => {
-        let li = document.createElement('li');
-        if (className) li.classList.add(className);
-        li.textContent = text;
-        return li;
-    };
-
-    updateCalendar();
-
-    const toggleModal = (modal, action) => modal.classList[action]('show');
-
-    document.querySelectorAll('[data-modal]').forEach(btn => {
-        const targetModal = document.getElementById(btn.dataset.modal);
-        btn.onclick = (event) => {
-            event.stopPropagation();
-            toggleModal(targetModal, 'add');
-        };
-    });
-
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.onclick = () => {
-            modals.forEach(modal => toggleModal(modal, 'remove'));
-        };
-    });
-
-    window.onclick = (event) => {
-        modals.forEach(modal => {
-            if (event.target == modal) toggleModal(modal, 'remove');
-        });
-    };
-
-    // Afficher les détails de la tâche
+    function showTaskDetails(taskId) {
+    fetch(`../mysql/get_task_details.php?task_id=${taskId}`)
+     .then(response => {
+          if (!response.ok) throw new Error('La réponse n\'est pas valide');
+          return response.json();
+      })
+     .then(data => {
+            if (typeof data!== 'object') throw new Error('Invalide JSON');
+            const taskDetailsElement = document.getElementById("taskDetails");
+            taskDetailsElement.innerHTML = `
+                <p>Nom de la tâche: ${data.nom}</p>
+                <p>Catégorie: ${data.categorie}</p>
+                <p>Date Limite de la Tache: ${data.dateTache}</p>
+            `;
+            taskDetailModal.classList.add("show");
+        })
+     .catch(error => console.error('Erreur:', error));
+}
     document.querySelectorAll('.tasksName').forEach(task => {
-        task.onclick = function () {
-            fetch(`../mysql/get_task_details.php?task_id=${this.getAttribute('id-task-id')}`)
-                .then(response => response.ok ? response.json() : Promise.reject('Erreur de réseau'))
-                .then(data => {
-                    if (typeof data !== 'object') throw new Error('Invalide JSON');
-                    taskDetailsElement.innerHTML = `
-                        <p>Nom de la tâche: ${data.nom}</p>
-                        <p>Catégorie: ${data.categorie}</p>
-                        <p>Date Limite de la Tache: ${data.dateTache}</p>
-                    `;
-                    toggleModal(taskDetailsElement.closest('.modal'), 'add');
-                })
-                .catch(error => console.error('Erreur:', error));
-        };
-    });
-
-    // Toggle étoile
-    window.toggleStarCompletion = (starIcon, taskId) => {
-        toggleClass(starIcon, 'full');
-        toggleClass(starIcon, 'half');
-        let starValue = starIcon.classList.contains('full') ? 1 : 0;
-        let doneValue = starIcon.classList.contains('full') ? 0 : 1;
-        fetch('../update_star_done.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `taskId=${taskId}&star=${starValue}&done=${doneValue}`
-        }).catch(error => console.error('Problème avec fetch:', error));
-    };
-
-    document.querySelector('.some-element').onclick = window.toggleMenu;
-
-    // Gérer les groupes
-    document.getElementById("openManageGroupModalBtn").onclick = () => {
-        const groupID = 1;
-        const groupName = "Nom du Groupe";
-        const groupDescription = "Description du Groupe";
-        const groupCode = "Code du Groupe";
-        const manageGroupModal = document.getElementById("ManageGroupModal");
-        document.getElementById("manageGroupName").value = groupName;
-        document.getElementById("manageGroupDescription").value = groupDescription;
-        document.getElementById("manageGroupCode").value = groupCode;
-        toggleModal(manageGroupModal, 'add');
-    };
-
-    // Gestion des groupes via dropdown
-    $('.dropdown-menu li a').on('click', function () {
-        const groupe = $(this).data('groupe');
-        $.post('main.php', { groupe, action: 'view' }, data => $('#page-content').html(data));
+        task.onclick = function() {
+            var taskId = this.getAttribute('id-task-id');
+            showTaskDetails(taskId);
+        }
     });
 });
 
+const daysWithTasks = document.querySelectorAll('.has-tasks');
+
+function toggleMenu() {
+            var menu = document.querySelector('.menu');
+            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+            }
+            
+            var createGroupModal = document.getElementById("CreateGroupModal");
+    var joinGroupModal = document.getElementById("JoinGroupModal");
+    var openCreateGroupModal = document.getElementById("openCreateGroupModal");
+    var openJoinGroupModal = document.getElementById("openJoinGroupModal");
+    var closeCreateGroupModal = document.getElementById("closeCreateGroupModal");
+    var closeJoinGroupModal = document.getElementById("closeJoinGroupModal");
+
+
+    openCreateGroupModal.onclick = function(event) {
+        event.preventDefault();
+        createGroupModal.classList.add("show");
+    }
+
+    closeCreateGroupModal.onclick = function() {
+        createGroupModal.classList.remove("show");
+    }
+
+    openJoinGroupModal.onclick = function(event) {
+        event.preventDefault();
+        joinGroupModal.classList.add("show");
+    }
+
+    closeJoinGroupModal.onclick = function() {
+        joinGroupModal.classList.remove("show");
+    }
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    var manageGroupModal = document.getElementById("ManageGroupModal");
+    var closeManageGroupModal = document.getElementById("closeManageGroupModal");
+
+    function openManageGroupModal(groupID, groupName, groupDescription, groupCode) {
+        document.getElementById("manageGroupName").value = groupName;
+        document.getElementById("manageGroupDescription").value = groupDescription;
+        document.getElementById("manageGroupCode").value = groupCode;
+        manageGroupModal.classList.add("show");
+    }
+
+    closeManageGroupModal.onclick = function() {
+        manageGroupModal.classList.remove("show");
+    }
+
+    window.onclick = function(event) {
+        if (event.target == manageGroupModal) {
+            manageGroupModal.classList.remove("show");
+        }
+    };
+
+    document.getElementById("openManageGroupModalBtn").onclick = function() {
+        var groupID = 1;
+        var groupName = "Nom du Groupe";
+        var groupDescription = "Description du Groupe";
+        var groupCode = "Code du Groupe";
+        openManageGroupModal(groupID, groupName, groupDescription, groupCode);
+    };
+});
 
 </script>
 </html>

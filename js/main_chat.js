@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Création de la fenêtre modale
+    // Création de la fenêtre modale (inchangé)
     var modal = document.createElement('div');
     modal.setAttribute('id', 'contactModal');
     modal.style.display = 'none';
@@ -35,11 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
     form.setAttribute('id', 'contactForm');
     modalContent.appendChild(form);
 
-    // Ajout des champs du formulaire
     var title = document.createElement('h2');
     title.textContent = 'Ajouter un contact';
     form.appendChild(title);
-    
+
     var label = document.createElement('label');
     label.setAttribute('for', 'contactEmail');
     label.textContent = 'Email du contact:';
@@ -56,13 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
     submit.setAttribute('value', 'Ajouter');
     form.appendChild(submit);
 
-    // Gestion de la soumission du formulaire
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         // Ajoutez ici votre code pour synchroniser la liste de contacts
     });
 
-    // Affichage de la fenêtre modale lors du clic sur le bouton
     var tasksDots = document.querySelectorAll('.tasksDots');
     tasksDots.forEach(function(dot) {
         dot.addEventListener('click', function() {
@@ -71,33 +68,64 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
 function fetchMessages() {
     fetch('../mysql/get_message.php')
         .then(response => response.json())
         .then(data => {
-            const chat = document.getElementById('chat_messagess');
+            const chat = document.getElementById('chat_messages');
             chat.innerHTML = '';
             data.forEach(msg => {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message');
-                messageElement.innerHTML = `<strong>${msg.Auteur_ID}</strong>: ${msg.Texte} <em>${msg.Date_Envoi}</em>`;
+                messageElement.innerHTML = `
+                    <p><strong>${msg.Auteur_Nom || 'Anonyme'}</strong>: ${msg.Texte}</p>
+                    <p><em>${new Date(msg.Date_Envoi).toLocaleString()}</em></p>
+                `;
                 chat.appendChild(messageElement);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching messages:', error);
         });
 }
 
 document.getElementById('newMessageForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const formData = new FormData(this);
-    fetch('post_message.php', {
+    fetch('../mysql/submit_message.php', {
         method: 'POST',
         body: formData
-    }).then(() => {
-        document.getElementById('message').value = '';
-        fetchMessages();
+    }).then(response => {
+        if (response.ok) {
+            document.getElementById('newMessageInput').value = '';
+            fetchMessages();
+        } else {
+            console.error('Error submitting message:', response.statusText);
+        }
+    }).catch(error => {
+        console.error('Error submitting message:', error);
     });
 });
 
-setInterval(fetchMessages, 1000); // Actualiser toutes les secondes
+let intervalId;
+
+function startFetchingMessages() {
+    intervalId = setInterval(fetchMessages, 5000); // Fetch new messages every 5 seconds
+}
+
+function stopFetchingMessages() {
+    clearInterval(intervalId);
+}
+
+// Start fetching messages when the page is visible
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        startFetchingMessages();
+    } else {
+        stopFetchingMessages();
+    }
+});
+
+// Initially start fetching messages
 fetchMessages();
+startFetchingMessages();

@@ -168,41 +168,6 @@ li {
 }
 /* nav end */
 
-
-
-
-/* disconnect start */
-.container .disconnect {
-    position: relative;
-    width: calc(100% - 30px);
-    text-align: center;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    padding: 10px;
-    z-index: -1;
-    overflow: hidden;
-}
-.container .disconnect .decoBtn {
-    height: 40px;
-    background: #fff;
-}
-.container .disconnect .decoBtn button {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    outline: none;
-    border: none;
-    font-size: 1.2em;
-    color: #000;
-    font-weight: 500;
-    cursor: pointer;
-}
-/* disconnect end */
 /* left end */
 /* right start */
 .container .right {
@@ -330,12 +295,17 @@ li {
         inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
         inset rgb(255, 255, 255) 0px 11px 28px 0px;
     padding: 20px;
-    display: flex;
+    /* display: flex; */
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
-    grid-row: 1 / 4;
+    grid-row: 1 / 7;
 }
+
+.container .right main .projectCard li .projetBox {
+    margin-bottom: 50px;
+}
+
 .container .right main .projectCard .projectTop {
     position: relative;
     width: 100%;
@@ -344,6 +314,7 @@ li {
     justify-content: space-between;
     align-items: center;
 }
+
 .container .right main .projectCard .projectTop h2 {
     color: #000;
     font-size: 1.2em;
@@ -388,12 +359,80 @@ li {
     font-weight: 500;
     letter-spacing: 0.5px;
 }
-.container .right main .projectCard .projectProgress .priority {
+
+.container .right main .projectCard .projectProgress .processRetard h2 {
+    color: #FF0000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.container .right main .projectCard .projectProgress .processFini h2 {
+    color: #008000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.container .right main .projectCard .projectProgress .priorityBasse {
     position: relative;
     padding: 5px 10px;
     cursor: pointer;
 }
-.container .right main .projectCard .projectProgress .priority::before {
+.container .right main .projectCard .projectProgress .priorityBasse::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #008000;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #008000,
+        0 0 5px #00800077;
+}
+.container .right main .projectCard .projectProgress .priorityBasse h2 {
+    color: #008000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.container .right main .projectCard .projectProgress .priorityMoyenne {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.container .right main .projectCard .projectProgress .priorityMoyenne::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #ffe436;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #ffe436,
+        0 0 5px #ffe43677;
+}
+.container .right main .projectCard .projectProgress .priorityMoyenne h2 {
+    color: #ffe436;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+
+.container .right main .projectCard .projectProgress .priorityHaute {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.container .right main .projectCard .projectProgress .priorityHaute::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -406,12 +445,13 @@ li {
     box-shadow: 0 0 2px #ff0000,
         0 0 5px #ff000077;
 }
-.container .right main .projectCard .projectProgress .priority h2 {
+.container .right main .projectCard .projectProgress .priorityHaute h2 {
     color: #ff0000;
     white-space: nowrap;
     font-size: 0.9em;
     font-weight: 500;
 }
+
 .container .right main .projectCard .task {
     position: relative;
     width: 100%;
@@ -437,6 +477,27 @@ li {
     z-index: 1;
     overflow: hidden;
 }
+
+.container .right main .projectCard .task .lineRetard {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, .1);
+    border-radius: 50px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.container .right main .projectCard .task .lineFini {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, .1);
+    border-radius: 50px;
+    z-index: 1;
+    overflow: hidden;
+}
+
 .container .right main .projectCard .task .line::before {
     content: '';
     position: absolute;
@@ -447,6 +508,29 @@ li {
     z-index: 1;
     border-radius: 50px;
 }
+
+.container .right main .projectCard .task .lineFini::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #008000;
+    z-index: 1;
+    border-radius: 50px;
+}
+
+.container .right main .projectCard .task .lineRetard::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #FF0000;
+    z-index: 1;
+    border-radius: 50px;
+}
+
 .container .right main .projectCard .due {
     position: relative;
     width: 100%;
@@ -463,6 +547,23 @@ li {
     font-size: 1.1em;
     color: #2C74B3;
 }
+
+.container .right main .projectCard .dueRetard h2 {
+    padding: 2px 10px;
+    border: 2px solid #FF0000;
+    border-radius: 10px;
+    font-size: 1.1em;
+    color: #FF0000;
+}
+
+.container .right main .projectCard .dueFini h2 {
+    padding: 2px 10px;
+    border: 2px solid #008000;
+    border-radius: 10px;
+    font-size: 1.1em;
+    color: #008000;
+}
+
 /* projectTop end */
 
 /* myTasks start */
@@ -690,7 +791,7 @@ li {
     color: black;
 }
 
-.container .right main .calendar .calendarData .days .has-Projet{
+.container .right main .calendar .calendarData .days .has-projet{
     background-color: rgb(167, 35, 35);
     color: rgb(255, 255, 255);
 }
