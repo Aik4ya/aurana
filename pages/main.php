@@ -377,7 +377,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
                     <h2>Projets</h2>
                     <?php 
                         if ($_SESSION['Droit_groupe'] == 1){
-                                echo "<button id=\"createTaskBtn\">Créer un projet</button>";
+                                echo "<button id=\"creaeProjetBtn\">Créer un projet</button>";
                             }
                     ?>
                     <br>
@@ -425,7 +425,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
                                     $css_status = "processFini";
                                     $css_line = "lineFini";
                                     $css_due = "dueFini";
-                                } elseif (strtotime($deadline) <= strtotime('-7 days') || strtotime($deadline) < strtotime('today')) { // si deadline dans moins de 7 jours ou déjà dépassé
+                                } elseif (strtotime($deadline) <= strtotime('+7 days') || strtotime($deadline) < strtotime('today') ) { // si deadline dans moins de 7 jours ou déjà dépassé
                                     $css_status = "processRetard";
                                     $css_line = "lineRetard";
                                     $css_due = "dueRetard";
@@ -671,36 +671,27 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
                     <div class="messagesHead">
                         <h2>Messages</h2>
                     </div>
-                    <div class="messagesUser">
-                        <div class="messagesUserImg">
-                            <img src="./groupImg/img1.jpg" alt="img1">
-                        </div>
-                        <h2>Marvin McKinney<br><span>Commodo volutpot noc</span></h2>
-                    </div>
-                    <div class="messagesUser">
-                        <div class="messagesUserImg">
-                            <img src="./groupImg/img2.jpg" alt="img2">
-                        </div>
-                        <h2>Wade Warren<br><span>Commodo volutpot noc</span></h2>
-                    </div>
-                    <div class="messagesUser">
-                        <div class="messagesUserImg">
-                            <img src="./groupImg/img3.jpg" alt="img3">
-                        </div>
-                        <h2>John Cooper<br><span>Commodo volutpot noc</span></h2>
-                    </div>
-                    <div class="messagesUser">
-                        <div class="messagesUserImg">
-                            <img src="./groupImg/img4.jpg" alt="img4">
-                        </div>
-                        <h2>Darlene Robertson<br><span>Commodo volutpot noc</span></h2>
-                    </div>
-                    <div class="messagesUser">
-                        <div class="messagesUserImg">
-                            <img src="./groupImg/img5.jpg" alt="img5">
-                        </div>
-                        <h2>Kristin Watson<br><span>Commodo volutpot noc</span></h2>
-                    </div>
+                    <?php 
+                        $sql = "SELECT * FROM MESSAGE WHERE Destinataire_ID = :groupe_id ORDER BY Date_Envoi DESC LIMIT 5";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
+                        $stmt->execute();
+
+
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            $message_id = $row['Message_ID'];
+                            $message_text = $row['Texte'];
+                            $message_date = $row['Date_Envoi'];
+                            $message_sender = $row['Auteur_ID'];
+
+                            echo "<div class=\"messagesUser\">";
+                            echo "<div class=\"messagesUserImg\">";
+                            echo "<img src=\"./groupImg/img1.jpg\" alt=\"img1\">";
+                            echo "</div>";
+                            echo "<h2>$message_sender<br><span>$message_text</span></h2>";
+                            echo "</div>";
+                        }
+                   ?>
                 </div>
             </main>
         </div>

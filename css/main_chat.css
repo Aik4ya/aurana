@@ -11,7 +11,7 @@
     font-optical-sizing: auto;
     font-weight: 300;
     font-style: normal;
-  }
+}
 
 * {
     margin: 0;
@@ -28,23 +28,26 @@ body {
     background: linear-gradient(#9fa7d621, #c5caff40);
 }
 
-::-webkit-scrollbar{
+::-webkit-scrollbar {
     width: 10px;
 }
-::-webkit-scrollbar-track{
+
+::-webkit-scrollbar-track {
     background: #f4dbfb;
 }
-::-webkit-scrollbar-thumb{
+
+::-webkit-scrollbar-thumb {
     background: #f4dbfb;
     border-radius: 10px;
     border: 3px solid #fff;
 }
+
 .full {
     font-variation-settings:
-        'FILL'1,
-        'wght'400,
-        'GRAD'0,
-        'opsz'48
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 48;
 }
 
 /* container start */
@@ -55,6 +58,7 @@ body {
     display: flex;
     gap: 20px;
 }
+
 /* left start */
 .container .left {
     position: relative;
@@ -72,11 +76,13 @@ body {
     flex-direction: column;
     padding: 20px 0;
 }
+
 /* header start */
 .container .left header {
     position: relative;
     width: 100%;
 }
+
 /* logo start */
 .container .left header .logo {
     position: relative;
@@ -86,6 +92,7 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
 .container .left header .logo h2 {
     font-size: 1.2em;
     font-weight: 500;
@@ -93,6 +100,7 @@ body {
     color: #000;
     font-family: 'Dunkin';
 }
+
 .container .left header .logo .close {
     position: relative;
     left: -20px;
@@ -103,6 +111,7 @@ body {
     display: none;
     cursor: pointer;
 }
+
 /* nav start */
 .container .left header nav {
     position: relative;
@@ -110,6 +119,7 @@ body {
     padding-bottom: 20px;
     padding-left: 20px;
 }
+
 .container .left header nav ul {
     position: relative;
     display: flex;
@@ -118,6 +128,7 @@ body {
     flex-direction: column;
     gap: 10px;
 }
+
 .container .left header nav ul li {
     position: relative;
     width: 100%;
@@ -127,6 +138,7 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 .container .left header nav ul li a {
     position: relative;
     width: 100%;
@@ -140,11 +152,13 @@ body {
     border-bottom-left-radius: 10px;
     transition: .3s ease;
 }
+
 .container .left header nav ul li:first-child a,
 .container .left header nav ul li a:hover {
     transition: 0s;
     background: #f1f3ff;
 }
+
 .container .left header nav ul li a::before {
     content: '';
     position: absolute;
@@ -154,25 +168,30 @@ body {
     background: #6577ff;
     transition: .3s ease;
 }
+
 .container .left header nav ul li:first-child a::before,
 .container .left header nav ul li a:hover::before {
     width: 4px;
 }
+
 .container .left header nav ul li a .material-symbols-outlined {
     color: #999;
     font-size: 1.7em;
     margin-right: 10px;
 }
+
 .container .left header nav ul li a .title {
     color: #999;
     font-size: 1.1em;
 }
+
 .container .left header nav ul li:first-child a .material-symbols-outlined,
 .container .left header nav ul li:first-child a .title,
 .container .left header nav ul li a:hover .material-symbols-outlined,
 .container .left header nav ul li a:hover .title {
     color: #5356FF;
 }
+
 /* nav end */
 
 /* left end */
@@ -185,6 +204,7 @@ body {
     flex-direction: column;
     gap: 20px;
 }
+
 /* top start */
 .container .right .top {
     position: relative;
@@ -197,6 +217,7 @@ body {
     background: #fff;
     border-radius: 20px;
 }
+
 /* user start */
 .container .right .top .user {
     position: relative;
@@ -205,20 +226,24 @@ body {
     align-items: center;
     gap: 15px;
 }
+
 .container .right .top .user span {
     color: #000;
     cursor: pointer;
 }
+
 .container .right .top .user h2 {
     font-size: 1.1em;
     line-height: 18px;
     white-space: nowrap;
     cursor: pointer;
 }
+
 .container .right .top .user h2 span {
     color: #999;
     font-size: 0.8em;
 }
+
 .container .right .top .user .arrow {
     position: relative;
     width: 40px;
@@ -228,15 +253,18 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 .container .right .top .user .arrow span {
     color: #000;
     font-size: 2em;
     font-weight: 600;
     transition: all .3s ease;
 }
+
 .container .right .top .user .arrow:hover span {
     transform: scale(1.2);
 }
+
 .container .right .top .user .toggle {
     position: relative;
     width: 40px;
@@ -248,15 +276,18 @@ body {
     line-height: 50px;
     display: none;
 }
+
 .container .right .top .user .toggle span {
     color: #000;
     font-size: 1.5em;
     font-weight: 900;
     transition: .3s ease, opacity 0s, visibility 0s;
 }
+
 .container .right .top .user .toggle:hover span {
     transform: scale(1.1);
 }
+
 .container .right .top .user .toggle span:last-child {
     position: absolute;
     top: 50%;
@@ -265,19 +296,18 @@ body {
     opacity: 0;
     visibility: hidden;
 }
+
 .container .right .top .user .toggle.active span:first-child {
     opacity: 0;
     visibility: hidden;
 }
+
 .container .right .top .user .toggle.active span:last-child {
     opacity: 1;
     visibility: visible;
 }
+
 /* user end */
-
-
-
-
 
 
 /* main start */
@@ -290,6 +320,7 @@ body {
     grid-template-rows: repeat(6, 1fr);
     gap: 20px;
 }
+
 /* projectCard start */
 .container .right main .projectCard {
     position: relative;
@@ -303,161 +334,117 @@ body {
         inset rgb(255, 255, 255) 0px 11px 28px 0px;
     padding: 20px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     flex-direction: column;
     grid-row: 1 / 7;
     grid-column: 2 / 4;
 }
+
 .container .right main .projectCard .projectTop {
-    position: relative;
-    width: 100%;
-    height: 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
+
 .container .right main .projectCard .projectTop h2 {
     color: #000;
     font-size: 1.2em;
     line-height: 18px;
     cursor: pointer;
 }
+
 .container .right main .projectCard .projectTop h2 span {
     color: #999;
     font-size: 0.8em;
 }
-.container .right main .projectCard .projectTop .projectDots {
-    position: relative;
+
+#chat_messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    margin-bottom: 10px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
+    flex-direction: column-reverse; /* New messages at the bottom */
 }
-.container .right main .projectCard .projectTop .projectDots span {
-    color: #000;
-    font-size: 1.8em;
-    font-weight: 700;
+
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    word-wrap: break-word;
 }
-.container .right main .projectCard .projectProgress {
-    position: relative;
+
+.message p {
+    margin: 0;
+    padding: 0;
+}
+
+.message strong {
+    color: #333;
+}
+
+.message em {
+    color: #777;
+    font-size: 0.8em;
+}
+
+/* Pour le formulaire */
+#newMessageForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#newMessageInput {
     width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    height: 50px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
 }
-.container .right main .projectCard .projectProgress .process {
-    position: relative;
-    padding: 5px 10px;
-    background: #f1f3ff;
+
+#newMessageForm button {
+    padding: 10px;
+    background-color: #6577ff;
+    color: white;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
 }
-.container .right main .projectCard .projectProgress .process h2 {
-    color: #8389f9;
-    white-space: nowrap;
-    font-size: 0.9em;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+
+#newMessageForm button:hover {
+    background-color: #5356ff;
 }
-.container .right main .projectCard .projectProgress .priority {
-    position: relative;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-.container .right main .projectCard .projectProgress .priority::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 8px;
-    height: 8px;
-    transform: translate(-50%, -50%);
-    background: #ff0000;
-    border-radius: 50%;
-    box-shadow: 0 0 2px #ff0000,
-        0 0 5px #ff000077;
-}
-.container .right main .projectCard .projectProgress .priority h2 {
-    color: #ff0000;
-    white-space: nowrap;
-    font-size: 0.9em;
-    font-weight: 500;
-}
-.container .right main .projectCard .task {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-direction: column;
-    margin: 10px 0;
-}
-.container .right main .projectCard .task h2 {
-    color: #999;
-    font-size: 1em;
-}
-.container .right main .projectCard .task h2 bold {
-    color: #000;
-}
-.container .right main .projectCard .task .line {
-    position: relative;
-    width: 100%;
-    height: 5px;
-    background: rgba(0, 0, 0, .1);
-    border-radius: 50px;
-    z-index: -1;
-    overflow: hidden;
-}
-.container .right main .projectCard .task .line::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: calc(100% - 25%);
-    height: 100%;
-    background: #6577ff;
-    z-index: 1;
-    border-radius: 50px;
-}
-.container .right main .projectCard .due {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    cursor: pointer;
-}
-.container .right main .projectCard .due h2 {
-    padding: 2px 10px;
-    border: 2px solid #2C74B3;
-    border-radius: 10px;
-    font-size: 1.1em;
-    color: #2C74B3;
-}
-/* projectTop end */
+
+
 /* projectCard2 start */
 .container .right main .projectCard.projectCard2 {
     grid-row: 4 / 7;
 }
+
 .container .right main .projectCard.projectCard2 .projectProgress .process {
     background: #dffde0;
 }
+
 .container .right main .projectCard.projectCard2 .projectProgress .process h2 {
     color: #69bc72;
 }
+
 .container .right main .projectCard.projectCard2 .projectProgress .priority::before {
     background: #69bc72;
     box-shadow: 0 0 2px #69bc72,
         0 0 5px #69bc7277;
 }
+
 .container .right main .projectCard.projectCard2 .projectProgress .priority h2 {
     color: #69bc72;
 }
+
 .container .right main .projectCard.projectCard2 .task .line::before {
     background: #f5c75f;
 }
+
 /* projectCard2 end */
 
 /* myfriends start */
@@ -479,6 +466,7 @@ body {
     grid-row: 1 / 7;
     grid-column: 1 / 2;
 }
+
 .container .right main .myfriends .friendsHead {
     position: relative;
     width: 100%;
@@ -487,6 +475,7 @@ body {
     justify-content: space-between;
     align-items: flex-start;
 }
+
 .container .right main .myfriends .friendsHead h2 {
     position: relative;
     width: 100%;
@@ -496,25 +485,30 @@ body {
     font-size: 1.2em;
     cursor: pointer;
 }
+
 .container .right main .myfriends .friendsHead .friendsDots {
     position: relative;
     cursor: pointer;
 }
+
 .container .right main .myfriends .friendsHead .friendsDots span {
     color: #000;
     font-size: 1.8em;
     font-weight: 700;
 }
+
 .container .right main .myfriends .friends {
     position: relative;
     width: 100%;
     height: 100%;
 }
+
 .container .right main .myfriends .friends ul {
     position: relative;
     width: 100%;
     height: 100%;
 }
+
 .container .right main .myfriends .friends ul li {
     position: relative;
     width: 100%;
@@ -523,6 +517,7 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
 .container .right main .myfriends .friends ul li::before {
     content: '';
     position: absolute;
@@ -532,9 +527,11 @@ body {
     height: 1.5px;
     background: rgba(0, 0, 0, .1);
 }
+
 .container .right main .myfriends .friends ul li:last-child::before {
     width: 0;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName {
     position: relative;
     width: 100%;
@@ -544,6 +541,7 @@ body {
     align-items: center;
     gap: 20px;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName .friendsIcon {
     position: relative;
     width: 25px;
@@ -554,23 +552,28 @@ body {
     align-items: center;
     cursor: pointer;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName .friendsIcon.done {
     color: #fff;
     background: #69bc72;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName .friendsIcon.notDone {
     background: #fff;
     border: 3px solid #999;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName .friendsName {
     position: relative;
     color: #000;
     cursor: pointer;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName .friendsName.friendsLine {
     color: #999;
     cursor: not-allowed;
 }
+
 .container .right main .myfriends .friends ul li .friendsIconName .friendsName.friendsLine::before {
     content: '';
     position: absolute;
@@ -580,6 +583,7 @@ body {
     height: 1.5px;
     background: rgba(0, 0, 0, .3);
 }
+
 .container .right main .myfriends .friends ul li .friendsStar {
     position: relative;
     display: flex;
@@ -587,305 +591,17 @@ body {
     align-items: center;
     cursor: pointer;
 }
+
 .container .right main .myfriends .friends ul li .friendsStar.full {
     color: #f5c75f;
 }
+
 .container .right main .myfriends .friends ul li .friendsStar.half {
     color: #f5c75f;
 }
+
 /* myfriends end */
-/* timeline start */
-.container .right main .timeline {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 5 / 7;
-    grid-column: 2 / 3;
-    padding: 20px;
-    overflow: hidden;
-}
-.container .right main .timeline .timelineHead {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.container .right main .timeline .timelineHead h2 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    line-height: 18px;
-    color: #000;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-.container .right main .timeline .timelineHead .timelineDots {
-    position: relative;
-    height: 100%;
-    cursor: pointer;
-}
-.container .right main .timeline .timelineHead .timelineDots span {
-    color: #000;
-    font-size: 1.8em;
-    font-weight: 700;
-}
-.container .right main .timeline .timelineVideos {
-    position: relative;
-    width: calc(100% + 40px);
-    height: 100%;
-}
-.container .right main .timeline .timelineVideos ul {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-.container .right main .timeline .timelineVideos ul li {
-    position: relative;
-    width: 100%;
-    height: calc(100% / 4);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    transition: .3s ease;
-}
-.container .right main .timeline .timelineVideos ul li:first-child::before,
-.container .right main .timeline .timelineVideos ul li:hover::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    background: #f1f3ff;
-    width: 100%;
-    height: 100%;
-    border-left: 4px solid #6577ff;
-    transition: 0s;
-}
-.container .right main .timeline .timelineVideos ul li .videoText {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: .3s ease;
-}
-.container .right main .timeline .timelineVideos ul li .videoText .material-symbols-outlined {
-    color: #999;
-    transition: .3s ease;
-}
-.container .right main .timeline .timelineVideos ul li:hover .videoText .material-symbols-outlined,
-.container .right main .timeline .timelineVideos ul li:first-child .videoText .material-symbols-outlined {
-    color: #6577ff;
-}
-.container .right main .timeline .timelineVideos ul li:first-child .videoText .text,
-.container .right main .timeline .timelineVideos ul li:hover .videoText .text {
-    color: #000;
-    font-weight: 500;
-}
-.container .right main .timeline .timelineVideos ul li .timelineTime {
-    color: #999;
-    z-index: 1;
-    font-size: 0.9em;
-    transition: .3s ease;
-}
-.container .right main .timeline .timelineVideos ul li:hover .timelineTime,
-.container .right main .timeline .timelineVideos ul li:first-child .timelineTime {
-    color: #000;
-}
-/* timeline end */
-/* calendar start */
-.container .right main .calendar {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 1 / 4;
-    grid-column: 3 / 4;
-    padding: 20px;
-    gap: 10px;
-}
-.container .right main .calendar .calendarHead {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.container .right main .calendar .calendarHead h2 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    line-height: 18px;
-    color: #000;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-.container .right main .calendar .calendarHead .calendarIcon {
-    position: relative;
-    display: flex;
-    gap: 10px;
-}
-.container .right main .calendar .calendarHead .calendarIcon .material-symbols-outlined {
-    position: relative;
-    width: 25px;
-    height: 25px;
-    border: 3px solid #9fa7d6;
-    border-radius: 50%;
-    cursor: pointer;
-    color: #9fa7d6;
-    font-size: 1.3em;
-    font-weight: 600;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.container .right main .calendar .calendarData {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.container .right main .calendar .calendarData .weeks {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-.container .right main .calendar .calendarData .weeks li {
-    list-style: none;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: 500;
-}
-.container .right main .calendar .calendarData .days {
-    position: relative;
-    width: 100%;
-    height: calc(100% - 30px);
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(6, 1fr);
-    place-items: center;
-}
-.container .right main .calendar .calendarData .days li {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #000;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: .3s ease;
-}
-.container .right main .calendar .calendarData .days li.inactive {
-    color: #999;
-}
-.container .right main .calendar .calendarData .days li:hover {
-    background: #999;
-    color: #fff;
-    transition: 0s;
-}
-.container .right main .calendar .calendarData .days li.active {
-    background: #6577ff;
-    color: #fff;
-}
-/* calendar end */
-/* messages start */
-.container .right main .messages {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 4 / 7;
-    padding: 20px;
-    gap: 5px;
-}
-.container .right main .messages .messagesHead {
-    position: relative;
-    width: 100%;
-    height: 30px;
-}
-.container .right main .messages .messagesHead h2 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    line-height: 18px;
-    color: #000;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-.container .right main .messages .messagesUser {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-}
-.container .right main .messages .messagesUser .messagesUserImg {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-.container .right main .messages .messagesUser .messagesUserImg img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
-}
-.container .right main .messages .messagesUser h2 {
-    position: relative;
-    color: #000;
-    cursor: pointer;
-    font-size: 1.2em;
-    line-height: 18px;
-}
-.container .right main .messages .messagesUser h2 span {
-    color: #999;
-    font-size: 0.8em;
-}
-/* messages end */
+
 /* Responsive */
 @media (max-width: 1176px) {
     .container .left {
@@ -896,9 +612,11 @@ body {
         box-shadow: none;
         transition: .5s ease;
     }
+
     .container .left.active {
         left: 20px;
     }
+
     .container .right.overlay::before {
         content: '';
         position: absolute;
@@ -908,38 +626,46 @@ body {
         z-index: 10;
         border-radius: 20px;
     }
+
     .container .right .top .user .toggle {
         display: block;
     }
 }
+
 @media (max-width: 927px) {
     .container {
         height: 100%;
         margin: 30px 0;
     }
+
     .container .left.active {
         width: calc(100% - 40px);
         height: calc(100vh - 55px);
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
     }
+
     .container .left header .logo .close {
         display: block;
     }
+
     .container .right main {
         grid-template-columns: repeat(1, 1fr);
         grid-template-rows: 1.4fr 1.4fr 1.6fr 1.3fr 1fr 1.3fr;
     }
+
     .container .right main * {
         grid-row: unset !important;
         grid-column: unset !important;
     }
 
 }
+
 @media (max-width: 586px) {
     .container .right .top .user .arrow {
         display: none;
     }
+
     .container .right .top .user h2 {
         display: none;
     }
@@ -950,7 +676,7 @@ body {
     position: absolute;
     background-color: #f9f9f9;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 9999;
 }
 
@@ -983,24 +709,3 @@ body {
     padding: 20px;
     border-radius: 15px;
 }
-
-.message {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.message p {
-    margin: 0;
-    padding: 0;
-}
-
-.message strong {
-    color: #333;
-}
-
-.message em {
-    color: #777;
-    font-size: 0.8em;
-}
-

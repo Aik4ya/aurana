@@ -21,8 +21,85 @@ verif_session();
     <link rel="stylesheet" href="../css/button.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        /* Modal */
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        }
+
+        .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+<!-- Modal -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Tâches</h2>
+    <ul id="taskList">
+      <?php
+      if (isset($_GET['project_id'])) {
+        $projectId = $_GET['project_id'];
+
+        $sql = "SELECT TACHE.Texte, TACHE.categorie, TACHE.done, TACHE.Date_Tache
+                FROM tache_assignee_projet
+                INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID
+                WHERE tache_assignee_projet.id_projet = :id_projet";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':id_projet', $projectId);
+        $stmt->execute();
+        $rowcount = $stmt->rowCount();
+
+        if ($rowcount > 0) {
+          while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $texte = $row['Texte'];
+            $categorie = $row['categorie'];
+            $done = $row['done'];
+            $date = $row['Date_Tache'];
+            echo "<li>";
+            echo "<div>";
+            echo "$texte $categorie $done $date";
+            echo "</div>";
+            echo "</li>";
+          }
+        } else {
+          echo "<li><div><p>Aucune tâche</p></div></li>";
+        }
+      }
+      ?>
+    </ul>
+  </div>
+</div>
+
 <div class="container">
             <div class="left">
                 <header>
@@ -273,4 +350,61 @@ verif_session();
         </div>
         <!-- fin de droite -->
     </div>
+    <script>
+    window.onload = function() {
+    // Obtenir la modal
+    var modal = document.getElementById("taskModal");
+
+    // Vérifier si la modal existe
+    if (modal) {
+        // Obtenir les boutons qui ouvrent la modal
+        var projectDots = document.getElementsByClassName("projectDots");
+        for (var i = 0; i < projectDots.length; i++) {
+        projectDots[i].onclick = function() {
+            modal.style.display = "block";
+            // Remplir la liste des tâches
+            var taskList = document.getElementById("taskList");
+            taskList.innerHTML = ""; // Vider la liste
+
+            // Récupérer l'ID du projet correspondant
+            var projectCard = this.closest(".projectCard");
+            var projectId = projectCard.getAttribute("data-project-id");
+
+            // Requête AJAX pour récupérer les tâches du projet
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "get_tasks.php?project_id=" + projectId, true);
+            xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                var tasks = JSON.parse(xhr.responseText);
+                for (var j = 0; j < tasks.length; j++) {
+                var task = tasks[j];
+                var li = document.createElement("li");
+                li.innerHTML = task.texte + " " + task.categorie + " " + task.done + " " + task.date;
+                taskList.appendChild(li);
+                }
+            }
+            };
+            xhr.send();
+        }
+        }
+
+        // Obtenir l'élément <span> qui ferme la modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // Lorsque l'utilisateur clique sur <span> (x), fermer la modal
+        span.onclick = function() {
+        modal.style.display = "none";
+        }
+
+        // Lorsque l'utilisateur clique n'importe où en dehors de la modal, fermer la modal
+        window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        }
+    } else {
+        console.error("La modal n'a pas été trouvée dans le document HTML.");
+    }
+    }
+  </script>
 </body>

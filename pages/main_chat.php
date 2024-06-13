@@ -1,9 +1,5 @@
 <?php
 
-/*ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);*/
-
 require '../mysql/cookies_uid.php';
 require '../mysql/connexion_bdd.php';
 $conn = connexion_bdd();
@@ -13,6 +9,12 @@ $_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
 
 ecriture_log("main_chat");
 verif_session();
+
+// Mettre à jour l'état en ligne
+$sql = "UPDATE UTILISATEUR SET En_Ligne = 1 WHERE Utilisateur_ID = :user_id";
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
+$stmt->execute();
 
 $nom_groupe = null;
 
@@ -33,6 +35,16 @@ if (isset($_GET['groupe'])) {
     exit;
 }
 
+// Mise à jour de l'état de déconnexion lors de la déconnexion
+if (isset($_POST['deconnexion'])) {
+    $sql = "UPDATE UTILISATEUR SET En_Ligne = 0, derniere_connexion = NOW() WHERE Utilisateur_ID = :user_id";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
+    $stmt->execute();
+    session_destroy();
+    header("Location: login.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -43,6 +55,7 @@ if (isset($_GET['groupe'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aurana - Dashboard</title>
     <link rel="stylesheet" href="../css/main_chat.css">
+    <script src="../js/main_chat.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>
 <body>
@@ -52,36 +65,26 @@ if (isset($_GET['groupe'])) {
                 <div class="logo">
                     <h2>aurana</h2>
                     <div class="close">
-                        <span class="material-symbols-outlined">
-                            close
-                        </span>
+                        <span class="material-symbols-outlined">close</span>
                     </div>
                 </div>
                 <nav>
                     <ul>
-                        <li><?php echo "<a href='main.php?groupe=" . $_GET['groupe'] . "'>" ?>
-                            <span class="material-symbols-outlined full">
-                                dashboard
-                            </span>
+                        <li><?php echo "<a href='main.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
+                            <span class="material-symbols-outlined full">dashboard</span>
                             <span class="title">Dashboard</span>
                         </a></li>
-                        <li><?php echo "<a href='main_task.php?groupe=" . $_GET['groupe'] . "'>" ?>
-                            <span class="material-symbols-outlined">
-                                check_box
-                            </span>
+                        <li><?php echo "<a href='main_task.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
+                            <span class="material-symbols-outlined">check_box</span>
                             <span class="title">Tâches</span>
                         </a></li>
-                        <li><?php echo "<a href='main_chat.php?groupe=" . $_GET['groupe'] . "'>" ?>
-                            <span class="material-symbols-outlined">
-                                chat_bubble
-                            </span>
+                        <li><?php echo "<a href='main_chat.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
+                            <span class="material-symbols-outlined">chat_bubble</span>
                             <span class="title">Messages</span>
                         </a></li>
                         <li>
                             <a href="main_files.php">
-                                <span class="material-symbols-outlined">
-                                    account_balance_wallet
-                                </span>
+                                <span class="material-symbols-outlined">account_balance_wallet</span>
                                 <span class="title">Fichiers</span>
                             </a>
                         </li>
@@ -126,9 +129,7 @@ if (isset($_GET['groupe'])) {
                     }
                     ?>
                     <div class="arrow" onclick="toggleMenu()">
-                        <span class="material-symbols-outlined">
-                            expand_more
-                        </span>
+                        <span class="material-symbols-outlined">expand_more</span>
                     </div>
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
@@ -144,8 +145,7 @@ if (isset($_GET['groupe'])) {
                             <li><a href="#" id="openCreateGroupModal">Créer un groupe</a></li>
                             <li><a href="#" id="openJoinGroupModal">Rejoindre un groupe</a></li>
                             <li><a href="#" id="openManageGroupModalBtn"
-                                   onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo htmlspecialchars($nom_groupe); ?>', 'Description du groupe', 'Code du groupe')">Gérer
-                                    le groupe</a></li>
+                                   onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo htmlspecialchars($nom_groupe); ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
                         </ul>
                     </div>
                 </div>
@@ -153,7 +153,7 @@ if (isset($_GET['groupe'])) {
             <main>
                 <div class="projectCard">
                     <div class="projectTop">
-                        <h2>Pseudo<br><span>Groupe</span></h2>
+                        <h2 id="chatTitle">Groupe<br><span>Messages de groupe</span></h2>
                     </div>
                     <div id="chat_messages"></div>
                     <div>
@@ -161,22 +161,21 @@ if (isset($_GET['groupe'])) {
                             <textarea id="newMessageInput" name="nouveau_message" placeholder="Ajouter un nouveau message"></textarea>
                             <button type="submit">Envoyer</button>
                         </form>
+                        <button id="switchToGroupChatBtn" onclick="openGroupChat()">Retourner aux messages de groupe</button>
                     </div>
                 </div>
                 <div class="myfriends">
                     <div class="friendsHead">
                         <h2>Messages</h2>
                         <div class="friendsDots">
-                            <span class="material-symbols-outlined">
-                                more_horiz
-                            </span>
+                            <span class="material-symbols-outlined">more_horiz</span>
                         </div>
                     </div>
                     <div class="friends">
                         <ul>
                             <?php
                             $dbh = connexion_bdd();
-                            $sql = "SELECT UTILISATEUR.Pseudo, UTILISATEUR.derniere_connexion 
+                            $sql = "SELECT UTILISATEUR.Utilisateur_ID, UTILISATEUR.Pseudo, UTILISATEUR.derniere_connexion, UTILISATEUR.En_Ligne 
                                     FROM UTILISATEUR
                                     JOIN est_membre ON UTILISATEUR.Utilisateur_ID = est_membre.Utilisateur_ID 
                                     WHERE est_membre.GROUPE = '{$_SESSION['Groupe_ID']}';";
@@ -184,28 +183,35 @@ if (isset($_GET['groupe'])) {
 
                             $html = "";
                             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                                $userId = $row['Utilisateur_ID'];
                                 $userName = htmlspecialchars($row['Pseudo']);
                                 $lastConnection = $row['derniere_connexion'];
+                                $enLigne = $row['En_Ligne'];
 
-                                $currentTime = time();
-                                $lastConnectionTime = strtotime($lastConnection);
-                                $duration = $currentTime - $lastConnectionTime;
-                                $minutes = floor($duration / 60);
-                                $hours = floor($minutes / 60);
-                                $days = floor($hours / 24);
-
-                                if ($days > 0) {
-                                    $lastConnection = "Il y a " . $days . " jours";
-                                } elseif ($hours > 0) {
-                                    $lastConnection = "Il y a " . $hours . " heures";
-                                } elseif ($minutes > 0) {
-                                    $lastConnection = "Il y a " . $minutes . " minutes";
+                                if ($enLigne) {
+                                    $lastConnection = "En ligne";
                                 } else {
-                                    $lastConnection = "Il y a quelques secondes";
+                                    $currentTime = time();
+                                    $lastConnectionTime = strtotime($lastConnection);
+                                    $duration = $currentTime - $lastConnectionTime;
+                                    $minutes = floor($duration / 60);
+                                    $hours = floor($minutes / 60);
+                                    $days = floor($hours / 24);
+
+                                    if ($days > 0) {
+                                        $lastConnection = "Il y a " . $days . " jours";
+                                    } elseif ($hours > 0) {
+                                        $lastConnection = "Il y a " . $hours . " heures";
+                                    } elseif ($minutes > 0) {
+                                        $lastConnection = "Il y a " . $minutes . " minutes";
+                                    } else {
+                                        $lastConnection = "Il y a quelques secondes";
+                                    }
                                 }
+
                                 $html .= "
                                     <li>
-                                        <span class=\"friendsIconName\">
+                                        <span class=\"friendsIconName\" onclick=\"openPrivateChat($userId, '$userName')\">
                                             <span class=\"friendsName\">$userName
                                             <br>
                                             Dernière connexion : $lastConnection</span>
@@ -220,46 +226,6 @@ if (isset($_GET['groupe'])) {
                 </div>
             </main>
             <script src="../js/main_chat.js"></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const chatMessages = document.getElementById('chat_messages');
-                    const newMessageForm = document.getElementById('newMessageForm');
-                    const newMessageInput = document.getElementById('newMessageInput');
-
-                    function fetchMessages() {
-                        fetch('../mysql/fetch_messages.php')
-                            .then(response => response.json())
-                            .then(data => {
-                                chatMessages.innerHTML = '';
-                                data.forEach(message => {
-                                    const messageElement = document.createElement('div');
-                                    messageElement.classList.add('message');
-                                    messageElement.innerHTML = `
-                                        <p><strong>${message.Pseudo}</strong> [${new Date(message.Date_Envoi).toLocaleString()}]:</p>
-                                        <p>${message.Texte}</p>
-                                    `;
-                                    chatMessages.appendChild(messageElement);
-                                });
-                            });
-                    }
-
-                    newMessageForm.addEventListener('submit', (event) => {
-                        event.preventDefault();
-
-                        const formData = new FormData(newMessageForm);
-
-                        fetch('../mysql/submit_message.php', {
-                            method: 'POST',
-                            body: formData
-                        }).then(response => {
-                            if (response.ok) {
-                                newMessageInput.value = '';
-                                fetchMessages();
-                            }
-                        });
-                    });
-                });
-            </script>
         </div>
     </div>
 </body>

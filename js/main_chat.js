@@ -1,3 +1,100 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const chatMessages = document.getElementById('chat_messages');
+    const newMessageForm = document.getElementById('newMessageForm');
+    const newMessageInput = document.getElementById('newMessageInput');
+    let intervalId;
+    let currentChatType = 'group';  // 'group' or 'private'
+    let currentRecipientId = null;
+
+    function fetchMessages() {
+        let url = currentChatType === 'group' ? '../mysql/fetch_messages.php' : '../mysql/fetch_private_messages.php';
+        let params = currentChatType === 'private' ? `?recipient_id=${currentRecipientId}` : '';
+
+        fetch(url + params)
+            .then(response => response.json())
+            .then(data => {
+                chatMessages.innerHTML = '';  // Clear previous messages
+                data.forEach(message => {
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message');
+                    messageElement.innerHTML = `
+                        <p><strong>${message.Pseudo}</strong>: ${message.Texte}</p>
+                        <p><em>${new Date(message.Date_Envoi).toLocaleString()}</em></p>
+                    `;
+                    chatMessages.appendChild(messageElement);
+                });
+                // Scroll to the bottom of the chat container
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => console.error('Error fetching messages:', error));
+    }
+
+    newMessageForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(newMessageForm);
+        formData.append('type', currentChatType);
+        if (currentChatType === 'private') {
+            formData.append('recipient_id', currentRecipientId);
+        }
+
+        fetch('../mysql/submit_message.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                newMessageInput.value = '';
+                fetchMessages();
+            }
+        })
+        .catch(error => console.error('Error submitting message:', error));
+    });
+
+    function startFetchingMessages() {
+        intervalId = setInterval(fetchMessages, 5000);  // Fetch new messages every 5 seconds
+    }
+
+    function stopFetchingMessages() {
+        clearInterval(intervalId);
+    }
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            fetchMessages();  // Fetch messages immediately when the tab becomes visible
+            startFetchingMessages();
+        } else {
+            stopFetchingMessages();
+        }
+    });
+
+    window.openPrivateChat = function(userId, userName) {
+        currentChatType = 'private';
+        currentRecipientId = userId;
+        document.getElementById('chatTitle').innerHTML = `${userName}<br><span>Conversation privée</span>`;
+        fetchMessages();
+    };
+
+    window.openGroupChat = function() {
+        currentChatType = 'group';
+        currentRecipientId = null;
+        document.getElementById('chatTitle').innerHTML = 'Groupe<br><span>Messages de groupe</span>';
+        fetchMessages();
+    };
+
+    // Add a button to switch back to group chat
+    const switchToGroupChatBtn = document.createElement('button');
+    switchToGroupChatBtn.textContent = 'Retourner aux messages de groupe';
+    switchToGroupChatBtn.addEventListener('click', openGroupChat);
+    document.querySelector('.projectCard').appendChild(switchToGroupChatBtn);
+
+    // Initially fetch messages and start the interval
+    fetchMessages();
+    startFetchingMessages();
+});
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     // Création de la fenêtre modale (inchangé)
     var modal = document.createElement('div');
@@ -67,65 +164,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-function fetchMessages() {
-    fetch('../mysql/get_message.php')
-        .then(response => response.json())
-        .then(data => {
-            const chat = document.getElementById('chat_messages');
-            chat.innerHTML = '';
-            data.forEach(msg => {
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message');
-                messageElement.innerHTML = `
-                    <p><strong>${msg.Auteur_Nom || 'Anonyme'}</strong>: ${msg.Texte}</p>
-                    <p><em>${new Date(msg.Date_Envoi).toLocaleString()}</em></p>
-                `;
-                chat.appendChild(messageElement);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching messages:', error);
-        });
-}
-
-document.getElementById('newMessageForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const formData = new FormData(this);
-    fetch('../mysql/submit_message.php', {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        if (response.ok) {
-            document.getElementById('newMessageInput').value = '';
-            fetchMessages();
-        } else {
-            console.error('Error submitting message:', response.statusText);
-        }
-    }).catch(error => {
-        console.error('Error submitting message:', error);
-    });
-});
-
-let intervalId;
-
-function startFetchingMessages() {
-    intervalId = setInterval(fetchMessages, 5000); // Fetch new messages every 5 seconds
-}
-
-function stopFetchingMessages() {
-    clearInterval(intervalId);
-}
-
-// Start fetching messages when the page is visible
-document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') {
-        startFetchingMessages();
-    } else {
-        stopFetchingMessages();
-    }
-});
-
-// Initially start fetching messages
-fetchMessages();
-startFetchingMessages();
