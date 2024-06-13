@@ -2,23 +2,23 @@
 require '../mysql/connexion_bdd.php';
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nouveau_message']) && isset($_SESSION['Utilisateur_ID'])) {
+if (isset($_SESSION['Utilisateur_ID']) && isset($_GET['recipient_id'])) {
     $conn = connexion_bdd();
-    $message = trim($_POST['nouveau_message']);
-    $auteur_id = $_SESSION['Utilisateur_ID'];
-    $type = $_POST['type'];
-    $destinataire_id = ($type === 'private') ? $_POST['recipient_id'] : $_SESSION['Groupe_ID'];
+    $user_id = $_SESSION['Utilisateur_ID'];
+    $recipient_id = $_GET['recipient_id'];
 
-    if (!empty($message)) {
-        $sql = "INSERT INTO MESSAGE (Texte, Date_Envoi, Auteur_ID, Destinataire_ID, Type, Destinataire_Utilisateur_ID) 
-                VALUES (:message, NOW(), :auteur_id, :destinataire_id, :type, :destinataire_utilisateur_id)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':message', $message, PDO::PARAM_STR);
-        $stmt->bindParam(':auteur_id', $auteur_id, PDO::PARAM_INT);
-        $stmt->bindParam(':destinataire_id', ($type === 'group' ? $destinataire_id : null), PDO::PARAM_INT);
-        $stmt->bindParam(':type', $type, PDO::PARAM_STR);
-        $stmt->bindParam(':destinataire_utilisateur_id', ($type === 'private' ? $destinataire_id : null), PDO::PARAM_INT);
-        $stmt->execute();
-    }
+    $sql = "SELECT MESSAGE.Texte, MESSAGE.Date_Envoi, UTILISATEUR.Pseudo 
+            FROM MESSAGE 
+            JOIN UTILISATEUR ON MESSAGE.Auteur_ID = UTILISATEUR.Utilisateur_ID 
+            WHERE (MESSAGE.Auteur_ID = :user_id AND MESSAGE.Destinataire_Utilisateur_ID = :recipient_id)
+               OR (MESSAGE.Auteur_ID = :recipient_id AND MESSAGE.Destinataire_Utilisateur_ID = :user_id)
+            ORDER BY MESSAGE.Date_Envoi DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->bindParam(':recipient_id', $recipient_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($messages);
 }
 ?>

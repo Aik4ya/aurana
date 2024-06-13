@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentChatType = 'private';
         currentRecipientId = userId;
         document.getElementById('chatTitle').innerHTML = `${userName}<br><span>Conversation privée</span>`;
+        document.getElementById('switchToGroupChatBtn').style.display = 'block';
         fetchMessages();
     };
 
@@ -79,19 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
         currentChatType = 'group';
         currentRecipientId = null;
         document.getElementById('chatTitle').innerHTML = 'Groupe<br><span>Messages de groupe</span>';
+        document.getElementById('switchToGroupChatBtn').style.display = 'none';
         fetchMessages();
     };
-
-    // Add a button to switch back to group chat
-    const switchToGroupChatBtn = document.createElement('button');
-    switchToGroupChatBtn.textContent = 'Retourner aux messages de groupe';
-    switchToGroupChatBtn.addEventListener('click', openGroupChat);
-    document.querySelector('.projectCard').appendChild(switchToGroupChatBtn);
 
     // Initially fetch messages and start the interval
     fetchMessages();
     startFetchingMessages();
 });
+
 
 
 

@@ -153,7 +153,7 @@ if (isset($_POST['deconnexion'])) {
             <main>
                 <div class="projectCard">
                     <div class="projectTop">
-                        <h2 id="chatTitle">Groupe<br><span>Messages de groupe</span></h2>
+                        <h2>Pseudo<br><span>Groupe</span></h2>
                     </div>
                     <div id="chat_messages"></div>
                     <div>
@@ -161,7 +161,6 @@ if (isset($_POST['deconnexion'])) {
                             <textarea id="newMessageInput" name="nouveau_message" placeholder="Ajouter un nouveau message"></textarea>
                             <button type="submit">Envoyer</button>
                         </form>
-                        <button id="switchToGroupChatBtn" onclick="openGroupChat()">Retourner aux messages de groupe</button>
                     </div>
                 </div>
                 <div class="myfriends">
@@ -173,9 +172,9 @@ if (isset($_POST['deconnexion'])) {
                     </div>
                     <div class="friends">
                         <ul>
-                            <?php
+                        <?php
                             $dbh = connexion_bdd();
-                            $sql = "SELECT UTILISATEUR.Utilisateur_ID, UTILISATEUR.Pseudo, UTILISATEUR.derniere_connexion, UTILISATEUR.En_Ligne 
+                            $sql = "SELECT UTILISATEUR.Pseudo, UTILISATEUR.derniere_connexion, UTILISATEUR.En_Ligne, UTILISATEUR.Utilisateur_ID 
                                     FROM UTILISATEUR
                                     JOIN est_membre ON UTILISATEUR.Utilisateur_ID = est_membre.Utilisateur_ID 
                                     WHERE est_membre.GROUPE = '{$_SESSION['Groupe_ID']}';";
@@ -183,10 +182,10 @@ if (isset($_POST['deconnexion'])) {
 
                             $html = "";
                             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                $userId = $row['Utilisateur_ID'];
                                 $userName = htmlspecialchars($row['Pseudo']);
                                 $lastConnection = $row['derniere_connexion'];
                                 $enLigne = $row['En_Ligne'];
+                                $userId = $row['Utilisateur_ID'];
 
                                 if ($enLigne) {
                                     $lastConnection = "En ligne";
@@ -225,7 +224,8 @@ if (isset($_POST['deconnexion'])) {
                     </div>
                 </div>
             </main>
-            <script src="../js/main_chat.js"></script>
+            <script>
+            </script>
         </div>
     </div>
 </body>
