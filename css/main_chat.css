@@ -50,6 +50,45 @@ body {
         'opsz' 48;
 }
 
+.Online {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+ .Online::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #008000;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #008000,
+        0 0 5px #00800077;
+}
+
+
+.Offline {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.Offline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #ff0000;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #ff0000,
+        0 0 5px #ff000077;
+}
+
 /* container start */
 .container {
     position: relative;
@@ -423,26 +462,231 @@ body {
     grid-row: 4 / 7;
 }
 
-.container .right main .projectCard.projectCard2 .projectProgress .process {
-    background: #dffde0;
+.container .right main .projectCard .projectProgress {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.container .right main .projectCard .projectProgress .process {
+    position: relative;
+    padding: 5px 10px;
+    background: #f1f3ff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.container .right main .projectCard .projectProgress .process h2 {
+    color: #8389f9;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
-.container .right main .projectCard.projectCard2 .projectProgress .process h2 {
-    color: #69bc72;
+.container .right main .projectCard .projectProgress .processRetard h2 {
+    color: #FF0000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
-.container .right main .projectCard.projectCard2 .projectProgress .priority::before {
-    background: #69bc72;
-    box-shadow: 0 0 2px #69bc72,
-        0 0 5px #69bc7277;
+.container .right main .projectCard .projectProgress .processFini h2 {
+    color: #008000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
-.container .right main .projectCard.projectCard2 .projectProgress .priority h2 {
-    color: #69bc72;
+.container .right main .projectCard .projectProgress .priorityBasse {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.container .right main .projectCard .projectProgress .priorityBasse::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #008000;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #008000,
+        0 0 5px #00800077;
+}
+.container .right main .projectCard .projectProgress .priorityBasse h2 {
+    color: #008000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
 }
 
-.container .right main .projectCard.projectCard2 .task .line::before {
-    background: #f5c75f;
+.container .right main .projectCard .projectProgress .priorityMoyenne {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.container .right main .projectCard .projectProgress .priorityMoyenne::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #ffe436;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #ffe436,
+        0 0 5px #ffe43677;
+}
+.container .right main .projectCard .projectProgress .priorityMoyenne h2 {
+    color: #ffe436;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+
+.container .right main .projectCard .projectProgress .priorityHaute {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.container .right main .projectCard .projectProgress .priorityHaute::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #ff0000;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #ff0000,
+        0 0 5px #ff000077;
+}
+.container .right main .projectCard .projectProgress .priorityHaute h2 {
+    color: #ff0000;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.container .right main .projectCard .task {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-direction: column;
+    margin: 10px 0;
+}
+.container .right main .projectCard .task h2 {
+    color: #999;
+    font-size: 1em;
+}
+.container .right main .projectCard .task h2 bold {
+    color: #000;
+}
+.container .right main .projectCard .task .line {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, .1);
+    border-radius: 50px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.container .right main .projectCard .task .lineRetard {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, .1);
+    border-radius: 50px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.container .right main .projectCard .task .lineFini {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, .1);
+    border-radius: 50px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.container .right main .projectCard .task .line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #6577ff;
+    z-index: 1;
+    border-radius: 50px;
+}
+
+.container .right main .projectCard .task .lineFini::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #008000;
+    z-index: 1;
+    border-radius: 50px;
+}
+
+.container .right main .projectCard .task .lineRetard::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #FF0000;
+    z-index: 1;
+    border-radius: 50px;
+}
+
+.container .right main .projectCard .due {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: pointer;
+}
+.container .right main .projectCard .due h2 {
+    padding: 2px 10px;
+    border: 2px solid #2C74B3;
+    border-radius: 10px;
+    font-size: 1.1em;
+    color: #2C74B3;
+}
+
+.container .right main .projectCard .dueRetard h2 {
+    padding: 2px 10px;
+    border: 2px solid #FF0000;
+    border-radius: 10px;
+    font-size: 1.1em;
+    color: #FF0000;
+}
+
+.container .right main .projectCard .dueFini h2 {
+    padding: 2px 10px;
+    border: 2px solid #008000;
+    border-radius: 10px;
+    font-size: 1.1em;
+    color: #008000;
 }
 
 /* projectCard2 end */

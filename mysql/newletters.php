@@ -3,7 +3,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Importation des classes PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -55,12 +54,11 @@ function sendNewsletter($conn, $mail, $subject, $message) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview'])) {
-    // Logique de prévisualisation
+
     echo "<h2>Prévisualisation :</h2>";
     echo "<p><strong>Sujet :</strong> " . $_POST['subject'] . "</p>";
     echo "<p><strong>Message :</strong> " . nl2br($_POST['message']) . "</p>";
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send'])) {
-    // Logique d'envoi
     sendNewsletter($conn, $mail, $_POST['subject'], $_POST['message']);
 }
 ?>

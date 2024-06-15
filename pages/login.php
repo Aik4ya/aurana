@@ -10,15 +10,17 @@
     if (isset($_SESSION['expiration']) && time() < $_SESSION['expiration'])
     {
         if (isset($_SESSION['page_precedente']))
-                    {
-                        $path = $_SESSION['page_precedente'];
-                        header("Location: $path");
-                        exit();
-                    }
-                    
-        header("Location: ../pages/main.php");
-        exit();
+        {
+            $path = $_SESSION['page_precedente'];
+            header("Location: $path");
+            exit();
+        } else {
+            header("Location: ../pages/main.php");
+            exit();
+        }
     }
+
+    
 
     $dbh = connexion_bdd();
 
@@ -31,12 +33,13 @@
 
     if (isset($_SESSION['essais']))
     {
-        if ($_SESSION['essais'] % $limite == 0)
+        if ($_SESSION['essais'] % $limite == 0 && $_SESSION['essais'] != 0)
         {
             $sql = $dbh->prepare('SELECT temps FROM PARAMETRES_BACK WHERE Parametres_Back_ID = 0');
             $sql->execute();
             $resultat = $sql->fetchAll(PDO::FETCH_ASSOC);
             $temps = $resultat[0]['temps'];
+            
         
             echo "<div id='temps' temps = $temps></div>";
             echo "<div id='data1' data-essais = 1></div>";
@@ -45,7 +48,6 @@
         else
         {
             echo "<div id='data1' data-essais = 0></div>";
-            echo $_SESSION['essais'];
 
         }
     }
@@ -96,6 +98,7 @@
             <?php
                 if (isset($_GET['statut'])){
                     if ($_GET['statut'] === 'session_expiree'){
+                        $_SESSION['essais'] = 0;
                         echo('<span style="color:red; font-weight:bold;">Déconnecté(e) : Session expirée</span>');
                     }
 

@@ -659,6 +659,12 @@ li {
     align-items: center;
     gap: 20px;
 }
+
+.scroll-container {
+    overflow-y: auto;
+    height: 100vh;
+    width: 100%;
+}
 .container .right main .myTasks .tasks ul li .tasksIconName .tasksIcon {
     position: relative;
     width: 25px;
@@ -787,6 +793,7 @@ li {
     .container .right .top .user {
         gap: 10px;
     }
+
 }
 @media (max-width: 586px) {
     .container .right .top .user .arrow {

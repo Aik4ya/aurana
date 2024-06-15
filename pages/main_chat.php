@@ -1,7 +1,11 @@
 <?php
 
-require '../mysql/cookies_uid.php';
-require '../mysql/connexion_bdd.php';
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
+include_once '../mysql/cookies_uid.php';
+include_once '../mysql/connexion_bdd.php';
 $conn = connexion_bdd();
 session_start();
 
@@ -9,12 +13,6 @@ $_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
 
 ecriture_log("main_chat");
 verif_session();
-
-// Mettre à jour l'état en ligne
-$sql = "UPDATE UTILISATEUR SET En_Ligne = 1 WHERE Utilisateur_ID = :user_id";
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
-$stmt->execute();
 
 $nom_groupe = null;
 
@@ -35,16 +33,6 @@ if (isset($_GET['groupe'])) {
     exit;
 }
 
-// Mise à jour de l'état de déconnexion lors de la déconnexion
-if (isset($_POST['deconnexion'])) {
-    $sql = "UPDATE UTILISATEUR SET En_Ligne = 0, derniere_connexion = NOW() WHERE Utilisateur_ID = :user_id";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
-    $stmt->execute();
-    session_destroy();
-    header("Location: login.php");
-    exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -174,7 +162,7 @@ if (isset($_POST['deconnexion'])) {
                         <ul>
                         <?php
                             $dbh = connexion_bdd();
-                            $sql = "SELECT UTILISATEUR.Pseudo, UTILISATEUR.derniere_connexion, UTILISATEUR.En_Ligne, UTILISATEUR.Utilisateur_ID 
+                            $sql = "SELECT UTILISATEUR.Pseudo, UTILISATEUR.derniere_connexion, UTILISATEUR.Utilisateur_ID 
                                     FROM UTILISATEUR
                                     JOIN est_membre ON UTILISATEUR.Utilisateur_ID = est_membre.Utilisateur_ID 
                                     WHERE est_membre.GROUPE = '{$_SESSION['Groupe_ID']}';";
@@ -184,12 +172,13 @@ if (isset($_POST['deconnexion'])) {
                             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                 $userName = htmlspecialchars($row['Pseudo']);
                                 $lastConnection = $row['derniere_connexion'];
-                                $enLigne = $row['En_Ligne'];
                                 $userId = $row['Utilisateur_ID'];
 
-                                if ($enLigne) {
+                                if (strtotime($lastConnection) > date('Y-m-d H:i:s', strtotime('-30 seconds'))){
                                     $lastConnection = "En ligne";
+                                    $css_status = "Online";
                                 } else {
+                                    $css_status = "Offline";
                                     $currentTime = time();
                                     $lastConnectionTime = strtotime($lastConnection);
                                     $duration = $currentTime - $lastConnectionTime;
@@ -212,8 +201,10 @@ if (isset($_POST['deconnexion'])) {
                                     <li>
                                         <span class=\"friendsIconName\" onclick=\"openPrivateChat($userId, '$userName')\">
                                             <span class=\"friendsName\">$userName
-                                            <br>
-                                            Dernière connexion : $lastConnection</span>
+                                                <br>
+                                                Dernière connexion : $lastConnection 
+                                                <span class=$css_status></span>
+                                            </span>
                                         </span>
                                     </li>
                                 ";
@@ -225,6 +216,9 @@ if (isset($_POST['deconnexion'])) {
                 </div>
             </main>
             <script>
+                var interval = setInterval(function () {
+                    fetch('../mysql/fetch_session.php')
+                    }, 5000);
             </script>
         </div>
     </div>

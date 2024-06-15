@@ -75,6 +75,7 @@ function creation_utilisateur($dbh) {
         
         $expiration = time() + (5*60); #trouver un truc pour back
         $Utilisateur_ID = $dbh->lastInsertID();
+
         // Mettre à jour la date d'inscription de l'utilisateur
         $sql_update = $dbh->prepare("UPDATE UTILISATEUR SET date_inscription = NOW() WHERE Utilisateur_ID = :Utilisateur_ID");
         $sql_update->bindParam(':Utilisateur_ID', $Utilisateur_ID);

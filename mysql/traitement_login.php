@@ -8,7 +8,7 @@ require 'connexion_bdd.php';
 require 'cookies_uid.php';
 
 session_start();
-$_SESSION['essais']++;
+
 
 function connexion_utilisateur($dbh)
 {  
@@ -34,20 +34,21 @@ function connexion_utilisateur($dbh)
                 $sql_update->execute();
 
                 // Démarre la session et redirige l'utilisateur vers la page principale
-                $expiration = time() + (30 * 24 * 60 * 60); // 30 jours 30 * 24 * 60 * 60 (trouver un truc pour paramétrer dans back)
+                $expiration = time() + (30 * 24 * 60 * 60 * 1000); // 30 jours 30 * 24 * 60 * 60 (trouver un truc pour paramétrer dans back)
                 
                 $_SESSION['expiration'] = $expiration;
                 $_SESSION['Utilisateur_ID'] = $resultat['Utilisateur_ID'];
                 $_SESSION['Droit'] = $resultat['Droit'];
                 $_SESSION['Pseudo'] = $resultat['Pseudo'];
 
-                header("Location: ../pages/main.php");
                 $_SESSION['essais'] = 0;
+                header("Location: ../pages/main.php");
                 exit(); 
             } 
             else 
             {   
                 header("Location: ../pages/login.php?statut=echec");
+                $_SESSION['essais']++;
                 exit(); 
             }
         } else {

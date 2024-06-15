@@ -300,6 +300,9 @@ li {
     align-items: center;
     flex-direction: column;
     grid-row: 1 / 7;
+    overflow-y: auto;
+    max-height: 800px; /* Adjust the height as per your design */
+    padding-right: 10px; /* Prevent content from overlapping with scrollbar */
 }
 
 .container .right main .projectCard li .projetBox {
@@ -584,7 +587,28 @@ li {
     flex-direction: column;
     grid-row: 1 / 7;
     grid-column: 2 / 3;
+    overflow-y: auto;
+    max-height: 800px; /* Adjust the height as per your design */
+    padding-right: 10px; /* Prevent content from overlapping with scrollbar */
 }
+
+.container .right main .projectCard::-webkit-scrollbar, 
+.container .right main .myTasks::-webkit-scrollbar {
+    width: 8px;
+}
+
+.container .right main .projectCard::-webkit-scrollbar-thumb, 
+.container .right main .myTasks::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.container .right main .projectCard::-webkit-scrollbar-thumb:hover, 
+.container .right main .myTasks::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+
 .container .right main .myTasks .tasksHead {
     position: relative;
     width: 100%;
@@ -593,6 +617,12 @@ li {
     justify-content: space-between;
     align-items: flex-start;
 }
+
+.container .right main .myTasks .tasksHead img {
+    height: 100%;
+    cursor: pointer;
+}
+
 .container .right main .myTasks .tasksHead h2 {
     position: relative;
     width: 100%;

@@ -127,5 +127,3 @@ document.getElementById('bulle').addEventListener('click', function() {
   }
 })()
 
-
-

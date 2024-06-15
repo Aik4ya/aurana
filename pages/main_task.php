@@ -59,47 +59,6 @@ verif_session();
     </style>
 </head>
 <body>
-<!-- Modal -->
-<div id="taskModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Tâches</h2>
-    <ul id="taskList">
-      <?php
-      if (isset($_GET['project_id'])) {
-        $projectId = $_GET['project_id'];
-
-        $sql = "SELECT TACHE.Texte, TACHE.categorie, TACHE.done, TACHE.Date_Tache
-                FROM tache_assignee_projet
-                INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID
-                WHERE tache_assignee_projet.id_projet = :id_projet";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':id_projet', $projectId);
-        $stmt->execute();
-        $rowcount = $stmt->rowCount();
-
-        if ($rowcount > 0) {
-          while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $texte = $row['Texte'];
-            $categorie = $row['categorie'];
-            $done = $row['done'];
-            $date = $row['Date_Tache'];
-            echo "<li>";
-            echo "<div>";
-            echo "$texte $categorie $done $date";
-            echo "</div>";
-            echo "</li>";
-          }
-        } else {
-          echo "<li><div><p>Aucune tâche</p></div></li>";
-        }
-      }
-      ?>
-    </ul>
-  </div>
-</div>
-
 <div class="container">
             <div class="left">
                 <header>
@@ -218,6 +177,7 @@ verif_session();
                         </div>
                     </div>
                 </div>
+        <div class="scroll-container">
             <main>
                 <div class="cardlist">                  
                 <?php 
@@ -254,7 +214,35 @@ verif_session();
                             $row = $stmt3->fetch(PDO::FETCH_ASSOC);
                             $tachetotal = $row['count(*)'];
 
-                            echo "<div class=\"projectCard\">";
+                            if ($tachefin == $tachetotal){ // si toutes les taches sont finies
+                                $css_status = "processFini";
+                                $css_line = "lineFini";
+                                $css_due = "dueFini";
+                            } elseif (strtotime($deadline) <= strtotime('+7 days') || strtotime($deadline) < strtotime('today') ) { // si deadline dans moins de 7 jours ou déjà dépassé
+                                $css_status = "processRetard";
+                                $css_line = "lineRetard";
+                                $css_due = "dueRetard";
+                            } else { // sinon taches en cours normales
+                                $css_status = "process";
+                                $css_line = "line";
+                                $css_due = "due";
+
+                            }
+
+                            switch ($priorite) {
+                                case "Basse":
+                                    $css_priorite = "priorityBasse";
+                                    break;
+                                case "Moyenne":
+                                    $css_priorite = "priorityMoyenne";
+                                    break;
+                                case "Haute":
+                                    $css_priorite = "priorityHaute";
+                                    break;
+                            }
+
+                            echo "<li>";
+                            echo "<div class=\"projetBox\">";
                             echo "<div class=\"projectTop\">";
                             echo "<h2>$nom<br><span>$groupe</span></h2>";
                             echo "<div class=\"projectDots\">";
@@ -264,26 +252,27 @@ verif_session();
                             echo "</div>";
                             echo "</div>";
                             echo "<div class=\"projectProgress\">";
-                            echo "<div class=\"process\">";
+                            echo "<div class=$css_status>";
                             echo "<h2>$status</h2>";
                             echo "</div>";
-                            echo "<div class=\"priority\">";
+                            echo "<div class=$css_priorite>";
                             echo "<h2>$priorite</h2>";
                             echo "</div>";
                             echo "</div>";
-                            
+
                             echo "<div class=\"task\">";
                             echo "<h2>Tâches faites: <strong>" . $tachefin . "</strong> / " . $tachetotal . "</h2>";
                             if ($tachetotal == 0) {
-                                echo "<span class=\"line\" style=\"width: 0%;\"></span>"; // éviter division par 0
+                                echo "<span class=$css_line style=\"width: 0%;\"></span>"; // éviter division par 0
                             } else {
-                                echo "<span class=\"line\" style=\"width: " . ($tachefin / $tachetotal) * 100 . "%;\"></span>";
+                                echo "<span class=$css_line style=\"width: " . ($tachefin / $tachetotal) * 100 . "%;\"></span>";
                             }
                             echo "</div>";
-                            echo "<div class=\"due\">";
+                            echo "<div class=$css_due>";
                             echo "<h2>Du pour le : $deadline</h2>";
                             echo "</div>";
                             echo "</div>";
+                            echo "<br>";
                             
 
                             $sql="SELECT TACHE.Texte, TACHE.categorie, TACHE.done, TACHE.Date_Tache FROM tache_assignee_projet INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID WHERE tache_assignee_projet.id_projet = :id_projet"; 
@@ -348,63 +337,65 @@ verif_session();
                 </div>
             </main>
         </div>
+        </div>
         <!-- fin de droite -->
     </div>
     <script>
-    window.onload = function() {
-    // Obtenir la modal
+window.onload = function() {
+    // Get the modal
     var modal = document.getElementById("taskModal");
 
-    // Vérifier si la modal existe
+    // Check if the modal exists
     if (modal) {
-        // Obtenir les boutons qui ouvrent la modal
+        // Get the buttons that open the modal
         var projectDots = document.getElementsByClassName("projectDots");
         for (var i = 0; i < projectDots.length; i++) {
-        projectDots[i].onclick = function() {
-            modal.style.display = "block";
-            // Remplir la liste des tâches
-            var taskList = document.getElementById("taskList");
-            taskList.innerHTML = ""; // Vider la liste
+            projectDots[i].onclick = function() {
+                modal.style.display = "block";
+                // Clear the task list
+                var taskList = document.getElementById("taskList");
+                taskList.innerHTML = ""; // Clear the list
 
-            // Récupérer l'ID du projet correspondant
-            var projectCard = this.closest(".projectCard");
-            var projectId = projectCard.getAttribute("data-project-id");
+                // Get the corresponding project ID
+                var projectCard = this.closest(".projectCard");
+                var projectId = projectCard.getAttribute("data-project-id");
 
-            // Requête AJAX pour récupérer les tâches du projet
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "get_tasks.php?project_id=" + projectId, true);
-            xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                var tasks = JSON.parse(xhr.responseText);
-                for (var j = 0; j < tasks.length; j++) {
-                var task = tasks[j];
-                var li = document.createElement("li");
-                li.innerHTML = task.texte + " " + task.categorie + " " + task.done + " " + task.date;
-                taskList.appendChild(li);
-                }
+                // AJAX request to get the project tasks
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "get_tasks.php?project_id=" + projectId, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        var tasks = JSON.parse(xhr.responseText);
+                        for (var j = 0; j < tasks.length; j++) {
+                            var task = tasks[j];
+                            var li = document.createElement("li");
+                            li.innerHTML = task.texte + " " + task.categorie + " " + task.done + " " + task.date;
+                            taskList.appendChild(li);
+                        }
+                    }
+                };
+                xhr.send();
             }
-            };
-            xhr.send();
-        }
         }
 
-        // Obtenir l'élément <span> qui ferme la modal
+        // Get the <span> element that closes the modal
         var span = document.getElementsByClassName("close")[0];
 
-        // Lorsque l'utilisateur clique sur <span> (x), fermer la modal
+        // When the user clicks on <span> (x), close the modal
         span.onclick = function() {
-        modal.style.display = "none";
-        }
-
-        // Lorsque l'utilisateur clique n'importe où en dehors de la modal, fermer la modal
-        window.onclick = function(event) {
-        if (event.target == modal) {
             modal.style.display = "none";
         }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
         }
     } else {
-        console.error("La modal n'a pas été trouvée dans le document HTML.");
+        console.error("The modal was not found in the HTML document.");
     }
-    }
+}
+
   </script>
 </body>

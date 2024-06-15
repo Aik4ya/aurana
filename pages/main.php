@@ -1,6 +1,6 @@
 <?php
-require_once '../mysql/cookies_uid.php';
-require_once '../mysql/connexion_bdd.php';
+include_once '../mysql/cookies_uid.php';
+include_once '../mysql/connexion_bdd.php';
 
 
 // ini_set('display_errors', 1);
@@ -139,7 +139,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/button.css">
     <link rel="stylesheet" href="../css/modals.css">
-    <script type="text/javascript" src="../js/aurana.js"></script>
+    <!-- <script type="text/javascript" src="../js/aurana.js"></script> -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
@@ -177,21 +177,20 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
 .menu li a:hover {
     background-color: #ddd;
 }
-/* Style du fond du modal */
 .modal-background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Couleur d'arrière-plan semi-transparente */
-    z-index: 999; /* Assure que le modal est au-dessus de tout le reste */
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 999; 
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Style du bouton de fermeture */
+
 .close-modal {
     position: absolute;
     top: 10px;
@@ -202,7 +201,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
 }
 
 .close-modal:hover {
-    color: #555; /* Couleur de survol légèrement plus foncée */
+    color: #555; 
 }
 
 .popup {
@@ -234,12 +233,12 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
 .group-menu {
     position: absolute;
     right: 0;
-    top: 100%;  /* Ajustez selon la position de votre bouton 'Sélectionner un groupe' */
+    top: 100%;  
     background-color: white;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1000;
-    width: 200px; /* ou la largeur que vous préférez */
-    display: none; /* Important pour que le menu ne soit pas visible par défaut */
+    width: 200px; 
+    display: none;
 }
 
 .group-menu ul {
@@ -390,7 +389,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
                             FROM PROJET 
                             WHERE id_groupe = :id_groupe 
                             AND ID IN (SELECT Projet_ID FROM est_membre_projet WHERE Utilisateur_ID = :id_utilisateur)
-                            ORDER BY deadline ASC LIMIT 3";
+                            ORDER BY deadline ASC";
                         $stmt1 = $conn->prepare($sql);
                         $stmt1->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
                         $stmt1->bindParam(':id_utilisateur', $_SESSION['Utilisateur_ID']);
@@ -502,7 +501,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
                     <div class="tasksHead">
                         <h2>Mes tâches</h2>
                         <?php if ($_SESSION['groupe'] == "none"){
-                            echo "<button id=\"createTaskBtn\">Créer une tâche</button>";
+                            echo "<img src=\"../img/plus.png\" id=\"createTaskBtn\">";
                         }
                         ?>
                     </div>
@@ -541,10 +540,10 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
 
                             echo "<li>";
                             echo "<span class=\"tasksIconName\">";
-                            echo "<span class=\"tasksIcon notDone\" onclick=\"TaskIcon(this)\">";
+                            echo "<span class=\"tasksIcon notDone\" onclick=\"toggleTaskCompletion(this)\">";
                             echo "<span class=\"material-symbols-outlined\"></span>";
                             echo "</span>";
-                            echo "<span class=\"tasksName\" id-task-id=\"$task_id\">" . htmlspecialchars($task_text) . "</span>";
+                            echo "<span class=\"tasksName notDone\" id-task-id=\"$task_id\">" . htmlspecialchars($task_text) . "</span>";
                             echo "</span>";
                             echo "<span class=\"tasksStar half\" onclick=\"toggleStarCompletion(this)\">";
                             echo "<span class=\"material-symbols-outlined\">star</span>";
@@ -801,6 +800,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd());
 </body>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
     var createTaskModal = document.getElementById("CreateModalTask");
     var taskDetailModal = document.getElementById("TaskDetailModal");
@@ -861,6 +861,15 @@ if (createTaskBtn) {
         }
     });
 });
+
+    // Example: Log scroll position
+    // projectCard.addEventListener('scroll', () => {
+    //     console.log('ProjectCard scroll position:', projectCard.scrollTop);
+    // });
+
+    // myTasks.addEventListener('scroll', () => {
+    //     console.log('MyTasks scroll position:', myTasks.scrollTop);
+    // });
 
 const daysWithTasks = document.querySelectorAll('.has-tasks');
 
@@ -925,6 +934,28 @@ document.addEventListener('DOMContentLoaded', function() {
         openManageGroupModal(groupID, groupName, groupDescription, groupCode);
     };
 });
+
+function toggleTaskCompletion(element) {
+    var taskIcon = element;
+    var taskName = element.parentElement.querySelector('.tasksName');
+
+    if (taskIcon.classList.contains('notDone')) {
+        taskIcon.classList.remove('notDone');
+        taskIcon.classList.add('done');
+        taskName.classList.remove('notDone');
+        taskName.classList.add('done', 'tasksLine');
+    } else if (taskIcon.classList.contains('done')) {
+        taskIcon.classList.remove('done');
+        taskIcon.classList.add('notDone');
+        taskName.classList.remove('done', 'tasksLine');
+        taskName.classList.add('notDone');
+    }
+}
+
+
+var interval = setInterval(function () {
+    fetch('../mysql/fetch_session.php')
+    }, 5000);
 
 </script>
 </html>
