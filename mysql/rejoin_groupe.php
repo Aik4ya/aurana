@@ -1,49 +1,34 @@
 <?php
 require_once 'connexion_bdd.php';
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 
-$code_groupe = $_POST['groupCode'];
-$utilisateur_id = $_SESSION['Utilisateur_ID'];
+if (!isset($_POST['groupCode']) || empty($_POST['groupCode'])) {
+    header("Location: ../pages/main.php?error=empty_group_code");
+    exit;
+}
 
+$groupCode = $_POST['groupCode'];
 $conn = connexion_bdd();
 
-$sql = "SELECT Groupe_ID, Nom FROM GROUPE WHERE Code = :code_groupe";
+$sql = "SELECT Groupe_ID, Nom FROM GROUPE WHERE Code = :groupCode";
 $stmt = $conn->prepare($sql);
-$stmt->bindParam(':code_groupe', $code_groupe);
+$stmt->bindParam(':groupCode', $groupCode);
 $stmt->execute();
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($row) {
+$group = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $groupe_id = $row['Groupe_ID'];
-    $nom_groupe = $row['Nom'];
-
-    $sql = "SELECT ID FROM est_membre WHERE Groupe = :groupe_ID AND Utilisateur_ID = :utilisateur_ID";
+if ($group) {
+    $groupId = $group['Groupe_ID'];
+    $groupName = $group['Nom'];
+    
+    $sql = "INSERT INTO est_membre (Utilisateur_ID, GROUPE, droit) VALUES (:userId, :groupId, 0)";
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':groupe_ID', $groupe_id);
-    $stmt->bindParam(':utilisateur_ID', $utilisateur_id);
+    $stmt->bindParam(':userId', $_SESSION['Utilisateur_ID']);
+    $stmt->bindParam(':groupId', $groupId);
     $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($result) {
-        header("Location: ../pages/main.php?groupe={$nom_groupe}&error=already_in_group");
-        exit;
-    } else {
-        $sql = "INSERT INTO est_membre (Utilisateur_ID, GROUPE) VALUES (:utilisateur_id, :groupe_id)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':utilisateur_id', $utilisateur_id);
-        $stmt->bindParam(':groupe_id', $groupe_id);
-        $stmt->execute();
-
-        header("Location: ../pages/main.php?groupe=$nom_groupe");
-    }
+    
+    header("Location: ../pages/main.php?groupe=$groupName");
 } else {
-    header("Location: ../pages/main.php?groupe=none");
+    header("Location: ../pages/main.php?error=group_not_found");
 }
-exit;
 ?>

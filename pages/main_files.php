@@ -41,6 +41,7 @@ verif_session();
             border: 1px solid #888;
             width: 30%;
         }
+        
 
         .close {
             color: #aaa;
@@ -115,6 +116,8 @@ verif_session();
         .file-list button:hover {
             background-color: #c82333;
         }
+
+        
     </style>
 </head>
 <body>
@@ -216,6 +219,9 @@ verif_session();
                         <h2>Fichiers</h2>
                         <button id="openModalBtn"><img src="../img/plus.png" alt="Upload File"></button>
                     </div>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Rechercher des fichiers..." onkeyup="searchFiles()">
+                    </div>
                     <ul class="file-list" id="fileList"></ul>
                 </div>
 
@@ -228,9 +234,9 @@ verif_session();
     <div id="fileModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Upload File</h2>
+            <h2>Téléverser vos fichiers</h2>
             <div class="drop-area" id="drop-area">
-                <p>Drag & Drop files here or click to upload</p>
+                <p>Glissez et déposez vos fichiers</p>
             </div>
         </div>
         <script>
@@ -321,7 +327,7 @@ verif_session();
                         ${file.Adresse} - ${file.Date_Stock}
                         <div class="file-info"> 
                             ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Delete</button>` : ''}
-                            <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Download</a>
+                            <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Télécharger</a>
                         </div>
                     `;
                     fileList.appendChild(li);
@@ -333,7 +339,7 @@ verif_session();
         }
 
         function deleteFile(fileId) {
-            if (!confirm('Are you sure you want to delete this file?')) {
+            if (!confirm('Voulez-vous vraiment supprimer ce fichier ?')) {
                 return;
             }
 
@@ -355,6 +361,29 @@ verif_session();
                 console.error('Error:', error);
             });
         }
+        function searchFiles() {
+                    const query = document.getElementById('searchInput').value;
+
+                    fetch(`../mysql/search_files.php?query=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const fileList = document.getElementById('fileList');
+                            fileList.innerHTML = '';
+
+                            data.forEach(file => {
+                                const li = document.createElement('li');
+                                li.innerHTML = `
+                                    ${file.Adresse} - ${file.Date_Stock}
+                                    <div class="file-info"> 
+                                        ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Supprimer</button>` : ''}
+                                        <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Download</a>
+                                    </div>
+                                `;
+                                fileList.appendChild(li);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching files:', error));
+                }
 
         // Fetch files on page load
         fetchFiles();

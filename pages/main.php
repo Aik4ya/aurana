@@ -121,8 +121,31 @@ function fetchTasksWithProjects($dbh, $projectID = 'all') {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function fetchTasksForProject($dbh, $groupeID, $projectID = 'all') {
+    $userID = $_SESSION['Utilisateur_ID'];
+
+    $sql = "SELECT Date_Tache FROM TACHE 
+            WHERE Tache_ID IN (SELECT Tache_ID FROM es_assigner WHERE Utilisateur_ID = :userID) 
+            AND Groupe_ID = :groupeID";
+
+    if ($projectID !== 'all') {
+        $sql .= " AND Tache_ID IN (SELECT id_tache FROM tache_assignee_projet WHERE id_projet = :projectID)";
+    }
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':userID', $userID);
+    $stmt->bindParam(':groupeID', $groupeID);
+    if ($projectID !== 'all') {
+        $stmt->bindParam(':projectID', $projectID);
+    }
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+
 $projectID = isset($_GET['projectID']) ? $_GET['projectID'] : 'all';
-$tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
+$task_dates = fetchTasksForProject($conn, $_SESSION['Groupe_ID'], $projectID);
+
 ?>
 
 <!DOCTYPE html>
@@ -140,7 +163,58 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
+<style>
+.btn {
+    display: inline-block;
+    padding: 5px 5px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 5px;
+}
 
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+#searchMembersInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+</style>
 <body>
     <div class="container">
         <div class="left">
@@ -200,9 +274,20 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
             <div class="top">
                 <div class="searchBx">
                     <?php if ($nom_groupe != null): ?>
-                    <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
+                        <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
                     <?php endif; ?>
+                    <div class="inputBx">
+                        <span class="material-symbols-outlined searchOpen">
+                            search
+                        </span>
+                        <input type="text" placeholder="Rechercher...">
+                        <span class="material-symbols-outlined searchClose">
+                            close
+                        </span>
+                    </div>
                 </div>
+
+
 
                 <div class="user">
                     <?php
@@ -422,9 +507,11 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
                         <select id="projectSelect">
                             <option value="all">Tous les projets</option>
                             <?php
-                            $sql = "SELECT ID, nom FROM PROJET WHERE id_groupe = :id_groupe";
+                            $sql = "SELECT PROJET.ID, PROJET.nom FROM PROJET 
+                                    JOIN est_membre_projet ON PROJET.ID = est_membre_projet.Projet_ID 
+                                    WHERE est_membre_projet.Utilisateur_ID = :user_id";
                             $stmt = $conn->prepare($sql);
-                            $stmt->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
+                            $stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
                             $stmt->execute();
                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 $selected = ($projectID == $row['ID']) ? "selected" : "";
@@ -494,7 +581,7 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
                     </div>
                 </div>
                 <!-- affichage messages -->
-                <div class="messages">  
+                <div class="messages">
                     <div class="messagesHead">
                         <h2>Messages récents</h2>
                     </div>
@@ -510,20 +597,29 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
                             $message_date = $row['Date_Envoi'];
                             $message_sender = $row['Auteur_ID'];
 
-                            $sql = "SELECT Pseudo FROM UTILISATEUR WHERE Utilisateur_ID = :user_id";
-                            $stmt2 = $conn->prepare($sql);
+                            $sql2 = "SELECT Pseudo, Avatar FROM UTILISATEUR WHERE Utilisateur_ID = :user_id";
+                            $stmt2 = $conn->prepare($sql2);
                             $stmt2->bindParam(':user_id', $message_sender);
                             $stmt2->execute();
-                            $pseudo = $stmt2->fetch(PDO::FETCH_ASSOC)['Pseudo'];
+                            $user_data = $stmt2->fetch(PDO::FETCH_ASSOC);
+                            $pseudo = $user_data['Pseudo'];
+                            $avatar_path = $user_data['Avatar'];
+
+                            // Si l'avatar n'existe pas, utiliser une image par défaut
+                            if (!$avatar_path) {
+                                $avatar_path = '../img/aurana_logo.png';
+                            } else {
+                                $avatar_path = '../uploads/avatars/' . $avatar_path;
+                            }
 
                             echo "<div class=\"messagesUser\">";
                             echo "<div class=\"messagesUserImg\">";
-                            echo "<img src=\"./groupImg/img1.jpg\" alt=\"img1\">";
+                            echo "<img src=\"" . htmlspecialchars($avatar_path) . "\" alt=\"Avatar\">";
                             echo "</div>";
-                            echo "<h2>$pseudo<br><span>$message_text</span></h2>";
+                            echo "<h2>" . htmlspecialchars($pseudo) . "<br><span>" . htmlspecialchars($message_text) . "</span></h2>";
                             echo "</div>";
                         }
-                   ?>
+                    ?>
                 </div>
             </main>
         </div>
@@ -532,20 +628,27 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
     <!-- Modales -->
 
     <div id="ManageGroupModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeManageGroupModal">&times;</span>
-            <h2>Gérer le groupe</h2>
-            <form id="manageGroupForm">
-                <label for="manageGroupName">Nom du groupe :</label><br>
-                <input type="text" id="manageGroupName" name="groupName" readonly><br><br>
-                <label for="manageGroupDescription">Description du groupe :</label><br>
-                <textarea id="manageGroupDescription" name="groupDescription" rows="4" cols="50" readonly></textarea><br><br>
-                <label for="manageGroupCode">Code du groupe :</label><br>
-                <input type="text" id="manageGroupCode" name="groupCode" readonly><br><br>
-                <button type="button" id="editGroupBtn">Éditer le groupe</button>
-            </form>
-        </div>
+    <div class="modal-content">
+        <span class="close" id="closeManageGroupModal">&times;</span>
+        <h2>Gérer le groupe</h2>
+        <form id="manageGroupForm" action="../mysql/update_groupe.php" method="POST">
+            <input type="hidden" id="manageGroupID" name="groupID">
+            <label for="manageGroupName">Nom du groupe :</label><br>
+            <input type="text" id="manageGroupName" name="groupName"><br><br>
+            <label for="manageGroupDescription">Description du groupe :</label><br>
+            <textarea id="manageGroupDescription" name="groupDescription" rows="4" cols="50"></textarea><br><br>
+            <label for="manageGroupCode">Code du groupe :</label><br>
+            <div style="display: flex;">
+                <input type="text" id="manageGroupCode" name="groupCode" readonly style="flex: 1;"><br><br>
+                <button type="button" id="generateGroupCode" style="margin-left: 10px;">Modifier</button>
+            </div><br>
+            <button type="submit" id="editGroupBtn">Sauvegarder</button>
+        </form>
     </div>
+</div>
+
+
+
 
     <div id="TaskDetailModal" class="modal">
     <div class="modal-content">
@@ -556,13 +659,10 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
 </div>
 
 
-    <div id="CreateGroupModal" class="modal <?php if (isset($_GET['error']) && in_array($_GET['error'], ['empty_group_name', 'group_exists'])) echo 'show'; ?>">
+<div id="CreateGroupModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeCreateGroupModal">&times;</span>
             <h2>Créer un nouveau groupe</h2>
-            <?php if (isset($_GET['error']) && in_array($_GET['error'], ['empty_group_name', 'group_exists'])): ?>
-                <div class="error-message"><?php echo $error_message; ?></div>
-            <?php endif; ?>
             <form action="../mysql/creation_groupe.php" method="POST" id="createGroupForm">
                 <label for="groupName">Nom du groupe :</label><br>
                 <input type="text" id="groupName" name="groupName" required><br><br>
@@ -660,26 +760,27 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
     </div>
 
     <div id="ProjectDetailModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeProjectDetailModal">&times;</span>
-            <h2>Détails du projet</h2>
-            <div id="currentProjectMembers">
-                <h3>Membres du projet</h3>
-                <ul id="projectMembersList"></ul>
-            </div>
-            <div id="addProjectMembers">
-                <h3>Ajouter une personne au projet</h3>
-                <form id="addProjectMembersForm">
-                    <div id="nonMembersList"></div>
-                    <button type="button" id="saveProjectMembers">Enregistrer</button>
-                </form>
-            </div>
-            <div id="projectTasks">
-                <h3>Liste des tâches</h3>
-                <ul id="projectTasksList"></ul>
-            </div>
+    <div class="modal-content">
+        <span class="close" id="closeProjectDetailModal">&times;</span>
+        <h2>Détails du projet</h2>
+        <div id="currentProjectMembers">
+            <h3>Membres du projet</h3>
+            <ul id="projectMembersList"></ul>
+        </div>
+        <div id="addProjectMembers">
+            <h3>Ajouter une personne au projet</h3>
+            <input type="text" id="searchMembersInput" placeholder="Rechercher un membre...">
+            <form id="addProjectMembersForm">
+                <div id="nonMembersList"></div>
+                <button type="button" id="saveProjectMembers" class="btn btn-primary">Enregistrer</button>
+            </form>
+        </div>
+        <div id="projectTasks">
+            <h3>Liste des tâches</h3>
+            <ul id="projectTasksList"></ul>
         </div>
     </div>
+</div>
 
 
     <script>
@@ -720,6 +821,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    document.addEventListener('DOMContentLoaded', function() {
+    var calendarDays = document.querySelectorAll('.days li.has-tasks');
+
+    calendarDays.forEach(function(day) {
+        day.addEventListener('click', function() {
+            var taskIds = this.getAttribute('data-task-ids');
+            if (taskIds) {
+                var taskIdArray = taskIds.split(',');
+                if (taskIdArray.length > 0) {
+                    showTaskDetails(taskIdArray[0]); // Open the modal with the first task ID
+                }
+            }
+        });
+    });
+
+    function showTaskDetails(taskId) {
+        fetch(`../mysql/get_task_details.php?task_id=${taskId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Error fetching task details');
+                }
+                const taskDetailsElement = document.getElementById("taskDetails");
+                const task = data.task;
+
+                const taskDate = new Date(task.Date_Tache);
+                const currentDate = new Date();
+                const daysRemaining = Math.floor((taskDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
+
+                taskDetailsElement.innerHTML = `
+                    <p>Nom de la tâche: ${task.Texte}</p>
+                    <p>Catégorie: ${task.Categorie}</p>
+                    <p>Date Limite de la Tache: ${task.Date_Tache} (${daysRemaining} J)</p> 
+                    <p>Assignée à: ${task.Pseudo}</p>
+                `;
+                document.getElementById("TaskDetailModal").classList.add("show");
+            })
+            .catch(error => console.error('Error:', error));
+    }
+});
+
+
     function showTaskDetails(taskId) {
         fetch(`../mysql/get_task_details.php?task_id=${taskId}`)
             .then(response => {
@@ -759,17 +907,29 @@ function toggleMenu() {
 document.addEventListener('DOMContentLoaded', function() {
     var manageGroupModal = document.getElementById("ManageGroupModal");
     var closeManageGroupModal = document.getElementById("closeManageGroupModal");
+    var generateGroupCodeBtn = document.getElementById("generateGroupCode");
 
-    window.openManageGroupModal = function(groupID, groupName, groupDescription, groupCode) {
-        document.getElementById("manageGroupName").value = groupName;
-        document.getElementById("manageGroupDescription").value = groupDescription;
-        document.getElementById("manageGroupCode").value = groupCode;
-        manageGroupModal.classList.add("show");
-    }
+    window.openManageGroupModal = function(groupID) {
+        fetch(`../mysql/get_group_details.php?group_id=${groupID}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    var group = data.group;
+                    document.getElementById("manageGroupID").value = group.Groupe_ID;
+                    document.getElementById("manageGroupName").value = group.Nom;
+                    document.getElementById("manageGroupDescription").value = group.Description_Groupe;
+                    document.getElementById("manageGroupCode").value = group.Code;
+                    manageGroupModal.classList.add("show");
+                } else {
+                    console.error('Error fetching group details:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    };
 
     closeManageGroupModal.onclick = function() {
         manageGroupModal.classList.remove("show");
-    }
+    };
 
     window.onclick = function(event) {
         if (event.target == manageGroupModal) {
@@ -777,14 +937,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    generateGroupCodeBtn.onclick = function() {
+        var newCode = generateRandomCode(6);
+        document.getElementById("manageGroupCode").value = newCode;
+    };
+
+    function generateRandomCode(length) {
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var code = '';
+        for (var i = 0; i < length; i++) {
+            code += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return code;
+    }
+
     document.getElementById("openManageGroupModalBtn").onclick = function() {
-        var groupID = 1;
-        var groupName = "Nom du Groupe";
-        var groupDescription = "Description du Groupe";
-        var groupCode = "Code du Groupe";
-        openManageGroupModal(groupID, groupName, groupDescription, groupCode);
+        openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>);
     };
 });
+
+
+
 
 function toggleTaskCompletion(element) {
     var taskIcon = element;
@@ -859,47 +1032,20 @@ function updateStarStatus(taskId, status) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    var taskDetailModal = document.getElementById("TaskDetailModal");
-    var closeDetailModal = document.getElementById("closeDetailModal");
-
-    closeDetailModal.onclick = function() {
-        taskDetailModal.classList.remove("show");
-    }
-
-    window.onclick = function(event) {
-        if (event.target == taskDetailModal) {
-            taskDetailModal.classList.remove("show");
-        }
-    };
+    var projectSelect = document.getElementById('projectSelect');
+    projectSelect.addEventListener('change', function() {
+        var selectedProjectID = this.value;
+        window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>&projectID=${selectedProjectID}`;
+    });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    var createProjectModal = document.getElementById("CreateProjectModal");
-    var createProjectBtn = document.getElementById("createProjectBtn");
-    var closeProjectModal = document.getElementById("closeProjectModal");
-
-    if (createProjectBtn) {
-        createProjectBtn.onclick = function(event) {
-            event.stopPropagation();
-            createProjectModal.classList.add("show");
-        }
-    }
-
-    closeProjectModal.onclick = function() {
-        createProjectModal.classList.remove("show");
-    }
-
-    window.onclick = function(event) {
-        if (event.target == createProjectModal) {
-            createProjectModal.classList.remove("show");
-        }
-    };
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     var projectDetailModal = document.getElementById('ProjectDetailModal');
     var closeProjectDetailModal = document.getElementById('closeProjectDetailModal');
     var saveProjectMembers = document.getElementById('saveProjectMembers');
+    var searchInput = document.getElementById('searchMembersInput');
+    var addProjectMembers = document.getElementById('addProjectMembers');
 
     closeProjectDetailModal.onclick = function() {
         projectDetailModal.style.display = 'none';
@@ -935,12 +1081,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateProjectDetailModal(data, projectID) {
         var projectMembersList = document.getElementById('projectMembersList');
+        var isAdmin = data.isAdmin;
+
         projectMembersList.innerHTML = data.members.map(member => `
             <li>
                 ${member.Pseudo} ${member.admin ? '(Admin)' : ''}
-                ${data.isAdmin ? `
-                    <button onclick="promoteToAdmin(${projectID}, ${member.Utilisateur_ID})">Promouvoir en tant qu'admin</button>
-                    <button onclick="removeMember(${projectID}, ${member.Utilisateur_ID})">Supprimer</button>
+                ${isAdmin ? `
+                    <button class="btn btn-primary promote-btn" onclick="promoteToAdmin(${projectID}, ${member.Utilisateur_ID})">Promouvoir</button>
+                    <button class="btn btn-danger remove-btn" onclick="removeMember(${projectID}, ${member.Utilisateur_ID})">Supprimer</button>
                 ` : ''}
             </li>
         `).join('');
@@ -949,15 +1097,21 @@ document.addEventListener('DOMContentLoaded', function() {
         projectTasksList.innerHTML = data.tasks.map(task => `
             <li>
                 ${task.Texte} - ${task.Pseudo} - ${task.Date_Tache}
-                ${data.isAdmin ? `<button onclick="openTaskDetailModal(${task.Tache_ID})">Modifier</button>` : ''}
+                ${isAdmin ? `<button class="btn btn-info" onclick="openTaskDetailModal(${task.Tache_ID})">Modifier</button>` : ''}
             </li>
         `).join('');
+
+        if (isAdmin) {
+            addProjectMembers.style.display = 'block';
+        } else {
+            addProjectMembers.style.display = 'none';
+        }
 
         const nonMembersList = document.getElementById('nonMembersList');
         nonMembersList.innerHTML = data.nonMembers.map(nonMember => `
             <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID}'> ${nonMember.Pseudo}</label><br>
         `).join('');
-        
+
         saveProjectMembers.onclick = function() {
             const formData = new FormData(document.getElementById('addProjectMembersForm'));
             formData.append('project_id', projectID);
@@ -975,6 +1129,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         };
+
+        searchInput.addEventListener('input', function() {
+            var searchQuery = searchInput.value.toLowerCase();
+            var filteredMembers = data.nonMembers.filter(member => 
+                member.Pseudo.toLowerCase().includes(searchQuery)
+            );
+            nonMembersList.innerHTML = filteredMembers.map(nonMember => `
+                <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID}'> ${nonMember.Pseudo}</label><br>
+            `).join('');
+        });
     }
 
     window.promoteToAdmin = function(projectID, userID) {
@@ -1007,55 +1171,68 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Ajout de la fonction openTaskDetailModal pour afficher les détails de la tâche
-    var taskDetailModal = document.getElementById("TaskDetailModal");
-    var closeDetailModal = document.getElementById("closeDetailModal");
-
-    closeDetailModal.onclick = function() {
-        taskDetailModal.classList.remove("show");
-    }
-
-    window.onclick = function(event) {
-        if (event.target == taskDetailModal) {
-            taskDetailModal.classList.remove("show");
-        }
-    };
-
-    window.openTaskDetailModal = function(taskID) {
-        fetch(`../mysql/get_task_details.php?task_id=${taskID}`)
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    throw new Error(data.error || 'Error fetching task details');
-                }
-                showTaskDetails(data);
-            })
-            .catch(error => console.error('Error:', error));
-    };
-
     function openTaskDetailModal(taskId) {
         showTaskDetails(taskId);
     }
+});
 
-    function showTaskDetails(data) {
-        const taskDetailsElement = document.getElementById("taskDetails");
 
-        const tacheDate = new Date(data.dateTache);
-        const currentDate = new Date();
-        const jours = Math.floor((tacheDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
+document.addEventListener('DOMContentLoaded', function() {
+    var createGroupModal = document.getElementById("CreateGroupModal");
+    var joinGroupModal = document.getElementById("JoinGroupModal");
+    var closeCreateGroupModal = document.getElementById("closeCreateGroupModal");
+    var closeJoinGroupModal = document.getElementById("closeJoinGroupModal");
 
-        taskDetailsElement.innerHTML = `
-            <p>Nom de la tâche: ${data.nom}</p>
-            <p>Catégorie: ${data.categorie}</p>
-            <p>Date Limite de la Tache: ${data.dateTache} (${jours} J)</p> 
-        `;
-        taskDetailModal.classList.add("show");
+    document.getElementById("openCreateGroupModal").onclick = function() {
+        createGroupModal.classList.add("show");
+    };
+
+    document.getElementById("openJoinGroupModal").onclick = function() {
+        joinGroupModal.classList.add("show");
+    };
+
+    closeCreateGroupModal.onclick = function() {
+        createGroupModal.classList.remove("show");
+    };
+
+    closeJoinGroupModal.onclick = function() {
+        joinGroupModal.classList.remove("show");
+    };
+
+    window.onclick = function(event) {
+        if (event.target == createGroupModal) {
+            createGroupModal.classList.remove("show");
+        } else if (event.target == joinGroupModal) {
+            joinGroupModal.classList.remove("show");
+        }
+    };
+
+    var createProjectBtn = document.getElementById("createProjectBtn");
+    var createProjectModal = document.getElementById("CreateProjectModal");
+    var closeProjectModal = document.getElementById("closeProjectModal");
+
+    if (createProjectBtn) {
+        createProjectBtn.onclick = function(event) {
+            event.stopPropagation();
+            createProjectModal.classList.add("show");
+        }
     }
+
+    closeProjectModal.onclick = function() {
+        createProjectModal.classList.remove("show");
+    }
+
+    window.onclick = function(event) {
+        if (event.target == createProjectModal) {
+            createProjectModal.classList.remove("show");
+        }
+    };
 });
 
 setInterval(function () {
     fetch('../mysql/fetch_session.php')
 }, 5000);
+
 
 
     </script>

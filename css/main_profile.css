@@ -27,11 +27,8 @@
     grid-row: 1 / 7;
 }
 .container .right main .projectCard .projectTop {
-    position: relative;
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    height: 100%;
 }
 .container .right main .projectCard .projectTop h2 {
     color: #000;
@@ -43,116 +40,65 @@
     color: #999;
     font-size: 0.8em;
 }
-.container .right main .projectCard .projectTop .projectDots {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-.container .right main .projectCard .projectTop .projectDots span {
-    color: #000;
-    font-size: 1.8em;
-    font-weight: 700;
-}
-.container .right main .projectCard .projectProgress {
-    position: relative;
-    width: 100%;
+
+.container .right main .projectCard .projectTop .profile {
     height: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.container .right main .projectCard .projectProgress .process {
-    position: relative;
-    padding: 5px 10px;
-    background: #f1f3ff;
-    border-radius: 5px;
-    cursor: pointer;
-}
-.container .right main .projectCard .projectProgress .process h2 {
-    color: #8389f9;
-    white-space: nowrap;
-    font-size: 0.9em;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-.container .right main .projectCard .projectProgress .priority {
-    position: relative;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-.container .right main .projectCard .projectProgress .priority::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 8px;
-    height: 8px;
-    transform: translate(-50%, -50%);
-    background: #ff0000;
-    border-radius: 50%;
-    box-shadow: 0 0 2px #ff0000,
-        0 0 5px #ff000077;
-}
-.container .right main .projectCard .projectProgress .priority h2 {
-    color: #ff0000;
-    white-space: nowrap;
-    font-size: 0.9em;
-    font-weight: 500;
-}
-.container .right main .projectCard .task {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-wrap: wrap;
     flex-direction: column;
-    margin: 10px 0;
-}
-.container .right main .projectCard .task h2 {
-    color: #999;
-    font-size: 1em;
-}
-.container .right main .projectCard .task h2 bold {
-    color: #000;
-}
-.container .right main .projectCard .task .line {
-    position: relative;
-    width: 100%;
-    height: 5px;
-    background: rgba(0, 0, 0, .1);
-    border-radius: 50px;
-    z-index: -1;
-    overflow: hidden;
-}
-.container .right main .projectCard .task .line::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: calc(100% - 25%);
-    height: 100%;
-    background: #6577ff;
-    z-index: 1;
-    border-radius: 50px;
-}
-.container .right main .projectCard .due {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
+    align-items: flex-start;
     justify-content: flex-start;
+}
+
+.container .right main .projectCard .projectTop .profile img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.container .right main .projectCard .projectTop .profile-info {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    /* margin: 10px 0; */
+    gap: 10px;
+    flex-direction: column;
+    width: 100%;
+}
+
+.container .right main .projectCard .projectTop .profile-info .profileHead {
+    width: 100%;
+    display: flex;
     align-items: center;
-    cursor: pointer;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-bottom: 40px;
 }
-.container .right main .projectCard .due h2 {
-    padding: 2px 10px;
-    border: 2px solid #2C74B3;
-    border-radius: 10px;
-    font-size: 1.1em;
-    color: #2C74B3;
+
+.container .right main .projectCard .profile-actions {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px 0;
+    align-content: space-around;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: transparent;
 }
-/* projectTop end */
+.container .right main .projectCard .profile-actions a {
+    text-decoration: none;
+    color: #000000;
+    padding: 10px 15px;
+    border: 1px solid #9c9c9c;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.container .right main .projectCard .profile-actions a:hover {
+    background-color: #007BFF;
+    color: #fff;
+}
 
 /* Responsive */
 @media (max-width: 1176px) {
@@ -272,28 +218,6 @@
     display: block;
 }
 
-/* Style du conteneur d'actions de profil */
-.profile-actions {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-}
-
-/* Style des liens d'actions de profil */
-.profile-actions a {
-    text-decoration: none;
-    color: #007BFF;
-    padding: 10px 15px;
-    border: 1px solid #007BFF;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-/* Style de survol des liens d'actions de profil */
-.profile-actions a:hover {
-    background-color: #007BFF;
-    color: #fff;
-}
 /* Style de la modal */
 #changePasswordModal {
     position: fixed; /* Fixe la modal au-dessus du contenu */

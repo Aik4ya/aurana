@@ -94,8 +94,5 @@
     </ul>
   </nav>
 
-  <h2>
-    Dashboard
-  </h2>
 </body>
 </html>

@@ -555,3 +555,15 @@
     display: block;
     }
     
+.search-container {
+        width: 100%;
+        display: flex;
+        margin-bottom: 20px;
+    }
+    
+#searchInput {
+        width: 50%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }

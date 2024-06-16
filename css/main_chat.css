@@ -48,10 +48,12 @@
 }
 
 .container .right main .projectCard .projectTop {
+    height: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    flex-direction: column;
 }
 
 .container .right main .projectCard .projectTop h2 {
@@ -66,13 +68,28 @@
     font-size: 0.8em;
 }
 
-#chat_messages {
+.container .right main .projectCard .projectTop .user-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.container .right main .projectCard .projectTop #chat_messages {
+    height: 100%;
+    width: 100%;
     flex: 1;
     overflow-y: auto;
     padding: 10px;
     margin-bottom: 10px;
     display: flex;
-    flex-direction: column-reverse; /* New messages at the bottom */
+    flex-direction: column-reverse;
+}
+
+.container .right main .projectCard .projectTop .buttonMess {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .message {
@@ -96,8 +113,8 @@
     font-size: 0.8em;
 }
 
-/* Pour le formulaire */
 #newMessageForm {
+    width: 100%;
     display: flex;
     flex-direction: column;
 }

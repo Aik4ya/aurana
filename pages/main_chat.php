@@ -48,6 +48,20 @@ if (isset($_GET['groupe'])) {
     <script src="../js/main_chat.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>
+<style>
+    .search-container {
+    margin: 10px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+</style>
 <body>
     <div class="container">
         <div class="left">
@@ -143,14 +157,19 @@ if (isset($_GET['groupe'])) {
             <main>
                 <div class="projectCard">
                     <div class="projectTop">
-                        <?php echo "<h2>{$_SESSION['Pseudo']}<br><span>{$_SESSION['Groupe']}</span></h2>"; ?>
-                    </div>
-                    <div id="chat_messages"></div>
-                    <div>
-                        <form id="newMessageForm">
-                            <textarea id="newMessageInput" name="nouveau_message" placeholder="Ajouter un nouveau message"></textarea>
-                            <button type="submit">Envoyer</button>
-                        </form>
+                        <div class="user-info">
+                            <?php echo "<h2>{$_SESSION['Pseudo']}<br><span>{$_SESSION['Groupe']}</span></h2>"; ?>
+                            <div class="search-container">
+                                <input type="text" id="searchInput" placeholder="Rechercher des messages..." onkeyup="searchMessages()">
+                            </div>
+                        </div>
+                        <div id="chat_messages"></div>
+                        <div class="buttonMess">
+                            <form id="newMessageForm">
+                                <textarea id="newMessageInput" name="nouveau_message" placeholder="Ajouter un nouveau message"></textarea>
+                                <button type="submit">Envoyer</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <div class="myfriends">
@@ -260,7 +279,25 @@ if (isset($_GET['groupe'])) {
                             modal.style.display = 'none';
                         }
                     };
-            </script>
+                    function searchMessages() {
+                        const query = document.getElementById('searchInput').value;
+
+                        fetch(`../mysql/search_messages.php?query=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const chatMessages = document.getElementById('chat_messages');
+                                chatMessages.innerHTML = '';
+
+                                data.forEach(message => {
+                                    const messageDiv = document.createElement('div');
+                                    messageDiv.classList.add('message');
+                                    messageDiv.innerHTML = `<strong>${message.Pseudo}:</strong> ${message.Texte} <small>${message.Date_Envoi}</small>`;
+                                    chatMessages.appendChild(messageDiv);
+                                });
+                            })
+                            .catch(error => console.error('Error fetching messages:', error));
+                    }              
+          </script>
         </div>
     </div>
 </body>
