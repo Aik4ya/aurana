@@ -49,7 +49,7 @@
 
       </li>
       <li class="has-subnav">
-        <a href="#">
+        <a href="ticket.php">
           <i class="fa fa-list fa-2x"></i>
           <span class="nav-text">
             Ticket
@@ -58,7 +58,7 @@
 
       </li>
       <li class="has-subnav">
-        <a href="#">
+        <a href="newsletter.php">
           <i class="fa fa-folder-open fa-2x"></i>
           <span class="nav-text">
             Newsletter
@@ -75,7 +75,7 @@
         </a>
       </li>
       <li>
-        <a href="../backoff/logs.php">
+        <a href="logs.php">
           <i class="fa fa-font fa-2x"></i>
           <span class="nav-text">
             Logs
@@ -83,7 +83,7 @@
         </a>
       </li>
       <li class="has-subnav">
-        <a href="../backoff/qr_captcha.php">
+        <a href="qr_captcha.php">
           <i class="fa fa-folder-open fa-2x"></i>
           <span class="nav-text">
             Captcha

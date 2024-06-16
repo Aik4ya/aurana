@@ -86,8 +86,7 @@ function creation_utilisateur($dbh) {
         $_SESSION['Utilisateur_ID'] = $Utilisateur_ID;
         $_SESSION['Droit'] = $Droits;
         $_SESSION['Pseudo'] = $Username;
-
-    $_SESSION["email"] = $_POST["email"];
+        $_SESSION['Email'] = $Email;
       
 
     $_SESSION["otp"] = random_int(100000, 999999);

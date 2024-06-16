@@ -18,6 +18,7 @@ verif_session();
     <title>Aurana - File Upload</title>
     <link rel="stylesheet" href="../css/main_files.css">
     <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/base_main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <style>
         /* Modal */
@@ -141,7 +142,7 @@ verif_session();
                             <span class="title">Messages</span>
                         </a></li>
                         <li>
-                            <a href="main_files.php">
+                            <?php echo "<a href='main_files.php?groupe=" . $_GET['groupe'] . "'>" ?>
                                 <span class="material-symbols-outlined">account_balance_wallet</span>
                                 <span class="title">Fichiers</span>
                             </a>
@@ -158,39 +159,38 @@ verif_session();
         <div class="right">
             <div class="top">
                 <div class="searchBx">
-                    <?php if ($nom_groupe !== null): ?>
-                        <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
+                <?php if ($nom_groupe != null): ?>
+                    <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
                     <?php endif; ?>
                 </div>
+
                 <div class="user">
                     <?php
-                    echo "<h2>" . htmlspecialchars($_SESSION['Pseudo']) . "<br>";
-                    if ($_SESSION['Droit'] == 0) {
-                        echo "<span>User</span></h2>";
-                    } elseif ($_SESSION['Droit'] == 1) {
-                        echo "<span>Admin</span></h2>";
+
+                    // affichage groupes + menu déroulant
+
+                    $conn = connexion_bdd();
+                    echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+
+                    if ($_SESSION['Droit_groupe'] == 2) {
+                        echo "<span>Administrateur du Groupe</span></h2>";
+                    } elseif ($_SESSION['Droit_groupe'] == 1) {
+                        echo "<span>Propriétaire du Groupe</span></h2>";
                     }
-
-                    $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
-                    $result = $conn->query($sql);
-
-                    if ($result->rowCount() > 0) {
-                        echo "<p>Groupe(s): ";
-                        $groupes = [];
-                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                            $groupes[] = htmlspecialchars($row["Nom"]);
-                        }
-                        echo implode("; ", $groupes);
-                        echo "</p>";
-                    } else {
-                        echo "<p>Aucun Groupe</p>";
+                    
+                    if ($_SESSION['Droit'] == 1) {
+                        echo "<br><span>Admin</span></h2>";
                     }
                     ?>
                     <div class="arrow" onclick="toggleMenu()">
-                        <span class="material-symbols-outlined">expand_more</span>
+                        <span class="material-symbols-outlined">
+                            expand_more
+                        </span>
                     </div>
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
+                            <li><a href="../pages/main_profile.php">Profil</a></li>
+
                             <?php
                             $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
                             $result = $conn->query($sql);
@@ -358,6 +358,11 @@ verif_session();
 
         // Fetch files on page load
         fetchFiles();
+
+        setInterval(function () {
+            fetch('../mysql/fetch_session.php')
+        }, 5000);
+
     </script>
     </div>
 </body>

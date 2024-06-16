@@ -12,10 +12,9 @@
     <button type="button" id="btn-create-captcha">Créer un nouveau CAPTCHA</button>
 </form>
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 require_once '../mysql/connexion_bdd.php';
 
 function affichage_captcha($dbh)

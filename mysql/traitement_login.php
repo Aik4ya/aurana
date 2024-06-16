@@ -40,6 +40,7 @@ function connexion_utilisateur($dbh)
                 $_SESSION['Utilisateur_ID'] = $resultat['Utilisateur_ID'];
                 $_SESSION['Droit'] = $resultat['Droit'];
                 $_SESSION['Pseudo'] = $resultat['Pseudo'];
+                $_SESSION['Email'] = $email;
 
                 $_SESSION['essais'] = 0;
                 header("Location: ../pages/main.php");

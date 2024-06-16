@@ -1,4 +1,5 @@
 <?php
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -10,55 +11,60 @@ require "../vendor/PHPMailer/src/PHPMailer.php";
 require "../vendor/PHPMailer/src/SMTP.php";
 require "../vendor/PHPMailer/src/Exception.php";
 
+$mail = new PHPMailer(true);
+
 require_once '../mysql/connexion_bdd.php';
+
 session_start();
 
-$mail = new PHPMailer(true);
-$conn = connexion_bdd();
-
-function getAllSubscribers($conn) {
+function getAllSubscribers()
+{
     $subscribers = [];
-    $sql = "SELECT Email FROM UTILISATEUR WHERE derniere_connexion <= DATE_SUB(NOW(), INTERVAL 30 DAY) AND Abonnement_NL = 1";
-    if ($result = $conn->query($sql)) {
-        while($row = $result->fetch_assoc()) {
-            $subscribers[] = $row['Email'];
-        }
+    $conn = connexion_bdd();
+    if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+    }
+    
+    $sql = $conn->prepare("SELECT Email FROM UTILISATEUR WHERE Abonnement_NL = 1");
+    $sql->execute();
+    
+    while($row = $sql->fetch(PDO::FETCH_ASSOC)) {
+        $subscribers[] = $row;
     }
     return $subscribers;
 }
 
-function sendNewsletter($conn, $mail, $subject, $message) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $subject = $_POST['subject'];
+    $message = $_POST['message'];
+    
+    $subscribers = getAllSubscribers();
+
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = getenv('SMTP_USERNAME');
-    $mail->Password = getenv('SMTP_PASSWORD');
+    $mail->Username = "staff.aurana@gmail.com";
+    $mail->Password = "bphm shjn sdpq erno";
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
+    $mail->SMTPDebug = 2;
     
-    $mail->setFrom('staff.aurana@gmail.com', 'Équipe Aurana');
+    $mail->setFrom('staff.aurana@gmail.com', 'Aurana Staff');
     $mail->isHTML(true);
-    $mail->Subject = $subject;
-    $mail->Body = $message;
-
-    $subscribers = getAllSubscribers($conn);
-    foreach ($subscribers as $email) {
+    
+    foreach ($subscribers as $subscriber) {
+        $email = $subscriber['Email'];
         $mail->addAddress($email);
+        $mail->Subject = $subject;
+        $mail->Body = $message;
+        
         if (!$mail->send()) {
-            echo "Erreur d'envoi à $email: " . $mail->ErrorInfo . "<br>";
+            echo "Une erreur est survenue lors de l'envoi à " . $email . ": " . $mail->ErrorInfo;
         } else {
-            echo "Email envoyé avec succès à $email<br>";
+            echo "Email envoyé à " . $email . "<br>";
         }
+        
         $mail->clearAddresses();
     }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview'])) {
-
-    echo "<h2>Prévisualisation :</h2>";
-    echo "<p><strong>Sujet :</strong> " . $_POST['subject'] . "</p>";
-    echo "<p><strong>Message :</strong> " . nl2br($_POST['message']) . "</p>";
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send'])) {
-    sendNewsletter($conn, $mail, $_POST['subject'], $_POST['message']);
 }
 ?>

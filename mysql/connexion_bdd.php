@@ -2,7 +2,7 @@
 function connexion_bdd()
 {
     $bdd_login = 'aurana';
-    $bdd_password = 'aurana2024';
+    $bdd_password = 'gH98SxjWP3hesN8h7Z94';
 
     try {
         $dbh = new PDO('mysql:host=localhost;dbname=Aurana_bdd', $bdd_login, $bdd_password);

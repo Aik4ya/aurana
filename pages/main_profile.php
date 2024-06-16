@@ -16,6 +16,7 @@ verif_session();
     <title>Aurana - Dashboard</title>
     <link rel="stylesheet" href="../css/main_profile.css">
     <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/base_main.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
@@ -114,15 +115,24 @@ verif_session();
                                 <div class="profile-details">
                                     <h3>Username: <?php echo $_SESSION['Pseudo']; ?></h3>
                                     <p>Email: <?php echo $_SESSION['Email']; ?></p>
-                                    <p>Role: <?php echo $_SESSION['Droit']; ?></p>
+                                    <p>Role: <?php 
+                                    if ($_SESSION['Droit'] == 1) {
+                                        echo "Administrateur";
+                                    } else {
+                                        echo "Utilisateur";
+                                    } ?></p>
                                 </div>
                             </div>
                             <div class="profile-actions">
-                                <a href="edit_profile.php">Edit Profile</a>
+                                <a href="edit_profile.php">Editer les informations</a>
                                 <br>
-                                <a href="#" id="changePasswordLink">Change Password</a>
+                                <a href="#" id="changePasswordLink">Changer le mot de passe</a>
                                 <br>
-                                <a href="../mysql/logout.php">Logout</a>
+                                <a href="../pages/logout.php">Logout</a>
+                                <br>
+                                <a href="oubli.php">Options de Confidentialité</a>
+                                <br>
+                                <a href="#" id="personnalisation">Personnalisation</a>
                             </div>
                         </div>
                     </div>
@@ -141,36 +151,75 @@ verif_session();
                         </form>
                     </div>
                 </div>
+                <div id="PersonnalisationModal" style="display: none;">
+                    <div>
+                        <h2>Personnalisation</h2>
+                        <form id="PersonnalisationForm" action="../mysql/set_parametres.php" method="POST">
+                            <label for="currentPassword">Current Password:</label><br>
+                            <input type="password" id="currentPassword" name="currentPassword"><br>
+                            <label for="newPassword">New Password:</label><br>
+                            <input type="password" id="newPassword" name="newPassword"><br>
+                            <label for="confirmPassword">Confirm New Password:</label><br>
+                            <input type="password" id="confirmPassword" name="confirmPassword"><br>
+                            <input type="submit" value="Change Password">
+                        </form>
+                    </div>
+                </div>
             </main>
             <script>
-                // Get the modal
-                var modal = document.getElementById('changePasswordModal');
+                
+                var modal1 = document.getElementById('changePasswordModal');
+                var modal2 = document.getElementById('PersonnalisationModal');
 
-                // Get the link that opens the modal
-                var link = document.getElementById('changePasswordLink');
+                
+                var link1 = document.getElementById('changePasswordLink');
+                var link2 = document.getElementById('personnalisation');
 
-                // When the user clicks on the link, open the modal 
-                link.onclick = function(event) {
+            
+                link1.onclick = function(event) {
                     event.preventDefault();
-                    modal.style.display = "block";
+                    modal1.style.display = "block";
                 }
 
-                // Get the form
-                var form = document.getElementById('changePasswordForm');
-
-                // When the user submits the form, prevent form submission and hide the modal
-                form.onsubmit = function(event) {
+                link2.onclick = function(event) {
                     event.preventDefault();
-                    // Here you can add your code to change the password
-                    modal.style.display = "none";
+                    modal2.style.display = "block";
                 }
 
-                // When the user clicks outside the modal, close it
+                
+                var form1 = document.getElementById('changePasswordForm');
+                var form2 = document.getElementById('PersonnalisationForm');
+
+
+                
+                form1.onsubmit = function(event) {
+                    event.preventDefault();
+                    
+                    modal1.style.display = "none";
+                }
+
+                form2.onsubmit = function(event) {
+                    event.preventDefault();
+                    
+                    modal2.style.display = "none";
+                }
+
+                
                 window.onclick = function(event) {
-                    if (event.target == modal) {
-                        modal.style.display = "none";
+                    if (event.target == modal1) {
+                        modal1.style.display = "none";
                     }
                 }
+
+                window.onclick = function(event) {
+                    if (event.target == modal2) {
+                        modal2.style.display = "none";
+                    }
+                }
+
+                setInterval(function () {
+                    fetch('../mysql/fetch_session.php')
+                }, 5000);
         </script>
 </body>
 

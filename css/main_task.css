@@ -1,286 +1,21 @@
-@font-face {
-    font-family: 'Dunkin';
-    src: url('../fonts/DunkinSansBold.otf');
-    font-weight: bold;
-    font-style: normal;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
-.red-hat display-300 {
-    font-family: "Red Hat Display", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 300;
-    font-style: normal;
-  }
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Red Hat Display', sans-serif;
-}
-
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(#9fa7d621, #c5caff40);
-}
-
-.full {
-    font-variation-settings:
-        'FILL'1,
-        'wght'400,
-        'GRAD'0,
-        'opsz'48
-}
-
-li {
-    list-style-type: none;
-}
-
-.cardlist {
-    display: flex;
-    gap: 20px;
-    flex-direction: column;
-    align-content: center;
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-
-
-/* container start */
-.container {
-    position: relative;
-    width: 95%;
-    height: 95vh;
-    display: flex;
-    gap: 20px;
-}
-/* left start */
-.container .left {
-    position: relative;
-    width: 250px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    padding: 20px 0;
-}
-/* header start */
-.container .left header {
-    position: relative;
-    width: 100%;
-}
-/* logo start */
-.container .left header .logo {
-    position: relative;
-    margin-bottom: 15px;
-    padding-left: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.container .left header .logo h2 {
-    font-size: 1.2em;
-    font-weight: 500;
-    cursor: pointer;
-    color: #000;
-    font-family: 'Dunkin';
-}
-.container .left header .logo .close {
-    position: relative;
-    left: -20px;
-    width: 20px;
-    height: 20px;
-    text-align: center;
-    line-height: 20px;
-    display: none;
-    cursor: pointer;
-}
-/* nav start */
-.container .left header nav {
-    position: relative;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    padding-left: 20px;
-}
-.container .left header nav ul {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-}
-.container .left header nav ul li {
-    position: relative;
-    width: 100%;
-    height: 50px;
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.container .left header nav ul li a {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    text-decoration: none;
-    padding-left: 20px;
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-    transition: .3s ease;
-}
-.container .left header nav ul li:first-child a,
+/* truc gauche encadré titre */
+.container .left header nav ul li:nth-child(2) a,
 .container .left header nav ul li a:hover {
     transition: 0s;
     background: #f1f3ff;
 }
-.container .left header nav ul li a::before {
-    content: '';
-    position: absolute;
-    right: 0;
-    width: 0;
-    height: 100%;
-    background: #6577ff;
-    transition: .3s ease;
-}
-.container .left header nav ul li:first-child a::before,
+
+.container .left header nav ul li:nth-child(2) a::before,
 .container .left header nav ul li a:hover::before {
     width: 4px;
 }
-.container .left header nav ul li a .material-symbols-outlined {
-    color: #999;
-    font-size: 1.7em;
-    margin-right: 10px;
-}
-.container .left header nav ul li a .title {
-    color: #999;
-    font-size: 1.1em;
-}
-.container .left header nav ul li:first-child a .material-symbols-outlined,
-.container .left header nav ul li:first-child a .title,
+
+.container .left header nav ul li:nth-child(2) a .material-symbols-outlined,
+.container .left header nav ul li:nth-child(2) a .title,
 .container .left header nav ul li a:hover .material-symbols-outlined,
 .container .left header nav ul li a:hover .title {
     color: #5356FF;
 }
-/* nav end */
-
-/* left end */
-/* right start */
-.container .right {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-/* top start */
-.container .right .top {
-    position: relative;
-    width: 100%;
-    height: 70px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: #fff;
-    border-radius: 20px;
-}
-/* user start */
-.container .right .top .user {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-}
-.container .right .top .user span {
-    color: #000;
-    cursor: pointer;
-}
-.container .right .top .user h2 {
-    font-size: 1.1em;
-    line-height: 18px;
-    white-space: nowrap;
-    cursor: pointer;
-}
-.container .right .top .user h2 span {
-    color: #999;
-    font-size: 0.8em;
-}
-.container .right .top .user .arrow {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.container .right .top .user .arrow span {
-    color: #000;
-    font-size: 2em;
-    font-weight: 600;
-    transition: all .3s ease;
-}
-.container .right .top .user .arrow:hover span {
-    transform: scale(1.2);
-}
-.container .right .top .user .toggle {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border: 3px solid #999;
-    border-radius: 10px;
-    cursor: pointer;
-    text-align: center;
-    line-height: 50px;
-    display: none;
-}
-.container .right .top .user .toggle span {
-    color: #000;
-    font-size: 1.5em;
-    font-weight: 900;
-    transition: .3s ease, opacity 0s, visibility 0s;
-}
-.container .right .top .user .toggle:hover span {
-    transform: scale(1.1);
-}
-.container .right .top .user .toggle span:last-child {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    visibility: hidden;
-}
-.container .right .top .user .toggle.active span:first-child {
-    opacity: 0;
-    visibility: hidden;
-}
-.container .right .top .user .toggle.active span:last-child {
-    opacity: 1;
-    visibility: visible;
-}
-/* user end */
-
-
-
-
 
 
 /* main start */
@@ -304,7 +39,7 @@ li {
         inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
         inset rgb(255, 255, 255) 0px 11px 28px 0px;
     padding: 20px;
-    /* display: flex; */
+    display: flex;
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
@@ -572,7 +307,6 @@ li {
     font-size: 1.1em;
     color: #008000;
 }
-
 /* projectTop end */
 
 /* myTasks start */

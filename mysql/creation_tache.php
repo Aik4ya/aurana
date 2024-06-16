@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 require_once 'connexion_bdd.php';
 
-session_start(); // Démarrer la session pour accéder à $_SESSION
+session_start();
 
 function creation_tache($dbh) {
     try {
@@ -55,7 +55,9 @@ function creation_tache($dbh) {
             $projetAssignSql->execute();
         }
 
-        echo "La tâche a été créée et assignée avec succès.";
+        header("Location: ../pages/main.php?groupe={$_SESSION['Groupe']}");
+        exit();
+
     } catch (Exception $e) {
         echo 'Erreur: ' . $e->getMessage();
     } catch (PDOException $e) {

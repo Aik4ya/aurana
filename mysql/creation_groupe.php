@@ -47,7 +47,7 @@ try {
 
     $groupe_id = $conn->lastInsertId();
 
-    $sql = "INSERT INTO est_membre (Utilisateur_ID, GROUPE) VALUES (:utilisateur_id, :groupe_id)";
+    $sql = "INSERT INTO est_membre (Utilisateur_ID, GROUPE, droit) VALUES (:utilisateur_id, :groupe_id, 1)";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':utilisateur_id', $utilisateur_id);
     $stmt->bindParam(':groupe_id', $groupe_id);

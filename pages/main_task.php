@@ -19,6 +19,7 @@ verif_session();
     <title>Aurana - Dashboard</title>
     <link rel="stylesheet" href="../css/main_task.css">
     <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/base_main.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
@@ -97,7 +98,7 @@ verif_session();
                                 </a>
                             </li>
                             <li>
-                                <a href="main_files.php">
+                                <?php echo "<a href='main_chat.php?groupe=" . $_GET['groupe'] . "'>" ?>
                                     <span class="material-symbols-outlined">
                                         account_balance_wallet
                                     </span>
@@ -117,49 +118,39 @@ verif_session();
             </div>
             <div class="right">
                 <div class="top">
-                    <div class="searchBx">
-                        <?php if ($nom_groupe !== null): ?>
-                        <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
-                        <?php endif; ?>
-                    </div>
+                <div class="searchBx">
+                <?php $nom_groupe = $_GET['groupe']; 
+                    if ($nom_groupe != null): ?>
+                    <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
+                    <?php endif; ?>
+                </div>
+
+                <div class="user">
+                    <?php
+
+                    // affichage groupes + menu déroulant
+
+                    $conn = connexion_bdd();
+                    echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+
+                    if ($_SESSION['Droit_groupe'] == 2) {
+                        echo "<span>Administrateur du Groupe</span></h2>";
+                    } elseif ($_SESSION['Droit_groupe'] == 1) {
+                        echo "<span>Propriétaire du Groupe</span></h2>";
+                    }
                     
-                    <div class="user">
-                        <?php
-
-                        // affichage groupes + menu déroulant
-
-                        session_start();
-                        $conn = connexion_bdd();
-                        echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
-
-                        if ($_SESSION['Droit'] == 0) {
-                            echo "<span>User</span></h2>";
-                        } elseif ($_SESSION['Droit'] == 1) {
-                            echo "<span>Admin</span></h2>";
-                        }
-
-                        $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
-                        $result = $conn->query($sql);
-
-                        if ($result->rowCount() > 0) {
-                            echo "<p>Groupe(s): ";
-                            $groupes = [];
-                            while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                $groupes[] = $row["Nom"];
-                            }
-                            echo implode("; ", $groupes);
-                            echo "</p>";
-                        } else {
-                            echo "<p>Aucun Groupe</p>";
-                        }
-                        ?>
-                        <div class="arrow" onclick="toggleMenu()">
-                            <span class="material-symbols-outlined">
-                                expand_more
-                            </span>
-                        </div>
-                        <div class="menu" style="display: none;">
-                            <ul id="menuList">
+                    if ($_SESSION['Droit'] == 1) {
+                        echo "<br><span>Admin</span></h2>";
+                    }
+                    ?>
+                    <div class="arrow" onclick="toggleMenu()">
+                        <span class="material-symbols-outlined">
+                            expand_more
+                        </span>
+                    </div>
+                    <div class="menu" style="display: none;">
+                        <ul id="menuList">
+                            <li><a href="../pages/main_profile.php">Profil</a></li>
 
                             <?php 
                                     $sql="SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
@@ -179,26 +170,72 @@ verif_session();
                 </div>
         <div class="scroll-container">
             <main>
-                <div class="cardlist">                  
+                <div class="projectCard">                  
                 <?php 
 
                 // affichage projets
 
-                    $sql="SELECT ID, nom, status, priorite, deadline FROM PROJET WHERE id_groupe = :id_groupe"; //nombre de projet dans grupe actuel
-                    $stmt1 = $conn->prepare($sql);
-                    $stmt1->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
-                    $stmt1->execute();
-                    $rowcount = $stmt1->rowCount();
-                    
-                    if ($rowcount > 0) { // si projet
-                        while ($row = $stmt1->fetch(PDO::FETCH_ASSOC)) {
-                            $id = $row['ID'];
-                            $nom = $row['nom'];
-                            $status = $row['status'];
-                            $priorite = $row['priorite'];
-                            $deadline = $row['deadline'];
-                            $groupe = $_GET['groupe'];
+                $sql = "SELECT ID, nom, status, priorite, deadline 
+                FROM PROJET 
+                WHERE id_groupe = :id_groupe 
+                AND ID IN (SELECT Projet_ID FROM est_membre_projet WHERE Utilisateur_ID = :id_utilisateur)
+                ORDER BY deadline ASC";
+                $stmt1 = $conn->prepare($sql);
+                $stmt1->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
+                $stmt1->bindParam(':id_utilisateur', $_SESSION['Utilisateur_ID']);
+                $stmt1->execute();
+                $rowcount = $stmt1->rowCount();
+
+                if ($rowcount > 0) { // si projet
+                    while ($row = $stmt1->fetch(PDO::FETCH_ASSOC)) {
+                        $id = $row['ID'];
+                        $nom = $row['nom'];
+                        $status = $row['status'];
+                        $priorite = $row['priorite'];
+                        $deadline = $row['deadline'];
+                        $groupe = $_GET['groupe'];
                             
+
+                        $sql="SELECT count(*) FROM tache_assignee_projet INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID WHERE tache_assignee_projet.id_projet = :id_projet AND TACHE.done = 1"; //nombre detache fini
+                                $stmt2 = $conn->prepare($sql);
+                                $stmt2->bindParam(':id_projet', $id);
+                                $stmt2->execute();
+                                $row = $stmt2->fetch(PDO::FETCH_ASSOC);
+                                $tachefin = $row['count(*)'];
+
+                                $sql="SELECT count(*) FROM tache_assignee_projet WHERE id_projet = :id_projet"; //nombre de tache total
+                                $stmt3 = $conn->prepare($sql);
+                                $stmt3->bindParam(':id_projet', $id);
+                                $stmt3->execute();
+                                $row = $stmt3->fetch(PDO::FETCH_ASSOC);
+                                $tachetotal = $row['count(*)'];
+
+                                if ($tachefin == $tachetotal){ // si toutes les taches sont finies
+                                    $css_status = "processFini";
+                                    $css_line = "lineFini";
+                                    $css_due = "dueFini";
+                                } elseif (strtotime($deadline) <= strtotime('+7 days') || strtotime($deadline) < strtotime('today') ) { // si deadline dans moins de 7 jours ou déjà dépassé
+                                    $css_status = "processRetard";
+                                    $css_line = "lineRetard";
+                                    $css_due = "dueRetard";
+                                } else { // sinon taches en cours normales
+                                    $css_status = "process";
+                                    $css_line = "line";
+                                    $css_due = "due";
+
+                                }
+
+                                switch ($priorite) {
+                                    case "Basse":
+                                        $css_priorite = "priorityBasse";
+                                        break;
+                                    case "Moyenne":
+                                        $css_priorite = "priorityMoyenne";
+                                        break;
+                                    case "Haute":
+                                        $css_priorite = "priorityHaute";
+                                        break;
+                                }
                     
                             $sql="SELECT count(*) FROM tache_assignee_projet INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID WHERE tache_assignee_projet.id_projet = :id_projet AND TACHE.done = 1"; //nombre detache fini
                             $stmt2 = $conn->prepare($sql);
@@ -214,35 +251,7 @@ verif_session();
                             $row = $stmt3->fetch(PDO::FETCH_ASSOC);
                             $tachetotal = $row['count(*)'];
 
-                            if ($tachefin == $tachetotal){ // si toutes les taches sont finies
-                                $css_status = "processFini";
-                                $css_line = "lineFini";
-                                $css_due = "dueFini";
-                            } elseif (strtotime($deadline) <= strtotime('+7 days') || strtotime($deadline) < strtotime('today') ) { // si deadline dans moins de 7 jours ou déjà dépassé
-                                $css_status = "processRetard";
-                                $css_line = "lineRetard";
-                                $css_due = "dueRetard";
-                            } else { // sinon taches en cours normales
-                                $css_status = "process";
-                                $css_line = "line";
-                                $css_due = "due";
-
-                            }
-
-                            switch ($priorite) {
-                                case "Basse":
-                                    $css_priorite = "priorityBasse";
-                                    break;
-                                case "Moyenne":
-                                    $css_priorite = "priorityMoyenne";
-                                    break;
-                                case "Haute":
-                                    $css_priorite = "priorityHaute";
-                                    break;
-                            }
-
-                            echo "<li>";
-                            echo "<div class=\"projetBox\">";
+                            echo "<div class=\"projectCard\">";
                             echo "<div class=\"projectTop\">";
                             echo "<h2>$nom<br><span>$groupe</span></h2>";
                             echo "<div class=\"projectDots\">";
@@ -259,20 +268,19 @@ verif_session();
                             echo "<h2>$priorite</h2>";
                             echo "</div>";
                             echo "</div>";
-
+                            
                             echo "<div class=\"task\">";
                             echo "<h2>Tâches faites: <strong>" . $tachefin . "</strong> / " . $tachetotal . "</h2>";
                             if ($tachetotal == 0) {
-                                echo "<span class=$css_line style=\"width: 0%;\"></span>"; // éviter division par 0
+                                echo "<span class= $css_line style=\"width: 0%;\"></span>"; // éviter division par 0
                             } else {
-                                echo "<span class=$css_line style=\"width: " . ($tachefin / $tachetotal) * 100 . "%;\"></span>";
+                                echo "<span class= $css_line style=\"width: " . ($tachefin / $tachetotal) * 100 . "%;\"></span>";
                             }
                             echo "</div>";
                             echo "<div class=$css_due>";
                             echo "<h2>Du pour le : $deadline</h2>";
                             echo "</div>";
                             echo "</div>";
-                            echo "<br>";
                             
 
                             $sql="SELECT TACHE.Texte, TACHE.categorie, TACHE.done, TACHE.Date_Tache FROM tache_assignee_projet INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID WHERE tache_assignee_projet.id_projet = :id_projet"; 
@@ -303,10 +311,17 @@ verif_session();
                                 
                                     echo "<li>";
                                     echo "<div>";
-                                    echo " $texte ";
-                                    echo " $categorie ";
-                                    echo " $done ";
-                                    echo " $date ";
+                                    echo " Nom de la tache : $texte ";
+                                    echo "<br>";
+                                    echo "Categorie :  $categorie ";
+                                    echo "<br>";
+                                    echo "Deadline : $date ";
+                                    echo "<br>";
+                                    if ($done == 1) {
+                                        echo "Tache finie";
+                                    } else {
+                                        echo "Tache en cours";
+                                    }
                                     echo "</div>";
                                     echo "</li>";
                                 }
@@ -341,61 +356,47 @@ verif_session();
         <!-- fin de droite -->
     </div>
     <script>
-window.onload = function() {
-    // Get the modal
-    var modal = document.getElementById("taskModal");
-
-    // Check if the modal exists
-    if (modal) {
-        // Get the buttons that open the modal
-        var projectDots = document.getElementsByClassName("projectDots");
-        for (var i = 0; i < projectDots.length; i++) {
-            projectDots[i].onclick = function() {
-                modal.style.display = "block";
-                // Clear the task list
-                var taskList = document.getElementById("taskList");
-                taskList.innerHTML = ""; // Clear the list
-
-                // Get the corresponding project ID
-                var projectCard = this.closest(".projectCard");
-                var projectId = projectCard.getAttribute("data-project-id");
-
-                // AJAX request to get the project tasks
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "get_tasks.php?project_id=" + projectId, true);
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        var tasks = JSON.parse(xhr.responseText);
-                        for (var j = 0; j < tasks.length; j++) {
-                            var task = tasks[j];
-                            var li = document.createElement("li");
-                            li.innerHTML = task.texte + " " + task.categorie + " " + task.done + " " + task.date;
-                            taskList.appendChild(li);
-                        }
-                    }
-                };
-                xhr.send();
+        // Menu déroulant
+        function toggleMenu() {
+            var menu = document.querySelector('.menu');
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
             }
         }
 
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
+        // Modal
+        var modal = document.querySelector('.modal');
+        var openCreateGroupModal = document.getElementById('openCreateGroupModal');
+        var openJoinGroupModal = document.getElementById('openJoinGroupModal');
+        var openManageGroupModalBtn = document.getElementById('openManageGroupModalBtn');
+        var close = document.querySelector('.close');
 
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
+        openCreateGroupModal.addEventListener('click', function () {
+            modal.style.display = 'block';
+        });
 
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
+        openJoinGroupModal.addEventListener('click', function () {
+            modal.style.display = 'block';
+        });
+
+        openManageGroupModalBtn.addEventListener('click', function () {
+            modal.style.display = 'block';
+        });
+
+        close.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        window.onclick = function (event) {
             if (event.target == modal) {
-                modal.style.display = "none";
+                modal.style.display = 'none';
             }
-        }
-    } else {
-        console.error("The modal was not found in the HTML document.");
-    }
-}
+        };
 
+    setInterval(function () {
+        fetch('../mysql/fetch_session.php')
+    }, 5000);
   </script>
 </body>

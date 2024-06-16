@@ -1,32 +1,22 @@
 <?php 
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
-
 function ecriture_log($page)
 {
-    session_start();
     $uid = $_SESSION['Utilisateur_ID'];
     $entree_log = date('Y-m-d H:i:s') . " - Utilisateur $uid a visité la page $page\n";
     $nom_fichier = "log-" . date('Y-m-d') . '.txt';
     $path = "../mysql/log/" . $nom_fichier;
-    
-    if (file_exists($path))
-    {   
-        file_put_contents($path, $entree_log, FILE_APPEND | LOCK_EX);
-    }
 
-    else
-    {   
+    if (file_exists($path)) {
+        file_put_contents($path, $entree_log, FILE_APPEND | LOCK_EX);
+    } else {
         touch($path);
         file_put_contents($path, $entree_log, FILE_APPEND | LOCK_EX);
     }
 }
 
 function verif_session()
-{   
-
+{
     include_once 'connexion_bdd.php';
 
     session_start();
@@ -37,7 +27,6 @@ function verif_session()
     $sql_update->execute();
 
     if (!isset($_SESSION['expiration']) || time() > $_SESSION['expiration']) {
-        
         session_destroy();
         header("Location: ../pages/login.php?statut=session_expiree");
         exit();
