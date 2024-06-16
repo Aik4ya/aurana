@@ -1,4 +1,7 @@
 <?php
+    // ini_set('display_errors', 1);
+    // ini_set('display_startup_errors', 1);
+    // error_reporting(E_ALL);
 require_once '../mysql/cookies_uid.php';
 require_once '../mysql/connexion_bdd.php';
 
@@ -98,11 +101,12 @@ function fetchTasksWithProjects($dbh, $projectID = 'all') {
     $userID = $_SESSION['Utilisateur_ID'];
     $groupeID = isset($_SESSION['Groupe_ID']) ? $_SESSION['Groupe_ID'] : 0;
 
-    $sql = "SELECT t.Tache_ID, t.Texte, p.nom AS NomProjet, t.Date_Tache
+    $sql = "SELECT t.Tache_ID, t.Texte, p.nom AS NomProjet, t.Date_Tache, u.Pseudo
             FROM es_assigner ea
             JOIN TACHE t ON ea.Tache_ID = t.Tache_ID
             LEFT JOIN tache_assignee_projet tap ON t.Tache_ID = tap.id_tache
             LEFT JOIN PROJET p ON tap.id_projet = p.ID
+            LEFT JOIN UTILISATEUR u ON ea.Utilisateur_ID = u.Utilisateur_ID
             WHERE ea.Utilisateur_ID = :userID AND (t.Groupe_ID = :groupeID OR t.Groupe_ID IS NULL)";
     
     if ($projectID !== 'all') {
@@ -121,10 +125,20 @@ function fetchTasksWithProjects($dbh, $projectID = 'all') {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$projectID = isset($_GET['projectID']) ? $_GET['projectID'] : 'all';
-$tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
-?>
+function fetchAvailableUsers($dbh, $groupeID) {
+    $sql = "SELECT Utilisateur_ID, Pseudo FROM UTILISATEUR 
+            WHERE Utilisateur_ID NOT IN (SELECT Utilisateur_ID FROM est_membre WHERE GROUPE = :groupeID)";
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindParam(':groupeID', $groupeID);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
+$availableUsers = fetchAvailableUsers($conn, $_SESSION['Groupe_ID']);
+
+$projectID = isset($_GET['projectID']) ? $_GET['projectID'] : 'all';
+$tasks = fetchTasksWithProjects($conn, $projectID);
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -208,7 +222,6 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
                 <div class="user">
                     <?php
                     // Affichage groupes + menu déroulant
-                    $conn = connexion_bdd();
                     echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
 
                     if ($_SESSION['Droit_groupe'] == 2) {
@@ -245,10 +258,12 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
             </div>
             <main>
                 <div class="projectCard">
+                    <div class="projectHead">
                     <h2>Projets</h2>
                     <?php if ($_SESSION['Droit_groupe'] == 1): ?>
                         <img src="../img/plus.png" id="createProjectBtn">
                     <?php endif; ?>
+                    </div>
                     <br>
                     <ul>
                         <?php
@@ -366,37 +381,37 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
                     </div>
                     <div class="tasks">
                         <ul>
-                            <?php
-                            $stmt_tasks = $conn->prepare("
-                                SELECT TACHE.Tache_ID, TACHE.Texte
-                                FROM es_assigner
-                                INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
-                                WHERE (es_assigner.Utilisateur_ID = :user_id 
-                                AND (TACHE.Groupe_ID = :groupe_id OR :groupe_id = 0)) AND TACHE.done = 0
-                                ORDER BY TACHE.Date_Tache
-                                LIMIT 7
-                            ");
-                            $stmt_tasks->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
-                            $stmt_tasks->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
-                            $stmt_tasks->execute();
+                        <?php
+                    $stmt_tasks = $conn->prepare("
+                        SELECT TACHE.Tache_ID, TACHE.Texte
+                        FROM es_assigner
+                        INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
+                        WHERE (es_assigner.Utilisateur_ID = :user_id 
+                        AND (TACHE.Groupe_ID = :groupe_id OR :groupe_id = 0)) AND TACHE.done = 0
+                        ORDER BY TACHE.Date_Tache
+                        LIMIT 7
+                    ");
+                    $stmt_tasks->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
+                    $stmt_tasks->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
+                    $stmt_tasks->execute();
 
-                            while ($row_tasks = $stmt_tasks->fetch(PDO::FETCH_ASSOC)) {
-                                $task_id = $row_tasks['Tache_ID'];
-                                $task_text = $row_tasks['Texte'];
+                    while ($row_tasks = $stmt_tasks->fetch(PDO::FETCH_ASSOC)) {
+                        $task_id = $row_tasks['Tache_ID'];
+                        $task_text = $row_tasks['Texte'];
 
-                                echo "<li>";
-                                echo "<span class=\"tasksIconName\">";
-                                echo "<span class=\"tasksIcon notDone\" onclick=\"toggleTaskCompletion(this)\">";
-                                echo "<span class=\"material-symbols-outlined\"></span>";
-                                echo "</span>";
-                                echo "<span class=\"tasksName notDone\" id-task-id=\"$task_id\">" . htmlspecialchars($task_text) . "</span>";
-                                echo "</span>";
-                                echo "<span class=\"tasksStar half\" onclick=\"toggleStarCompletion(this)\">";
-                                echo "<span class=\"material-symbols-outlined\">star</span>";
-                                echo "</span>";
-                                echo "</li>";
-                            }
-                            ?>
+                        echo "<li>";
+                        echo "<span class=\"tasksIconName\">";
+                        echo "<span class=\"tasksIcon notDone\" onclick=\"toggleTaskCompletion(this)\">";
+                        echo "<span class=\"material-symbols-outlined\"></span>";
+                        echo "</span>";
+                        echo "<span class=\"tasksName notDone\" id-task-id=\"$task_id\">" . htmlspecialchars($task_text) . "</span>";
+                        echo "</span>";
+                        echo "<span class=\"tasksStar half\" onclick=\"toggleStarCompletion(this)\">";
+                        echo "<span class=\"material-symbols-outlined\">star</span>";
+                        echo "</span>";
+                        echo "</li>";
+                    }
+                    ?>
                         </ul>
                     </div>
                 </div>
@@ -658,38 +673,40 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
         </div>
     </div>
 
+    <!-- HTML: ProjectDetailModal -->
     <div id="ProjectDetailModal" class="modal">
-    <div class="modal-content">
-        <span class="close" id="closeProjectDetailModal">&times;</span>
-        <h2>Détails du projet</h2>
+        <div class="modal-content">
+            <span class="close" id="closeProjectDetailModal">&times;</span>
+            <h2>Détails du projet</h2>
 
-        <!-- Membres actuels du projet -->
-        <div id="currentProjectMembers">
-            <h3>Membres du projet</h3>
-            <ul id="projectMembersList">
-                <!-- Liste des membres actuels -->
-            </ul>
-        </div>
+            <!-- Membres actuels du projet -->
+            <div id="currentProjectMembers">
+                <h3>Membres du projet</h3>
+                <ul id="projectMembersList">
+                    <!-- Liste des membres actuels -->
+                </ul>
+            </div>
 
-        <!-- Ajouter une personne au projet -->
-        <div id="addProjectMembers">
-            <h3>Ajouter une personne au projet</h3>
-            <form id="addProjectMembersForm">
-                <!-- Liste des utilisateurs disponibles sera remplie dynamiquement -->
-                <div id="nonMembersList"></div>
-                <button type="button" id="saveProjectMembers">Enregistrer</button>
-            </form>
-        </div>
+            <!-- Ajouter une personne au projet -->
+            <div id="addProjectMembers">
+                <h3>Ajouter une personne au projet</h3>
+                <form id="addProjectMembersForm">
+                    <!-- Liste des utilisateurs disponibles sera remplie dynamiquement -->
+                    <div id="nonMembersList"></div>
+                    <button type="button" id="saveProjectMembers">Enregistrer</button>
+                </form>
+            </div>
 
-        <!-- Liste des tâches du projet -->
-        <div id="projectTasks">
-            <h3>Liste des tâches</h3>
-            <ul id="projectTasksList">
-                <!-- Liste des tâches -->
-            </ul>
+            <!-- Liste des tâches du projet -->
+            <div id="projectTasks">
+                <h3>Liste des tâches</h3>
+                <ul id="projectTasksList">
+                    <!-- Liste des tâches -->
+                </ul>
+            </div>
         </div>
     </div>
-</div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var createTaskModal = document.getElementById("CreateModalTask");
@@ -797,11 +814,25 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
                 taskIcon.classList.add('done');
                 taskName.classList.remove('notDone');
                 taskName.classList.add('done', 'tasksLine');
+                fetch('../mysql/update_done.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        task_id: taskName.getAttribute('id-task-id'),
+                        task_status: 1
+                    })
+                });
             } else if (taskIcon.classList.contains('done')) {
                 taskIcon.classList.remove('done');
                 taskIcon.classList.add('notDone');
                 taskName.classList.remove('done', 'tasksLine');
                 taskName.classList.add('notDone');
+                fetch('../mysql/update_done.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        task_id: taskName.getAttribute('id-task-id'),
+                        task_status: 0
+                    })
+                });
             }
         }
 
@@ -859,19 +890,20 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
     }
 
     function updateProjectDetailModal(data, projectID) {
-        document.getElementById('projectMembersList').innerHTML = data.members.map(member => `<li>${member}</li>`).join('');
+        document.getElementById('projectMembersList').innerHTML = data.members.map(member => `<li>${member.Pseudo ? member.Pseudo : 'Pseudo non disponible'}</li>`).join('');
         document.getElementById('projectTasksList').innerHTML = data.tasks.map(task => `
             <li>
-                ${task.Texte}
+                ${task.Texte ? task.Texte : 'Texte non disponible'} - ${task.Pseudo ? task.Pseudo : 'Pseudo non disponible'} - ${task.Date_Tache ? task.Date_Tache : 'Date non disponible'}
                 <?php if ($_SESSION['Droit'] == 1): ?>
-                    <span class="material-symbols-outlined" onclick="openTaskDetailModal(${task.Tache_ID})">edit</span>
+                    <span class="material-symbols-outlined" onclick="openTaskDetailModal(${task.Tache_ID ? task.Tache_ID : 'ID non disponible'})">edit</span>
                 <?php endif; ?>
             </li>`).join('');
 
         const nonMembersList = document.getElementById('nonMembersList');
         nonMembersList.innerHTML = data.nonMembers.map(nonMember => `
-            <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID}'> ${nonMember.Pseudo}</label><br>
+            <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID ? nonMember.Utilisateur_ID : ''}'> ${nonMember.Pseudo ? nonMember.Pseudo : 'Pseudo non disponible'}</label><br>
         `).join('');
+
         saveProjectMembers.onclick = function () {
             const formData = new FormData(document.getElementById('addProjectMembersForm'));
             formData.append('project_id', projectID);
@@ -890,7 +922,13 @@ $tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
             });
         };
     }
+
+    window.openTaskDetailModal = function(taskID) {
+        alert(`Edit task ID: ${taskID}`);
+    };
 });
+
+
 
         setInterval(function () {
             fetch('../mysql/fetch_session.php')

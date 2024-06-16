@@ -251,7 +251,7 @@ verif_session();
                             $row = $stmt3->fetch(PDO::FETCH_ASSOC);
                             $tachetotal = $row['count(*)'];
 
-                            echo "<div class=\"projectCard\">";
+                            echo "<div class=\"projectBox\">";
                             echo "<div class=\"projectTop\">";
                             echo "<h2>$nom<br><span>$groupe</span></h2>";
                             echo "<div class=\"projectDots\">";
@@ -280,7 +280,6 @@ verif_session();
                             echo "<div class=$css_due>";
                             echo "<h2>Du pour le : $deadline</h2>";
                             echo "</div>";
-                            echo "</div>";
                             
 
                             $sql="SELECT TACHE.Texte, TACHE.categorie, TACHE.done, TACHE.Date_Tache FROM tache_assignee_projet INNER JOIN TACHE ON tache_assignee_projet.id_tache = TACHE.Tache_ID WHERE tache_assignee_projet.id_projet = :id_projet"; 
@@ -293,7 +292,7 @@ verif_session();
 
                             echo "<div class=\"myTasks\">";
                             echo "<div class=\"tasksHead\">";
-                            echo "<h2>Mes tâches</h2>";
+                            echo "<h2>Tâches</h2>";
 
                             if ($_SESSION['groupe'] == "none"){
                                 echo "<button id=\"createTaskBtn\">Créer une tâche</button>";
@@ -309,8 +308,7 @@ verif_session();
                                     $done = $row['done'];
                                     $date = $row['Date_Tache'];
                                 
-                                    echo "<li>";
-                                    echo "<div>";
+                                    echo "<div class=\"tasksBox\">";
                                     echo " Nom de la tache : $texte ";
                                     echo "<br>";
                                     echo "Categorie :  $categorie ";
@@ -323,7 +321,6 @@ verif_session();
                                         echo "Tache en cours";
                                     }
                                     echo "</div>";
-                                    echo "</li>";
                                 }
 
                             } else { // si pas de tache
@@ -334,13 +331,14 @@ verif_session();
                                 echo "</li>";
                             }
 
-                        echo "</ul>";
+                            echo "</div>";
+
                         echo "</div>";
                         echo "</div>";
                         echo "</li>";
 
                         }
-                        
+
                     } else { // si pas de projet
                         echo "<li>";
                         echo "<div class=\"projectCard\">";
