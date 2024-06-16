@@ -1,28 +1,29 @@
 <?php
-require_once '../mysql/connexion_bdd.php';
+require_once 'connexion_bdd.php';
+session_start();
 
+if (!isset($_GET['task_id'])) {
+    echo json_encode(['success' => false, 'error' => 'task_id missing']);
+    exit;
+}
+
+$taskID = $_GET['task_id'];
 $conn = connexion_bdd();
 
-if (isset($_GET['task_id'])) {
-    $task_id = $_GET['task_id'];
-    // Sélectionnez uniquement les colonnes Texte, Categorie et Date_Tache
-    $sql = "SELECT Texte AS nom, Categorie, Date_Tache FROM TACHE WHERE Tache_ID = :task_id";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':task_id', $task_id);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+$sql_task = "SELECT TACHE.Tache_ID, TACHE.Texte, TACHE.Categorie, TACHE.Date_Tache, UTILISATEUR.Pseudo 
+             FROM TACHE 
+             JOIN es_assigner ON TACHE.Tache_ID = es_assigner.Tache_ID 
+             JOIN UTILISATEUR ON es_assigner.Utilisateur_ID = UTILISATEUR.Utilisateur_ID 
+             WHERE TACHE.Tache_ID = :taskID";
+$stmt_task = $conn->prepare($sql_task);
+$stmt_task->bindParam(':taskID', $taskID, PDO::PARAM_INT);
+$stmt_task->execute();
+$task = $stmt_task->fetch(PDO::FETCH_ASSOC);
 
-    if ($row) {
-        // Renvoie les données en JSON
-        echo json_encode([
-            'nom' => $row['nom'], // Notez l'utilisation de 'nom' au lieu de 'Texte'
-            'categorie' => $row['Categorie'],
-            'dateTache' => $row['Date_Tache'],
-        ]);
-    } else {
-        echo json_encode(['error' => 'Task not found']);
-    }
-} else {
-    echo json_encode(['error' => 'No task_id provided']);
+if (!$task) {
+    echo json_encode(['success' => false, 'error' => 'Task not found']);
+    exit;
 }
+
+echo json_encode(['success' => true, 'task' => $task]);
 ?>

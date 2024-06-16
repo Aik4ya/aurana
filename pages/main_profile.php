@@ -167,15 +167,12 @@ verif_session();
                 </div>
             </main>
             <script>
-                
                 var modal1 = document.getElementById('changePasswordModal');
                 var modal2 = document.getElementById('PersonnalisationModal');
 
-                
                 var link1 = document.getElementById('changePasswordLink');
                 var link2 = document.getElementById('personnalisation');
 
-            
                 link1.onclick = function(event) {
                     event.preventDefault();
                     modal1.style.display = "block";
@@ -186,33 +183,23 @@ verif_session();
                     modal2.style.display = "block";
                 }
 
-                
                 var form1 = document.getElementById('changePasswordForm');
                 var form2 = document.getElementById('PersonnalisationForm');
 
-
-                
                 form1.onsubmit = function(event) {
                     event.preventDefault();
-                    
                     modal1.style.display = "none";
                 }
 
                 form2.onsubmit = function(event) {
                     event.preventDefault();
-                    
                     modal2.style.display = "none";
                 }
 
-                
                 window.onclick = function(event) {
                     if (event.target == modal1) {
                         modal1.style.display = "none";
-                    }
-                }
-
-                window.onclick = function(event) {
-                    if (event.target == modal2) {
+                    } else if (event.target == modal2) {
                         modal2.style.display = "none";
                     }
                 }
@@ -220,7 +207,7 @@ verif_session();
                 setInterval(function () {
                     fetch('../mysql/fetch_session.php')
                 }, 5000);
-        </script>
+            </script>
 </body>
 
 </html>

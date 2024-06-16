@@ -221,6 +221,45 @@ if (isset($_GET['groupe'])) {
                 var interval = setInterval(function () {
                     fetch('../mysql/fetch_session.php')
                     }, 5000);
+
+                    // Menu déroulant
+                    function toggleMenu() {
+                        var menu = document.querySelector('.menu');
+                        if (menu.style.display === 'none') {
+                            menu.style.display = 'block';
+                        } else {
+                            menu.style.display = 'none';
+                        }
+                    }
+
+                    // Modal
+                    var modal = document.querySelector('.modal');
+                    var openCreateGroupModal = document.getElementById('openCreateGroupModal');
+                    var openJoinGroupModal = document.getElementById('openJoinGroupModal');
+                    var openManageGroupModalBtn = document.getElementById('openManageGroupModalBtn');
+                    var close = document.querySelector('.close');
+
+                    openCreateGroupModal.addEventListener('click', function () {
+                        modal.style.display = 'block';
+                    });
+
+                    openJoinGroupModal.addEventListener('click', function () {
+                        modal.style.display = 'block';
+                    });
+
+                    openManageGroupModalBtn.addEventListener('click', function () {
+                        modal.style.display = 'block';
+                    });
+
+                    close.addEventListener('click', function () {
+                        modal.style.display = 'none';
+                    });
+
+                    window.onclick = function (event) {
+                        if (event.target == modal) {
+                            modal.style.display = 'none';
+                        }
+                    };
             </script>
         </div>
     </div>

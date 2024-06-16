@@ -1,7 +1,4 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
 require_once '../mysql/cookies_uid.php';
 require_once '../mysql/connexion_bdd.php';
 
@@ -101,12 +98,11 @@ function fetchTasksWithProjects($dbh, $projectID = 'all') {
     $userID = $_SESSION['Utilisateur_ID'];
     $groupeID = isset($_SESSION['Groupe_ID']) ? $_SESSION['Groupe_ID'] : 0;
 
-    $sql = "SELECT t.Tache_ID, t.Texte, p.nom AS NomProjet, t.Date_Tache, u.Pseudo
+    $sql = "SELECT t.Tache_ID, t.Texte, p.nom AS NomProjet, t.Date_Tache
             FROM es_assigner ea
             JOIN TACHE t ON ea.Tache_ID = t.Tache_ID
             LEFT JOIN tache_assignee_projet tap ON t.Tache_ID = tap.id_tache
             LEFT JOIN PROJET p ON tap.id_projet = p.ID
-            LEFT JOIN UTILISATEUR u ON ea.Utilisateur_ID = u.Utilisateur_ID
             WHERE ea.Utilisateur_ID = :userID AND (t.Groupe_ID = :groupeID OR t.Groupe_ID IS NULL)";
     
     if ($projectID !== 'all') {
@@ -125,21 +121,8 @@ function fetchTasksWithProjects($dbh, $projectID = 'all') {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
-
-function fetchAvailableUsers($dbh, $groupeID) {
-    $sql = "SELECT Utilisateur_ID, Pseudo FROM UTILISATEUR 
-            WHERE Utilisateur_ID NOT IN (SELECT Utilisateur_ID FROM est_membre WHERE GROUPE = :groupeID)";
-    $stmt = $dbh->prepare($sql);
-    $stmt->bindParam(':groupeID', $groupeID);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-$availableUsers = fetchAvailableUsers($conn, $_SESSION['Groupe_ID']);
-
 $projectID = isset($_GET['projectID']) ? $_GET['projectID'] : 'all';
-$tasks = fetchTasksWithProjects($conn, $projectID);
+$tasks = fetchTasksWithProjects(connexion_bdd(), $projectID);
 ?>
 
 <!DOCTYPE html>
@@ -400,19 +383,19 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
                     while ($row_tasks = $stmt_tasks->fetch(PDO::FETCH_ASSOC)) {
                         $task_id = $row_tasks['Tache_ID'];
                         $task_text = $row_tasks['Texte'];
-
+                    
                         echo "<li>";
                         echo "<span class=\"tasksIconName\">";
                         echo "<span class=\"tasksIcon notDone\" onclick=\"toggleTaskCompletion(this)\">";
                         echo "<span class=\"material-symbols-outlined\"></span>";
                         echo "</span>";
-                        echo "<span class=\"tasksName notDone\" id-task-id=\"$task_id\">" . htmlspecialchars($task_text) . "</span>";
+                        echo "<span class=\"tasksName notDone\" data-task-id=\"$task_id\">" . htmlspecialchars($task_text) . "</span>";
                         echo "</span>";
                         echo "<span class=\"tasksStar half\" onclick=\"toggleStarCompletion(this)\">";
                         echo "<span class=\"material-symbols-outlined\">star</span>";
                         echo "</span>";
                         echo "</li>";
-                    }
+                    }                    
                     ?>
                         </ul>
                     </div>
@@ -565,12 +548,13 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
     </div>
 
     <div id="TaskDetailModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeDetailModal">&times;</span>
-            <h2>Détails de la tâche</h2>
-            <p id="taskDetails"></p>
-        </div>
+    <div class="modal-content">
+        <span class="close" id="closeDetailModal">&times;</span>
+        <h2>Détails de la tâche</h2>
+        <p id="taskDetails"></p>
     </div>
+</div>
+
 
     <div id="CreateGroupModal" class="modal <?php if (isset($_GET['error']) && in_array($_GET['error'], ['empty_group_name', 'group_exists'])) echo 'show'; ?>">
         <div class="modal-content">
@@ -679,12 +663,10 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
         <div class="modal-content">
             <span class="close" id="closeProjectDetailModal">&times;</span>
             <h2>Détails du projet</h2>
-
             <div id="currentProjectMembers">
                 <h3>Membres du projet</h3>
                 <ul id="projectMembersList"></ul>
             </div>
-
             <div id="addProjectMembers">
                 <h3>Ajouter une personne au projet</h3>
                 <form id="addProjectMembersForm">
@@ -692,7 +674,6 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
                     <button type="button" id="saveProjectMembers">Enregistrer</button>
                 </form>
             </div>
-
             <div id="projectTasks">
                 <h3>Liste des tâches</h3>
                 <ul id="projectTasksList"></ul>
@@ -700,238 +681,237 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
         </div>
     </div>
 
-    <div id="TaskDetailModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeDetailModal">&times;</span>
-            <h2>Détails de la tâche</h2>
-            <p id="taskDetails"></p>
-        </div>
-    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var createTaskModal = document.getElementById("CreateModalTask");
-            var taskDetailModal = document.getElementById("TaskDetailModal");
-            var closeCreateModal = document.getElementById("closeModal");
-            var closeDetailModal = document.getElementById("closeDetailModal");
+document.addEventListener('DOMContentLoaded', function() {
+    var createTaskModal = document.getElementById("CreateModalTask");
+    var taskDetailModal = document.getElementById("TaskDetailModal");
+    var closeCreateModal = document.getElementById("closeModal");
+    var closeDetailModal = document.getElementById("closeDetailModal");
 
-            var createTaskBtn = document.getElementById("createTaskBtn");
-            if (createTaskBtn) {
-                createTaskBtn.onclick = function(event) {
-                    event.stopPropagation();
-                    createTaskModal.classList.add("show");
-                }
-            }
-
-            closeCreateModal.onclick = function() {
-                createTaskModal.classList.remove("show");
-            }
-
-            closeDetailModal.onclick = function() {
-                taskDetailModal.classList.remove("show");
-            }
-
-            window.onclick = function(event) {
-                if (event.target == createTaskModal) {
-                    createTaskModal.classList.remove("show");
-                } else if (event.target == taskDetailModal) {
-                    taskDetailModal.classList.remove("show");
-                }
-            };
-
-            document.querySelectorAll('.tasksName').forEach(task => {
-                task.onclick = function() {
-                    var taskId = this.getAttribute('id-task-id');
-                    showTaskDetails(taskId);
-                }
-            });
-
-            function showTaskDetails(taskId) {
-                fetch(`../mysql/get_task_details.php?task_id=${taskId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('La réponse n\'est pas valide');
-                    return response.json();
-                })
-                .then(data => {
-                    if (typeof data !== 'object') throw new Error('Invalide JSON');
-                    const taskDetailsElement = document.getElementById("taskDetails");
-                
-                    const tacheDate = new Date(data.dateTache);
-                    const currentDate = new Date();
-                    const jours = Math.floor((tacheDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
-                
-                    taskDetailsElement.innerHTML = `
-                        <p>Nom de la tâche: ${data.nom}</p>
-                        <p>Catégorie: ${data.categorie}</p>
-                        <p>Date Limite de la Tache: ${data.dateTache} (${jours} J)</p> 
-                    `;
-                    taskDetailModal.classList.add("show");
-                })
-                .catch(error => console.error('Erreur:', error));
-            }
-        });
-
-        function toggleMenu() {
-            var menu = document.querySelector('.menu');
-            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+    var createTaskBtn = document.getElementById("createTaskBtn");
+    if (createTaskBtn) {
+        createTaskBtn.onclick = function(event) {
+            event.stopPropagation();
+            createTaskModal.classList.add("show");
         }
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var manageGroupModal = document.getElementById("ManageGroupModal");
-            var closeManageGroupModal = document.getElementById("closeManageGroupModal");
+    closeCreateModal.onclick = function() {
+        createTaskModal.classList.remove("show");
+    }
 
-            window.openManageGroupModal = function(groupID, groupName, groupDescription, groupCode) {
-                document.getElementById("manageGroupName").value = groupName;
-                document.getElementById("manageGroupDescription").value = groupDescription;
-                document.getElementById("manageGroupCode").value = groupCode;
-                manageGroupModal.classList.add("show");
-            }
+    closeDetailModal.onclick = function() {
+        taskDetailModal.classList.remove("show");
+    }
 
-            closeManageGroupModal.onclick = function() {
-                manageGroupModal.classList.remove("show");
-            }
-
-            window.onclick = function(event) {
-                if (event.target == manageGroupModal) {
-                    manageGroupModal.classList.remove("show");
-                }
-            };
-
-            document.getElementById("openManageGroupModalBtn").onclick = function() {
-                var groupID = 1;
-                var groupName = "Nom du Groupe";
-                var groupDescription = "Description du Groupe";
-                var groupCode = "Code du Groupe";
-                openManageGroupModal(groupID, groupName, groupDescription, groupCode);
-            };
-        });
-
-        function toggleTaskCompletion(element) {
-            var taskIcon = element;
-            var taskName = element.parentElement.querySelector('.tasksName');
-
-            if (taskIcon.classList.contains('notDone')) {
-                taskIcon.classList.remove('notDone');
-                taskIcon.classList.add('done');
-                taskName.classList.remove('notDone');
-                taskName.classList.add('done', 'tasksLine');
-                updateTaskStatus(taskName.getAttribute('id-task-id'), 1);
-            } else if (taskIcon.classList.contains('done')) {
-                taskIcon.classList.remove('done');
-                taskIcon.classList.add('notDone');
-                taskName.classList.remove('done', 'tasksLine');
-                taskName.classList.add('notDone');
-                updateTaskStatus(taskName.getAttribute('id-task-id'), 0);
-            }
+    window.onclick = function(event) {
+        if (event.target == createTaskModal) {
+            createTaskModal.classList.remove("show");
+        } else if (event.target == taskDetailModal) {
+            taskDetailModal.classList.remove("show");
         }
+    };
 
-        function updateTaskStatus(taskId, status) {
-            fetch('../mysql/update_done.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `taskId=${taskId}&task_status=${status}`
+    document.querySelectorAll('.tasksName').forEach(task => {
+        task.onclick = function() {
+            var taskId = this.getAttribute('data-task-id');
+            showTaskDetails(taskId);
+        }
+    });
+
+    function showTaskDetails(taskId) {
+        fetch(`../mysql/get_task_details.php?task_id=${taskId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
             })
-            .then(response => response.json())
             .then(data => {
                 if (!data.success) {
-                    console.error('Error updating task status:', data.message);
+                    throw new Error(data.error || 'Error fetching task details');
                 }
+                const taskDetailsElement = document.getElementById("taskDetails");
+                const task = data.task;
+
+                const taskDate = new Date(task.Date_Tache);
+                const currentDate = new Date();
+                const daysRemaining = Math.floor((taskDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
+
+                taskDetailsElement.innerHTML = `
+                    <p>Nom de la tâche: ${task.Texte}</p>
+                    <p>Catégorie: ${task.Categorie}</p>
+                    <p>Date Limite de la Tache: ${task.Date_Tache} (${daysRemaining} J)</p> 
+                    <p>Assignée à: ${task.Pseudo}</p>
+                `;
+                document.getElementById("TaskDetailModal").classList.add("show");
             })
             .catch(error => console.error('Error:', error));
+    }
+});
+
+function toggleMenu() {
+    var menu = document.querySelector('.menu');
+    menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var manageGroupModal = document.getElementById("ManageGroupModal");
+    var closeManageGroupModal = document.getElementById("closeManageGroupModal");
+
+    window.openManageGroupModal = function(groupID, groupName, groupDescription, groupCode) {
+        document.getElementById("manageGroupName").value = groupName;
+        document.getElementById("manageGroupDescription").value = groupDescription;
+        document.getElementById("manageGroupCode").value = groupCode;
+        manageGroupModal.classList.add("show");
+    }
+
+    closeManageGroupModal.onclick = function() {
+        manageGroupModal.classList.remove("show");
+    }
+
+    window.onclick = function(event) {
+        if (event.target == manageGroupModal) {
+            manageGroupModal.classList.remove("show");
         }
+    };
 
-        function toggleStarCompletion(element) {
-            var taskIcon = element;
-            var taskName = element.parentElement.querySelector('.tasksName');
+    document.getElementById("openManageGroupModalBtn").onclick = function() {
+        var groupID = 1;
+        var groupName = "Nom du Groupe";
+        var groupDescription = "Description du Groupe";
+        var groupCode = "Code du Groupe";
+        openManageGroupModal(groupID, groupName, groupDescription, groupCode);
+    };
+});
 
-            if (taskIcon.classList.contains('half')) {
-                taskIcon.classList.remove('half');
-                taskIcon.classList.add('full');
-                taskName.classList.remove('half');
-                taskName.classList.add('full', 'tasksLine');
-                updateStarStatus(taskName.getAttribute('id-task-id'), 1);
-            } else if (taskIcon.classList.contains('full')) {
-                taskIcon.classList.remove('full');
-                taskIcon.classList.add('half');
-                taskName.classList.remove('full', 'tasksLine');
-                taskName.classList.add('half');
-                updateStarStatus(taskName.getAttribute('id-task-id'), 0);
-            }
+function toggleTaskCompletion(element) {
+    var taskIcon = element;
+    var taskName = element.parentElement.querySelector('.tasksName');
+
+    if (taskIcon.classList.contains('notDone')) {
+        taskIcon.classList.remove('notDone');
+        taskIcon.classList.add('done');
+        taskName.classList.remove('notDone');
+        taskName.classList.add('done', 'tasksLine');
+        updateTaskStatus(taskName.getAttribute('data-task-id'), 1);
+    } else if (taskIcon.classList.contains('done')) {
+        taskIcon.classList.remove('done');
+        taskIcon.classList.add('notDone');
+        taskName.classList.remove('done', 'tasksLine');
+        taskName.classList.add('notDone');
+        updateTaskStatus(taskName.getAttribute('data-task-id'), 0);
+    }
+}
+
+function updateTaskStatus(taskId, status) {
+    fetch('../mysql/update_done.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `taskId=${taskId}&task_status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Error updating task status:', data.message);
         }
+    })
+    .catch(error => console.error('Error:', error));
+}
 
-        function updateStarStatus(taskId, status) {
-            fetch('../mysql/update_stars.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `taskId=${taskId}&task_status=${status}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    console.error('Error updating task status:', data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
+function toggleStarCompletion(element) {
+    var taskIcon = element;
+    var taskName = element.parentElement.querySelector('.tasksName');
+
+    if (taskIcon.classList.contains('half')) {
+        taskIcon.classList.remove('half');
+        taskIcon.classList.add('full');
+        taskName.classList.remove('half');
+        taskName.classList.add('full', 'tasksLine');
+        updateStarStatus(taskName.getAttribute('data-task-id'), 1);
+    } else if (taskIcon.classList.contains('full')) {
+        taskIcon.classList.remove('full');
+        taskIcon.classList.add('half');
+        taskName.classList.remove('full', 'tasksLine');
+        taskName.classList.add('half');
+        updateStarStatus(taskName.getAttribute('data-task-id'), 0);
+    }
+}
+
+function updateStarStatus(taskId, status) {
+    fetch('../mysql/update_stars.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `taskId=${taskId}&task_status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Error updating task status:', data.message);
         }
+    })
+    .catch(error => console.error('Error:', error));
+}
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var taskDetailModal = document.getElementById("TaskDetailModal");
-            var closeDetailModal = document.getElementById("closeDetailModal");
+document.addEventListener('DOMContentLoaded', function() {
+    var taskDetailModal = document.getElementById("TaskDetailModal");
+    var closeDetailModal = document.getElementById("closeDetailModal");
 
-            closeDetailModal.onclick = function() {
-                taskDetailModal.classList.remove("show");
-            }
+    closeDetailModal.onclick = function() {
+        taskDetailModal.classList.remove("show");
+    }
 
-            window.onclick = function(event) {
-                if (event.target == taskDetailModal) {
-                    taskDetailModal.classList.remove("show");
-                }
-            };
-        });
+    window.onclick = function(event) {
+        if (event.target == taskDetailModal) {
+            taskDetailModal.classList.remove("show");
+        }
+    };
+});
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var createProjectModal = document.getElementById("CreateProjectModal");
-            var createProjectBtn = document.getElementById("createProjectBtn");
-            var closeProjectModal = document.getElementById("closeProjectModal");
+document.addEventListener('DOMContentLoaded', function() {
+    var createProjectModal = document.getElementById("CreateProjectModal");
+    var createProjectBtn = document.getElementById("createProjectBtn");
+    var closeProjectModal = document.getElementById("closeProjectModal");
 
-            if (createProjectBtn) {
-                createProjectBtn.onclick = function(event) {
-                    event.stopPropagation();
-                    createProjectModal.classList.add("show");
-                }
-            }
+    if (createProjectBtn) {
+        createProjectBtn.onclick = function(event) {
+            event.stopPropagation();
+            createProjectModal.classList.add("show");
+        }
+    }
 
-            closeProjectModal.onclick = function() {
-                createProjectModal.classList.remove("show");
-            }
+    closeProjectModal.onclick = function() {
+        createProjectModal.classList.remove("show");
+    }
 
-            window.onclick = function(event) {
-                if (event.target == createProjectModal) {
-                    createProjectModal.classList.remove("show");
-                }
-            };
-        });
+    window.onclick = function(event) {
+        if (event.target == createProjectModal) {
+            createProjectModal.classList.remove("show");
+        }
+    };
+});
 
-        document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     var projectDetailModal = document.getElementById('ProjectDetailModal');
     var closeProjectDetailModal = document.getElementById('closeProjectDetailModal');
     var saveProjectMembers = document.getElementById('saveProjectMembers');
 
-    closeProjectDetailModal.onclick = function () {
+    closeProjectDetailModal.onclick = function() {
         projectDetailModal.style.display = 'none';
     };
 
-    window.onclick = function (event) {
+    window.onclick = function(event) {
         if (event.target == projectDetailModal) {
             projectDetailModal.style.display = 'none';
         }
     };
 
-    window.openProjectDetailModal = function (projectID) {
+    window.openProjectDetailModal = function(projectID) {
         fetchProjectDetails(projectID);
         projectDetailModal.style.display = 'block';
     };
@@ -940,13 +920,13 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
         fetch(`../mysql/get_project_details.php?project_id=${projectID}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
+                if (!data.success) {
+                    throw new Error(data.error || 'Error fetching project details');
                 }
                 updateProjectDetailModal(data, projectID);
             })
@@ -954,67 +934,130 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
     }
 
     function updateProjectDetailModal(data, projectID) {
-        document.getElementById('projectMembersList').innerHTML = data.members.map(member => `<li>${member.Pseudo}</li>`).join('');
-        document.getElementById('projectTasksList').innerHTML = data.tasks.map(task => `
+        var projectMembersList = document.getElementById('projectMembersList');
+        projectMembersList.innerHTML = data.members.map(member => `
+            <li>
+                ${member.Pseudo} ${member.admin ? '(Admin)' : ''}
+                ${data.isAdmin ? `
+                    <button onclick="promoteToAdmin(${projectID}, ${member.Utilisateur_ID})">Promouvoir en tant qu'admin</button>
+                    <button onclick="removeMember(${projectID}, ${member.Utilisateur_ID})">Supprimer</button>
+                ` : ''}
+            </li>
+        `).join('');
+
+        var projectTasksList = document.getElementById('projectTasksList');
+        projectTasksList.innerHTML = data.tasks.map(task => `
             <li>
                 ${task.Texte} - ${task.Pseudo} - ${task.Date_Tache}
-                <span class="material-symbols-outlined" onclick="openTaskDetailModal(${task.Tache_ID})">edit</span>
-            </li>`).join('');
+                ${data.isAdmin ? `<button onclick="openTaskDetailModal(${task.Tache_ID})">Modifier</button>` : ''}
+            </li>
+        `).join('');
 
         const nonMembersList = document.getElementById('nonMembersList');
         nonMembersList.innerHTML = data.nonMembers.map(nonMember => `
             <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID}'> ${nonMember.Pseudo}</label><br>
         `).join('');
-
-        saveProjectMembers.onclick = function () {
+        
+        saveProjectMembers.onclick = function() {
             const formData = new FormData(document.getElementById('addProjectMembersForm'));
             formData.append('project_id', projectID);
             fetch('../mysql/add_project_members.php', {
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Membres ajoutés avec succès');
-                        fetchProjectDetails(projectID); // Refresh the details
-                    } else {
-                        alert('Erreur lors de l\'ajout des membres');
-                    }
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Membres ajoutés avec succès');
+                    fetchProjectDetails(projectID); // Refresh the details
+                } else {
+                    alert('Erreur lors de l\'ajout des membres');
+                }
+            });
         };
     }
 
-    function openTaskDetailModal(taskID) {
+    window.promoteToAdmin = function(projectID, userID) {
+        if (confirm("Voulez-vous vraiment promouvoir cet utilisateur en tant qu'administrateur ?")) {
+            fetch(`../mysql/promote_to_admin.php?project_id=${projectID}&user_id=${userID}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Utilisateur promu avec succès');
+                        fetchProjectDetails(projectID); // Refresh the details
+                    } else {
+                        alert('Erreur lors de la promotion de l\'utilisateur');
+                    }
+                });
+        }
+    };
+
+    window.removeMember = function(projectID, userID) {
+        if (confirm("Voulez-vous vraiment supprimer cet utilisateur du projet ?")) {
+            fetch(`../mysql/remove_member.php?project_id=${projectID}&user_id=${userID}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Utilisateur supprimé avec succès');
+                        fetchProjectDetails(projectID); // Refresh the details
+                    } else {
+                        alert('Erreur lors de la suppression de l\'utilisateur');
+                    }
+                });
+        }
+    }
+
+    // Ajout de la fonction openTaskDetailModal pour afficher les détails de la tâche
+    var taskDetailModal = document.getElementById("TaskDetailModal");
+    var closeDetailModal = document.getElementById("closeDetailModal");
+
+    closeDetailModal.onclick = function() {
+        taskDetailModal.classList.remove("show");
+    }
+
+    window.onclick = function(event) {
+        if (event.target == taskDetailModal) {
+            taskDetailModal.classList.remove("show");
+        }
+    };
+
+    window.openTaskDetailModal = function(taskID) {
         fetch(`../mysql/get_task_details.php?task_id=${taskID}`)
             .then(response => response.json())
             .then(data => {
-                if (typeof data !== 'object') throw new Error('Invalid JSON');
-                const taskDetailsElement = document.getElementById("taskDetails");
-
-                const tacheDate = new Date(data.dateTache);
-                const currentDate = new Date();
-                const jours = Math.floor((tacheDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
-
-                taskDetailsElement.innerHTML = `
-                    <p>Nom de la tâche: ${data.nom}</p>
-                    <p>Catégorie: ${data.categorie}</p>
-                    <p>Date Limite de la Tache: ${data.dateTache} (${jours} J)</p> 
-                `;
-
-                const taskDetailModal = document.getElementById("TaskDetailModal");
-                taskDetailModal.classList.add("show");
+                if (!data.success) {
+                    throw new Error(data.error || 'Error fetching task details');
+                }
+                showTaskDetails(data);
             })
-            .catch(error => console.error('Erreur:', error));
+            .catch(error => console.error('Error:', error));
+    };
+
+    function openTaskDetailModal(taskId) {
+        showTaskDetails(taskId);
+    }
+
+    function showTaskDetails(data) {
+        const taskDetailsElement = document.getElementById("taskDetails");
+
+        const tacheDate = new Date(data.dateTache);
+        const currentDate = new Date();
+        const jours = Math.floor((tacheDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
+
+        taskDetailsElement.innerHTML = `
+            <p>Nom de la tâche: ${data.nom}</p>
+            <p>Catégorie: ${data.categorie}</p>
+            <p>Date Limite de la Tache: ${data.dateTache} (${jours} J)</p> 
+        `;
+        taskDetailModal.classList.add("show");
     }
 });
 
+setInterval(function () {
+    fetch('../mysql/fetch_session.php')
+}, 5000);
 
 
-
-        setInterval(function () {
-            fetch('../mysql/fetch_session.php')
-        }, 5000);
     </script>
 </body>
 </html>

@@ -374,10 +374,12 @@
     color: #000000;
     cursor: pointer;
     transition: border 0.3s ease;
+    transition: color 0.3s ease;
 }
 
 .container .right main .myTasks .tasks .tasksBox:hover {
     border: solid 1px #69b9ff;
+    color: #00447c;
 }
 .scroll-container {
     overflow-y: auto;
