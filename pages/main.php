@@ -1,7 +1,7 @@
 <?php
-    // ini_set('display_errors', 1);
-    // ini_set('display_startup_errors', 1);
-    // error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 require_once '../mysql/cookies_uid.php';
 require_once '../mysql/connexion_bdd.php';
 
@@ -124,6 +124,8 @@ function fetchTasksWithProjects($dbh, $projectID = 'all') {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
 
 function fetchAvailableUsers($dbh, $groupeID) {
     $sql = "SELECT Utilisateur_ID, Pseudo FROM UTILISATEUR 
@@ -673,37 +675,36 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
         </div>
     </div>
 
-    <!-- HTML: ProjectDetailModal -->
     <div id="ProjectDetailModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeProjectDetailModal">&times;</span>
             <h2>Détails du projet</h2>
 
-            <!-- Membres actuels du projet -->
             <div id="currentProjectMembers">
                 <h3>Membres du projet</h3>
-                <ul id="projectMembersList">
-                    <!-- Liste des membres actuels -->
-                </ul>
+                <ul id="projectMembersList"></ul>
             </div>
 
-            <!-- Ajouter une personne au projet -->
             <div id="addProjectMembers">
                 <h3>Ajouter une personne au projet</h3>
                 <form id="addProjectMembersForm">
-                    <!-- Liste des utilisateurs disponibles sera remplie dynamiquement -->
                     <div id="nonMembersList"></div>
                     <button type="button" id="saveProjectMembers">Enregistrer</button>
                 </form>
             </div>
 
-            <!-- Liste des tâches du projet -->
             <div id="projectTasks">
                 <h3>Liste des tâches</h3>
-                <ul id="projectTasksList">
-                    <!-- Liste des tâches -->
-                </ul>
+                <ul id="projectTasksList"></ul>
             </div>
+        </div>
+    </div>
+
+    <div id="TaskDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeDetailModal">&times;</span>
+            <h2>Détails de la tâche</h2>
+            <p id="taskDetails"></p>
         </div>
     </div>
 
@@ -814,27 +815,83 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
                 taskIcon.classList.add('done');
                 taskName.classList.remove('notDone');
                 taskName.classList.add('done', 'tasksLine');
-                fetch('../mysql/update_done.php', {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        task_id: taskName.getAttribute('id-task-id'),
-                        task_status: 1
-                    })
-                });
+                updateTaskStatus(taskName.getAttribute('id-task-id'), 1);
             } else if (taskIcon.classList.contains('done')) {
                 taskIcon.classList.remove('done');
                 taskIcon.classList.add('notDone');
                 taskName.classList.remove('done', 'tasksLine');
                 taskName.classList.add('notDone');
-                fetch('../mysql/update_done.php', {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        task_id: taskName.getAttribute('id-task-id'),
-                        task_status: 0
-                    })
-                });
+                updateTaskStatus(taskName.getAttribute('id-task-id'), 0);
             }
         }
+
+        function updateTaskStatus(taskId, status) {
+            fetch('../mysql/update_done.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `taskId=${taskId}&task_status=${status}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Error updating task status:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function toggleStarCompletion(element) {
+            var taskIcon = element;
+            var taskName = element.parentElement.querySelector('.tasksName');
+
+            if (taskIcon.classList.contains('half')) {
+                taskIcon.classList.remove('half');
+                taskIcon.classList.add('full');
+                taskName.classList.remove('half');
+                taskName.classList.add('full', 'tasksLine');
+                updateStarStatus(taskName.getAttribute('id-task-id'), 1);
+            } else if (taskIcon.classList.contains('full')) {
+                taskIcon.classList.remove('full');
+                taskIcon.classList.add('half');
+                taskName.classList.remove('full', 'tasksLine');
+                taskName.classList.add('half');
+                updateStarStatus(taskName.getAttribute('id-task-id'), 0);
+            }
+        }
+
+        function updateStarStatus(taskId, status) {
+            fetch('../mysql/update_stars.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `taskId=${taskId}&task_status=${status}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Error updating task status:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var taskDetailModal = document.getElementById("TaskDetailModal");
+            var closeDetailModal = document.getElementById("closeDetailModal");
+
+            closeDetailModal.onclick = function() {
+                taskDetailModal.classList.remove("show");
+            }
+
+            window.onclick = function(event) {
+                if (event.target == taskDetailModal) {
+                    taskDetailModal.classList.remove("show");
+                }
+            };
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             var createProjectModal = document.getElementById("CreateProjectModal");
@@ -860,48 +917,53 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-    var modal = document.getElementById('ProjectDetailModal');
-    var closeModal = document.getElementById('closeProjectDetailModal');
+    var projectDetailModal = document.getElementById('ProjectDetailModal');
+    var closeProjectDetailModal = document.getElementById('closeProjectDetailModal');
     var saveProjectMembers = document.getElementById('saveProjectMembers');
 
-    closeModal.onclick = function () {
-        modal.style.display = 'none';
+    closeProjectDetailModal.onclick = function () {
+        projectDetailModal.style.display = 'none';
     };
 
     window.onclick = function (event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        if (event.target == projectDetailModal) {
+            projectDetailModal.style.display = 'none';
         }
     };
 
-    window.openProjectDetailModal = function(projectID) {
+    window.openProjectDetailModal = function (projectID) {
         fetchProjectDetails(projectID);
-        modal.style.display = 'block';
+        projectDetailModal.style.display = 'block';
     };
 
     function fetchProjectDetails(projectID) {
         fetch(`../mysql/get_project_details.php?project_id=${projectID}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
-                if (typeof data !== 'object') throw new Error('Invalid JSON');
+                if (data.error) {
+                    throw new Error(data.error);
+                }
                 updateProjectDetailModal(data, projectID);
             })
             .catch(error => console.error('Error:', error));
     }
 
     function updateProjectDetailModal(data, projectID) {
-        document.getElementById('projectMembersList').innerHTML = data.members.map(member => `<li>${member.Pseudo ? member.Pseudo : 'Pseudo non disponible'}</li>`).join('');
+        document.getElementById('projectMembersList').innerHTML = data.members.map(member => `<li>${member.Pseudo}</li>`).join('');
         document.getElementById('projectTasksList').innerHTML = data.tasks.map(task => `
             <li>
-                ${task.Texte ? task.Texte : 'Texte non disponible'} - ${task.Pseudo ? task.Pseudo : 'Pseudo non disponible'} - ${task.Date_Tache ? task.Date_Tache : 'Date non disponible'}
-                <?php if ($_SESSION['Droit'] == 1): ?>
-                    <span class="material-symbols-outlined" onclick="openTaskDetailModal(${task.Tache_ID ? task.Tache_ID : 'ID non disponible'})">edit</span>
-                <?php endif; ?>
+                ${task.Texte} - ${task.Pseudo} - ${task.Date_Tache}
+                <span class="material-symbols-outlined" onclick="openTaskDetailModal(${task.Tache_ID})">edit</span>
             </li>`).join('');
 
         const nonMembersList = document.getElementById('nonMembersList');
         nonMembersList.innerHTML = data.nonMembers.map(nonMember => `
-            <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID ? nonMember.Utilisateur_ID : ''}'> ${nonMember.Pseudo ? nonMember.Pseudo : 'Pseudo non disponible'}</label><br>
+            <label><input type='checkbox' name='projectMembers[]' value='${nonMember.Utilisateur_ID}'> ${nonMember.Pseudo}</label><br>
         `).join('');
 
         saveProjectMembers.onclick = function () {
@@ -911,22 +973,42 @@ $tasks = fetchTasksWithProjects($conn, $projectID);
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Membres ajoutés avec succès');
-                    fetchProjectDetails(projectID); // Refresh the details
-                } else {
-                    alert('Erreur lors de l\'ajout des membres');
-                }
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Membres ajoutés avec succès');
+                        fetchProjectDetails(projectID); // Refresh the details
+                    } else {
+                        alert('Erreur lors de l\'ajout des membres');
+                    }
+                });
         };
     }
 
-    window.openTaskDetailModal = function(taskID) {
-        alert(`Edit task ID: ${taskID}`);
-    };
+    function openTaskDetailModal(taskID) {
+        fetch(`../mysql/get_task_details.php?task_id=${taskID}`)
+            .then(response => response.json())
+            .then(data => {
+                if (typeof data !== 'object') throw new Error('Invalid JSON');
+                const taskDetailsElement = document.getElementById("taskDetails");
+
+                const tacheDate = new Date(data.dateTache);
+                const currentDate = new Date();
+                const jours = Math.floor((tacheDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
+
+                taskDetailsElement.innerHTML = `
+                    <p>Nom de la tâche: ${data.nom}</p>
+                    <p>Catégorie: ${data.categorie}</p>
+                    <p>Date Limite de la Tache: ${data.dateTache} (${jours} J)</p> 
+                `;
+
+                const taskDetailModal = document.getElementById("TaskDetailModal");
+                taskDetailModal.classList.add("show");
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
 });
+
 
 
 

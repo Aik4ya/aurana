@@ -45,6 +45,7 @@
     align-items: center;
     flex-direction: column;
     grid-row: 1 / 7;
+    grid-column: 1 / 4;
 }
 
 .container .right main .projectCard li .projetBox {
@@ -58,6 +59,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.container .right main .projectCard .projectTop #openModalBtn {
+    height: 75%;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.container .right main .projectCard .projectTop #openModalBtn img {
+    height: 100%;
 }
 
 .container .right main .projectCard .projectTop h2 {
@@ -309,332 +322,8 @@
     color: #008000;
 }
 
-/* projectTop end */
 
-/* myTasks start */
-.container .right main .myTasks {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 1 / 7;
-    grid-column: 2 / 3;
-}
-.container .right main .myTasks .tasksHead {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-.container .right main .myTasks .tasksHead h2 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    line-height: 18px;
-    color: #000;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-.container .right main .myTasks .tasksHead .tasksDots {
-    position: relative;
-    cursor: pointer;
-}
-.container .right main .myTasks .tasksHead .tasksDots span {
-    color: #000;
-    font-size: 1.8em;
-    font-weight: 700;
-}
-.container .right main .myTasks .tasks {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.container .right main .myTasks .tasks ul {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.container .right main .myTasks .tasks ul li {
-    position: relative;
-    width: 100%;
-    height: calc(100% / 7);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.container .right main .myTasks .tasks ul li::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    background: rgba(0, 0, 0, .1);
-}
-.container .right main .myTasks .tasks ul li:last-child::before {
-    width: 0;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName .tasksIcon {
-    position: relative;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName .tasksIcon.done {
-    color: #fff;
-    background: #69bc72;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName .tasksIcon.notDone {
-    background: #fff;
-    border: 3px solid #999;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName .tasksName {
-    position: relative;
-    color: #000;
-    cursor: pointer;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName .tasksName.tasksLine {
-    color: #999;
-    cursor: not-allowed;
-}
-.container .right main .myTasks .tasks ul li .tasksIconName .tasksName.tasksLine::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    background: rgba(0, 0, 0, .3);
-}
-.container .right main .myTasks .tasks ul li .tasksStar {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-.container .right main .myTasks .tasks ul li .tasksStar.full {
-    color: #f5c75f;
-}
-.container .right main .myTasks .tasks ul li .tasksStar.half {
-    color: #f5c75f;
-}
-/* myTasks end */
 
-/* calendar start */
-.container .right main .calendar {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 1 / 4;
-    grid-column: 3 / 4;
-    padding: 20px;
-    gap: 10px;
-}
-.container .right main .calendar .calendarHead {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.container .right main .calendar .calendarHead h2 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    line-height: 18px;
-    color: #000;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-.container .right main .calendar .calendarHead .calendarIcon {
-    position: relative;
-    display: flex;
-    gap: 10px;
-}
-.container .right main .calendar .calendarHead .calendarIcon .material-symbols-outlined {
-    position: relative;
-    width: 25px;
-    height: 25px;
-    border: 3px solid #9fa7d6;
-    border-radius: 50%;
-    cursor: pointer;
-    color: #9fa7d6;
-    font-size: 1.3em;
-    font-weight: 600;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.container .right main .calendar .calendarData {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.container .right main .calendar .calendarData .weeks {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-.container .right main .calendar .calendarData .weeks li {
-    list-style: none;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: 500;
-}
-.container .right main .calendar .calendarData .days {
-    position: relative;
-    width: 100%;
-    height: calc(100% - 30px);
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(6, 1fr);
-    place-items: center;
-}
-
-.container .right main .calendar .calendarData .days .has-tasks{
-    background-color: rgb(49, 234, 255);
-    color: black;
-}
-
-.container .right main .calendar .calendarData .days .has-projet{
-    background-color: rgb(167, 35, 35);
-    color: rgb(255, 255, 255);
-}
-.container .right main .calendar .calendarData .days li {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #000;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: .3s ease;
-}
-.container .right main .calendar .calendarData .days li.inactive {
-    color: #999;
-}
-.container .right main .calendar .calendarData .days li:hover {
-    background: #999;
-    color: #fff;
-    transition: 0s;
-}
-.container .right main .calendar .calendarData .days li.active {
-    background: #6577ff;
-    color: #fff;
-}
-/* calendar end */
-/* messages start */
-.container .right main .messages {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 4 / 7;
-    grid-column: 3 / 3;
-    padding: 20px;
-    gap: 5px;
-}
-.container .right main .messages .messagesHead {
-    position: relative;
-    width: 100%;
-    height: 30px;
-}
-.container .right main .messages .messagesHead h2 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    line-height: 18px;
-    color: #000;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-.container .right main .messages .messagesUser {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-}
-.container .right main .messages .messagesUser .messagesUserImg {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-.container .right main .messages .messagesUser .messagesUserImg img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
-}
-.container .right main .messages .messagesUser h2 {
-    position: relative;
-    color: #000;
-    cursor: pointer;
-    font-size: 1.2em;
-    line-height: 18px;
-}
-.container .right main .messages .messagesUser h2 span {
-    color: #999;
-    font-size: 0.8em;
-}
-/* messages end */
 /* Responsive */
 @media (max-width: 1176px) {
     .container .left {

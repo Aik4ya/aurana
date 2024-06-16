@@ -44,36 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-
-    // Gestion des étoiles pour la complétion des tâches
-    document.querySelectorAll('.tasksStar').forEach(star => {
-        star.onclick = function() {
-            let taskId = this.getAttribute('data-taskId');
-            toggleStarCompletion(this, taskId);
-        };
-    });
-
-    function toggleStarCompletion(starIcon, taskId) {
-        starIcon.classList.toggle('full');
-        starIcon.classList.toggle('half');
-        let starValue = starIcon.classList.contains('full') ? 1 : 0;
-        let doneValue = starIcon.classList.contains('full') ? 0 : 1;
-
-        fetch('../update_star_done.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `taskId=${taskId}&star=${starValue}&done=${doneValue}`
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        }).catch(error => {
-            console.error('There has been a problem with your fetch operation:', error);
-        });
-    }
 });
 
 // Code pour gérer le calendrier

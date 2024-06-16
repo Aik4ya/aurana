@@ -17,5 +17,3 @@ if (isset($_GET['project_id']) && isset($_GET['user_id'])) {
     echo json_encode(['success' => $success]);
 }
 ?>
-
-?>

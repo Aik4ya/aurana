@@ -150,10 +150,12 @@ verif_session();
                     </ul>
                 </nav>
             </header>
-            <div class="decoBtn">
-                <form action="logout.php">
-                    <button id='deconnexion'>Deconnexion</button>
-                </form>
+            <div class="disconnect">
+                <div class="decoBtn">
+                    <form action="logout.php">
+                        <button id='deconnexion'>Déconnexion</button>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="right">
@@ -211,14 +213,10 @@ verif_session();
             <main>
             <div class="projectCard">
                     <div class="projectTop">
-                    <!-- Trigger Button -->
-                    <button id="openModalBtn">Upload File</button>
-
-                    <!-- File List -->
-                    <h2>Files</h2>
-                    <ul id="fileList" class="file-list"></ul>
-                        </form>
+                        <h2>Fichiers</h2>
+                        <button id="openModalBtn"><img src="../img/plus.png" alt="Upload File"></button>
                     </div>
+                    <ul class="file-list" id="fileList"></ul>
                 </div>
 
             </main>
@@ -320,9 +318,11 @@ verif_session();
                 files.forEach(file => {
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        ${file.Adresse} - ${file.Date_Stock} 
-                        <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Download</a>
-                        ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Delete</button>` : ''}
+                        ${file.Adresse} - ${file.Date_Stock}
+                        <div class="file-info"> 
+                            ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Delete</button>` : ''}
+                            <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Download</a>
+                        </div>
                     `;
                     fileList.appendChild(li);
                 });

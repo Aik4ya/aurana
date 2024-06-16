@@ -19,3 +19,4 @@ if (isset($_POST['project_id']) && isset($_POST['projectMembers'])) {
 
     echo json_encode(['success' => $success]);
 }
+?>

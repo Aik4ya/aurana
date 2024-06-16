@@ -44,6 +44,7 @@ if (isset($_GET['groupe'])) {
     <title>Aurana - Dashboard</title>
     <link rel="stylesheet" href="../css/main_chat.css">
     <link rel="stylesheet" href="../css/base_main.css">
+    <link rel="stylesheet" href="../css/button.css">
     <script src="../js/main_chat.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>

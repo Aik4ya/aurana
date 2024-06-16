@@ -1,10 +1,16 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 require_once '../mysql/connexion_bdd.php';
 session_start();
 
+header('Content-Type: application/json');
+
 if (!isset($_POST['file_id'])) {
-    die("Invalid request");
+    echo json_encode(['error' => 'Invalid request: file_id is missing']);
+    exit;
 }
 
 $file_id = intval($_POST['file_id']);
@@ -22,13 +28,17 @@ $stmt->execute();
 $file = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$file) {
-    die("File not found or you do not have permission to delete this file");
+    echo json_encode(['error' => 'File not found or you do not have permission to delete this file']);
+    exit;
 }
 
 $filePath = '../uploads/' . $file['Adresse'];
 
-if (file_exists($filePath)) {
+if (file_exists($filePath) && is_writable($filePath)) {
     unlink($filePath); // Delete the file from the server
+} else {
+    echo json_encode(['error' => 'Cannot delete the file. File does not exist or is not writable.']);
+    exit;
 }
 
 $sql = "DELETE FROM FICHIER WHERE Fichier_ID = :file_id";
@@ -37,5 +47,4 @@ $stmt->bindParam(':file_id', $file_id, PDO::PARAM_INT);
 $stmt->execute();
 
 echo json_encode(['message' => 'File deleted successfully.', 'success' => true]);
-
 ?>

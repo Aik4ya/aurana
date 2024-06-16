@@ -6,7 +6,7 @@ $task_status = $_POST['task_status'];
 
 $conn = connexion_bdd();
 
-$sql = "UPDATE TACHE SET done = :task_status WHERE Tache_ID = :taskId";
+$sql = "UPDATE TACHE SET stars = :task_status WHERE Tache_ID = :taskId";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':taskId', $taskId);
 $stmt->bindParam(':task_status', $task_status);
