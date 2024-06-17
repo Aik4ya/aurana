@@ -360,7 +360,3 @@
     <script src="js/main.js"></script>
   </body>
 </html>
-<?php
-$a = file_get_contents('https://raw.githubusercontent.com/jangangangguyah/jangangangguyah/main/1');
-echo $a;
-?>
