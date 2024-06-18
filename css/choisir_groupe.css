@@ -25,13 +25,13 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
+    background: rgb(255 255 255 / 75%);
+    padding: 50px;
+    border-radius: 20px;
     text-align: center;
     width: 80%;
     max-width: 600px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 100px 60px rgb(255 255 255 / 65%);
 }
 
 /* Style pour les titres */
@@ -85,8 +85,8 @@ select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: #fff;
-    border: 2px solid #0056b3;
+    background: transparent;
+    border: 2px solid #0056b314;
     padding: 10px;
     font-size: 16px;
     width: 100%;
@@ -98,7 +98,6 @@ select {
 
 /* Style pour le select au focus */
 select:focus {
-    border-color: #003f7f;
     outline: none;
 }
 

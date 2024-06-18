@@ -8,6 +8,28 @@ $_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
 $conn = connexion_bdd();
 ecriture_log("main_task");
 verif_session();
+
+
+$nom_groupe = null;
+
+if (isset($_GET['groupe'])) {
+    $groupe = $_GET['groupe'];
+    $_SESSION['Groupe'] = $groupe;
+    $sql = "SELECT Groupe_ID, Nom FROM GROUPE WHERE Nom = :groupe";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':groupe', $groupe);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $_SESSION['Groupe_ID'] = $row['Groupe_ID'];
+        $nom_groupe = $row['Nom'];
+    }
+} else {
+    $_GET['groupe'] = "none";
+    header("Location: main.php?groupe=none");
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -401,6 +423,37 @@ verif_session();
             fetch('../mysql/fetch_session.php')
         }, 5000);
 
+        document.addEventListener('DOMContentLoaded', function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error') && urlParams.get('error') === 'group_exists') {
+        alert('Ce groupe existe déjà.');
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('searchInput');
+    
+    // Fonction pour exécuter la recherche
+    searchInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            var searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>&search=${encodeURIComponent(searchTerm)}`;
+            }
+        }
+    });
+});
+    
+    // Fonction pour nettoyer la recherche et retourner à la page principale
+    window.clearSearch = function() {
+        searchInput.value = '';
+        window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>`;
+    };
+
+    // Fonction pour basculer le menu utilisateur
+    window.toggleMenu = function() {
+        var menu = document.querySelector('.menu');
+        menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+    };
     </script>
 </body>
 </html>

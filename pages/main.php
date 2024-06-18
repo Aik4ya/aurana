@@ -683,13 +683,28 @@ $task_dates = fetchTasksForProject($conn, $_SESSION['Groupe_ID'], $projectID);
 
 
 
-    <div id="TaskDetailModal" class="modal">
+<div id="TaskDetailModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeDetailModal">&times;</span>
         <h2>Détails de la tâche</h2>
-        <p id="taskDetails"></p>
+        <form id="taskDetailForm">
+            <label for="taskName">Nom de la tâche :</label>
+            <input type="text" id="taskName" name="taskName" required>
+            
+            <label for="taskCategory">Catégorie :</label>
+            <input type="text" id="taskCategory" name="taskCategory" required>
+            
+            <label for="taskDate">Date limite de la tâche :</label>
+            <input type="date" id="taskDate" name="taskDate" required>
+            
+            <label for="taskDescription">Description :</label>
+            <textarea id="taskDescription" name="taskDescription" rows="4" required></textarea>
+            
+            <button type="submit">Sauvegarder</button>
+        </form>
     </div>
 </div>
+
 
 
 <div id="CreateGroupModal" class="modal">
@@ -822,8 +837,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (urlParams.has('error') && urlParams.get('error') === 'group_exists') {
         alert('Ce groupe existe déjà.');
     }
-});
-document.addEventListener('DOMContentLoaded', function() {
+
     var searchInput = document.getElementById('searchInput');
     
     // Fonction pour exécuter la recherche
@@ -831,7 +845,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.key === 'Enter') {
             var searchTerm = searchInput.value.trim();
             if (searchTerm) {
-                window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>&search=${encodeURIComponent(searchTerm)}`;
+                window.location.href = `main.php?groupe=${encodeURIComponent('<?php echo $_GET['groupe']; ?>')}&search=${encodeURIComponent(searchTerm)}`;
             }
         }
     });
@@ -839,7 +853,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour nettoyer la recherche et retourner à la page principale
     window.clearSearch = function() {
         searchInput.value = '';
-        window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>`;
+        window.location.href = `main.php?groupe=${encodeURIComponent('<?php echo $_GET['groupe']; ?>')}`;
     };
 
     // Fonction pour basculer le menu utilisateur
@@ -909,20 +923,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!data.success) {
                     throw new Error(data.error || 'Error fetching task details');
                 }
-                const taskDetailsElement = document.getElementById("taskDetails");
                 const task = data.task;
 
-                const taskDate = new Date(task.Date_Tache);
-                const currentDate = new Date();
-                const daysRemaining = Math.floor((taskDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
+                // Remplir les champs de saisie avec les détails de la tâche
+                document.getElementById("taskName").value = task.Texte;
+                document.getElementById("taskCategory").value = task.Categorie;
+                document.getElementById("taskDate").value = task.Date_Tache;
+                document.getElementById("taskDescription").value = task.Description;
 
-                taskDetailsElement.innerHTML = `
-                    <p>Nom de la tâche: ${task.Texte}</p>
-                    <p>Catégorie: ${task.Categorie}</p>
-                    <p>Date Limite de la Tache: ${task.Date_Tache} (${daysRemaining} J)</p> 
-                    <p>Assignée à: ${task.Pseudo}</p>
-                `;
-                document.getElementById("TaskDetailModal").classList.add("show");
+                taskDetailModal.classList.add("show");
             })
             .catch(error => console.error('Error:', error));
     }
@@ -1217,6 +1226,7 @@ document.addEventListener('DOMContentLoaded', function() {
 setInterval(function () {
     fetch('../mysql/fetch_session.php')
 }, 5000);
+
 
 
 

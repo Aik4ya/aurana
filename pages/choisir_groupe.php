@@ -29,7 +29,7 @@ $dbh = connexion_bdd();
 <body>
     <div class="container">
         <div class="content">
-            <h1>Bienvenue!</h1>
+            <h1>Aurana</h1>
             <p>Veuillez choisir un groupe pour continuer :</p>
             <form action="main.php" method="get">
                 <div class="select-wrapper">
