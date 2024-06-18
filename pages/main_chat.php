@@ -6,6 +6,7 @@
 
 include_once '../mysql/cookies_uid.php';
 include_once '../mysql/connexion_bdd.php';
+require_once '../mysql/verif_groupe.php';
 $conn = connexion_bdd();
 session_start();
 
@@ -63,31 +64,45 @@ if (isset($_GET['groupe'])) {
 
 </style>
 <body>
-    <div class="container">
+<div class="container">
         <div class="left">
             <header>
                 <div class="logo">
                     <h2>aurana</h2>
                     <div class="close">
-                        <span class="material-symbols-outlined">close</span>
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
                     </div>
                 </div>
                 <nav>
                     <ul>
-                        <li><?php echo "<a href='main.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
-                            <span class="material-symbols-outlined full">dashboard</span>
-                            <span class="title">Dashboard</span>
-                        </a></li>
-                        <li><?php echo "<a href='main_task.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
-                            <span class="material-symbols-outlined">check_box</span>
-                            <span class="title">Tâches</span>
-                        </a></li>
-                        <li><?php echo "<a href='main_chat.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
-                            <span class="material-symbols-outlined">chat_bubble</span>
-                            <span class="title">Messages</span>
-                        </a></li>
                         <li>
-                            <?php echo "<a href='main_files.php?groupe=" . $_GET['groupe'] . "'>" ?>
+                            <a href="#">
+                                <span class="material-symbols-outlined full">
+                                    dashboard
+                                </span>
+                                <span class="title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="main_task.php?groupe=<?php echo $_GET['groupe']; ?>">
+                                <span class="material-symbols-outlined">
+                                    check_box
+                                </span>
+                                <span class="title">Tâches</span>
+                            </a>
+                        </li>
+                        <?php if ($_GET['groupe'] != "none"): ?>
+                            <li>
+                                <a href="main_chat.php?groupe=<?php echo $_GET['groupe']; ?>">
+                                    <span class="material-symbols-outlined">chat_bubble</span>
+                                    <span class="title">Messages</span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        <li>
+                            <a href="main_files.php?groupe=<?php echo $_GET['groupe']; ?>">
                                 <span class="material-symbols-outlined">account_balance_wallet</span>
                                 <span class="title">Fichiers</span>
                             </a>
@@ -98,7 +113,7 @@ if (isset($_GET['groupe'])) {
             <div class="disconnect">
                 <div class="decoBtn">
                     <form action="logout.php">
-                        <button id='deconnexion'>Deconnexion</button>
+                        <button id='deconnexion'>Déconnexion</button>
                     </form>
                 </div>
             </div>
@@ -106,17 +121,16 @@ if (isset($_GET['groupe'])) {
         <div class="right">
             <div class="top">
                 <div class="searchBx">
-                <?php if ($nom_groupe != null): ?>
-                    <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
+                    <?php if ($nom_groupe != null): ?>
+                        <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
                     <?php endif; ?>
                 </div>
 
+
+
                 <div class="user">
                     <?php
-
-                    // affichage groupes + menu déroulant
-
-                    $conn = connexion_bdd();
+                    // Affichage groupes + menu déroulant
                     echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
 
                     if ($_SESSION['Droit_groupe'] == 2) {
@@ -130,26 +144,15 @@ if (isset($_GET['groupe'])) {
                     }
                     ?>
                     <div class="arrow" onclick="toggleMenu()">
-                        <span class="material-symbols-outlined">
-                            expand_more
-                        </span>
+                        <span class="material-symbols-outlined">expand_more</span>
                     </div>
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
                             <li><a href="../pages/main_profile.php">Profil</a></li>
-                            <?php
-                            $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
-                            $result = $conn->query($sql);
-                            if ($result->rowCount() > 0) {
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                    echo "<li><a href='main_chat.php?groupe=" . htmlspecialchars($row['Nom']) . "'>" . htmlspecialchars($row['Nom']) . "</a></li>";
-                                }
-                            }
-                            ?>
+                            <li><a href="../pages/choisir_groupe.php">Choisir son groupe</a></li>
                             <li><a href="#" id="openCreateGroupModal">Créer un groupe</a></li>
                             <li><a href="#" id="openJoinGroupModal">Rejoindre un groupe</a></li>
-                            <li><a href="#" id="openManageGroupModalBtn"
-                                   onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo htmlspecialchars($nom_groupe); ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
+                            <li><a href="#" id="openManageGroupModalBtn" onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo $nom_groupe; ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
                         </ul>
                     </div>
                 </div>
@@ -208,13 +211,13 @@ if (isset($_GET['groupe'])) {
                                     $days = floor($hours / 24);
 
                                     if ($days > 0) {
-                                        $lastConnection = "Il y a " . $days . " jours";
+                                        $lastConnection = "Dernière connexion : Il y a " . $days . " jours";
                                     } elseif ($hours > 0) {
-                                        $lastConnection = "Il y a " . $hours . " heures";
+                                        $lastConnection = "Dernière connexion : Il y a " . $hours . " heures";
                                     } elseif ($minutes > 0) {
-                                        $lastConnection = "Il y a " . $minutes . " minutes";
+                                        $lastConnection = "Dernière connexion : Il y a " . $minutes . " minutes";
                                     } else {
-                                        $lastConnection = "Il y a quelques secondes";
+                                        $lastConnection = "Dernière connexion : Il y a quelques secondes";
                                     }
                                 }
 
@@ -224,7 +227,7 @@ if (isset($_GET['groupe'])) {
                                             <span class=$css_status></span>
                                             <span class=\"friendsName\">$userName
                                                 <br>
-                                                Dernière connexion : $lastConnection 
+                                                $lastConnection 
                                             </span>
                                         </span>
                                     </li>

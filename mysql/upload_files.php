@@ -3,7 +3,8 @@
 require_once '../mysql/connexion_bdd.php';
 session_start();
 
-$maxFileSize = 100 * 1024 * 1024; // 100MB
+// Définir la taille maximale du fichier à 100MB
+$maxFileSize = 100 * 1024 * 1024;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     $file = $_FILES['file'];
@@ -11,19 +12,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     $fileName = basename($file['name']);
     $filePath = '../uploads/' . $fileName;
 
+    // Vérifier la taille du fichier
     if ($fileSize > $maxFileSize) {
-        echo json_encode(['message' => 'File size exceeds 100MB.', 'success' => false]);
+        echo json_encode(['message' => 'La taille du fichier dépasse la limite de 100MB.', 'success' => false]);
         exit;
     }
 
-    // Ensure the uploads directory exists
+    // Vérifier l'existence du répertoire uploads et le créer si nécessaire
     if (!is_dir('../uploads')) {
         mkdir('../uploads', 0777, true);
     }
 
-    // Move the file to the uploads directory
+    // Déplacer le fichier vers le répertoire uploads
     if (move_uploaded_file($file['tmp_name'], $filePath)) {
-        // Scan the file using VirusTotal API
+        // Scanner le fichier avec l'API VirusTotal
         $apiKey = '6bf815eb330e6e3193f9ccbdb9ba65d691c09bc4c0b81df61e5978f459970512';
         $url = 'https://www.virustotal.com/vtapi/v2/file/scan';
 
@@ -43,25 +45,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
         $result = json_decode($response, true);
 
         if (isset($result['scan_id'])) {
-            // Save the file info to the database
+            // Sauvegarder les informations du fichier dans la base de données
             $conn = connexion_bdd();
             $sql = "INSERT INTO FICHIER (Adresse, Date_Stock, Groupe_ID, fichier_type, fichier_size, Utilisateur_id) VALUES (:adresse, NOW(), :groupe_id, :fichier_type, :fichier_size, :utilisateur_id)";
             $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':adresse', $fileName); // Store only the file name
-            $stmt->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
-            $stmt->bindParam(':fichier_type', $file['type']);
-            $stmt->bindParam(':fichier_size', $fileSize);
-            $stmt->bindParam(':utilisateur_id', $_SESSION['Utilisateur_ID']);
+            $stmt->bindParam(':adresse', $fileName, PDO::PARAM_STR);
+            $stmt->bindParam(':groupe_id', $_SESSION['Groupe_ID'], PDO::PARAM_INT);
+            $stmt->bindParam(':fichier_type', $file['type'], PDO::PARAM_STR);
+            $stmt->bindParam(':fichier_size', $fileSize, PDO::PARAM_INT);
+            $stmt->bindParam(':utilisateur_id', $_SESSION['Utilisateur_ID'], PDO::PARAM_INT);
             $stmt->execute();
 
-            echo json_encode(['message' => 'File uploaded and scanned successfully.', 'success' => true]);
+            echo json_encode(['message' => 'Fichier téléversé et scanné avec succès.', 'success' => true]);
         } else {
-            echo json_encode(['message' => 'Failed to scan file.', 'success' => false]);
+            echo json_encode(['message' => 'Échec du scan du fichier.', 'success' => false]);
         }
     } else {
-        echo json_encode(['message' => 'Failed to upload file.', 'success' => false]);
+        echo json_encode(['message' => 'Échec du téléversement du fichier.', 'success' => false]);
     }
 } else {
-    echo json_encode(['message' => 'No file uploaded.', 'success' => false]);
+    echo json_encode(['message' => 'Aucun fichier téléversé.', 'success' => false]);
 }
 ?>

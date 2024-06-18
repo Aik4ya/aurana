@@ -1,6 +1,7 @@
 <?php
 require_once '../mysql/cookies_uid.php';
 require_once '../mysql/connexion_bdd.php';
+require_once '../mysql/verif_groupe.php';
 
 session_start();
 $_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
@@ -127,25 +128,39 @@ verif_session();
                 <div class="logo">
                     <h2>aurana</h2>
                     <div class="close">
-                        <span class="material-symbols-outlined">close</span>
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
                     </div>
                 </div>
                 <nav>
                     <ul>
-                        <li><?php echo "<a href='main.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
-                            <span class="material-symbols-outlined full">dashboard</span>
-                            <span class="title">Dashboard</span>
-                        </a></li>
-                        <li><?php echo "<a href='main_task.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
-                            <span class="material-symbols-outlined">check_box</span>
-                            <span class="title">Tâches</span>
-                        </a></li>
-                        <li><?php echo "<a href='main_chat.php?groupe=" . htmlspecialchars($_GET['groupe']) . "'>" ?>
-                            <span class="material-symbols-outlined">chat_bubble</span>
-                            <span class="title">Messages</span>
-                        </a></li>
                         <li>
-                            <?php echo "<a href='main_files.php?groupe=" . $_GET['groupe'] . "'>" ?>
+                            <a href="#">
+                                <span class="material-symbols-outlined full">
+                                    dashboard
+                                </span>
+                                <span class="title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="main_task.php?groupe=<?php echo $_GET['groupe']; ?>">
+                                <span class="material-symbols-outlined">
+                                    check_box
+                                </span>
+                                <span class="title">Tâches</span>
+                            </a>
+                        </li>
+                        <?php if ($_GET['groupe'] != "none"): ?>
+                            <li>
+                                <a href="main_chat.php?groupe=<?php echo $_GET['groupe']; ?>">
+                                    <span class="material-symbols-outlined">chat_bubble</span>
+                                    <span class="title">Messages</span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        <li>
+                            <a href="main_files.php?groupe=<?php echo $_GET['groupe']; ?>">
                                 <span class="material-symbols-outlined">account_balance_wallet</span>
                                 <span class="title">Fichiers</span>
                             </a>
@@ -164,17 +179,16 @@ verif_session();
         <div class="right">
             <div class="top">
                 <div class="searchBx">
-                <?php if ($nom_groupe != null): ?>
-                    <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
+                    <?php if ($nom_groupe != null): ?>
+                        <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
                     <?php endif; ?>
                 </div>
 
+
+
                 <div class="user">
                     <?php
-
-                    // affichage groupes + menu déroulant
-
-                    $conn = connexion_bdd();
+                    // Affichage groupes + menu déroulant
                     echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
 
                     if ($_SESSION['Droit_groupe'] == 2) {
@@ -188,27 +202,15 @@ verif_session();
                     }
                     ?>
                     <div class="arrow" onclick="toggleMenu()">
-                        <span class="material-symbols-outlined">
-                            expand_more
-                        </span>
+                        <span class="material-symbols-outlined">expand_more</span>
                     </div>
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
                             <li><a href="../pages/main_profile.php">Profil</a></li>
-
-                            <?php
-                            $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
-                            $result = $conn->query($sql);
-                            if ($result->rowCount() > 0) {
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                    echo "<li><a href='main_chat.php?groupe=" . htmlspecialchars($row['Nom']) . "'>" . htmlspecialchars($row['Nom']) . "</a></li>";
-                                }
-                            }
-                            ?>
+                            <li><a href="../pages/choisir_groupe.php">Choisir son groupe</a></li>
                             <li><a href="#" id="openCreateGroupModal">Créer un groupe</a></li>
                             <li><a href="#" id="openJoinGroupModal">Rejoindre un groupe</a></li>
-                            <li><a href="#" id="openManageGroupModalBtn"
-                                   onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo htmlspecialchars($nom_groupe); ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
+                            <li><a href="#" id="openManageGroupModalBtn" onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo $nom_groupe; ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
                         </ul>
                     </div>
                 </div>
@@ -224,7 +226,6 @@ verif_session();
                     </div>
                     <ul class="file-list" id="fileList"></ul>
                 </div>
-
             </main>
             <script>
             </script>
@@ -239,7 +240,8 @@ verif_session();
                 <p>Glissez et déposez vos fichiers</p>
             </div>
         </div>
-        <script>
+    </div>
+    <script>
         const modal = document.getElementById('fileModal');
         const openModalBtn = document.getElementById('openModalBtn');
         const closeModal = document.getElementsByClassName('close')[0];
@@ -296,6 +298,11 @@ verif_session();
         }
 
         function uploadFile(file) {
+            if (file.size > 100 * 1024 * 1024) { // Limite de taille de fichier de 100MB
+                alert('La taille du fichier dépasse la limite de 100MB.');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('file', file);
 
@@ -326,7 +333,7 @@ verif_session();
                     li.innerHTML = `
                         ${file.Adresse} - ${file.Date_Stock}
                         <div class="file-info"> 
-                            ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Delete</button>` : ''}
+                            ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Supprimer</button>` : ''}
                             <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Télécharger</a>
                         </div>
                     `;
@@ -361,38 +368,39 @@ verif_session();
                 console.error('Error:', error);
             });
         }
+
         function searchFiles() {
-                    const query = document.getElementById('searchInput').value;
+            const query = document.getElementById('searchInput').value;
 
-                    fetch(`../mysql/search_files.php?query=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const fileList = document.getElementById('fileList');
-                            fileList.innerHTML = '';
+            fetch(`../mysql/search_files.php?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const fileList = document.getElementById('fileList');
+                    fileList.innerHTML = '';
 
-                            data.forEach(file => {
-                                const li = document.createElement('li');
-                                li.innerHTML = `
-                                    ${file.Adresse} - ${file.Date_Stock}
-                                    <div class="file-info"> 
-                                        ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Supprimer</button>` : ''}
-                                        <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Download</a>
-                                    </div>
-                                `;
-                                fileList.appendChild(li);
-                            });
-                        })
-                        .catch(error => console.error('Error fetching files:', error));
-                }
+                    data.forEach(file => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            ${file.Adresse} - ${file.Date_Stock}
+                            <div class="file-info"> 
+                                ${file.Utilisateur_id == userId ? `<button onclick="deleteFile(${file.Fichier_ID})">Supprimer</button>` : ''}
+                                <a href="../mysql/download_file.php?file_id=${file.Fichier_ID}">Télécharger</a>
+                            </div>
+                        `;
+                        fileList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error fetching files:', error));
+        }
 
         // Fetch files on page load
         fetchFiles();
 
+        // Refresh session every 5 seconds
         setInterval(function () {
             fetch('../mysql/fetch_session.php')
         }, 5000);
 
     </script>
-    </div>
 </body>
 </html>

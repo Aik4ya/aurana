@@ -1,6 +1,12 @@
 <?php
+
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 require_once '../mysql/cookies_uid.php';
 require_once '../mysql/connexion_bdd.php';
+require_once '../mysql/verif_groupe.php';
 
 session_start();
 $_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
@@ -59,6 +65,41 @@ if ($_GET['groupe'] != "none") {
 } else {
     $_SESSION['Droit_groupe'] = 0;
 }
+
+
+if (isset($_GET['search'])) {
+    $searchTerm = '%' . filter_input(INPUT_GET, 'search', FILTER_SANITIZE_STRING) . '%';
+
+    // Rechercher dans les projets
+    $sql = "SELECT ID, nom, status, priorite, deadline 
+            FROM PROJET 
+            WHERE id_groupe = :id_groupe 
+            AND nom LIKE :searchTerm 
+            AND ID IN (SELECT Projet_ID FROM est_membre_projet WHERE Utilisateur_ID = :id_utilisateur)
+            ORDER BY deadline ASC";
+    $stmt1 = $conn->prepare($sql);
+    $stmt1->bindParam(':id_groupe', $_SESSION['Groupe_ID']);
+    $stmt1->bindParam(':id_utilisateur', $_SESSION['Utilisateur_ID']);
+    $stmt1->bindParam(':searchTerm', $searchTerm);
+    $stmt1->execute();
+    $projects = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+
+    // Rechercher dans les tâches
+    $sql = "SELECT TACHE.Tache_ID, TACHE.Texte 
+            FROM es_assigner
+            INNER JOIN TACHE ON es_assigner.Tache_ID = TACHE.Tache_ID
+            WHERE (es_assigner.Utilisateur_ID = :user_id 
+            AND (TACHE.Groupe_ID = :groupe_id OR :groupe_id = 0)) 
+            AND TACHE.Texte LIKE :searchTerm 
+            ORDER BY TACHE.Date_Tache";
+    $stmt2 = $conn->prepare($sql);
+    $stmt2->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
+    $stmt2->bindParam(':groupe_id', $_SESSION['Groupe_ID']);
+    $stmt2->bindParam(':searchTerm', $searchTerm);
+    $stmt2->execute();
+    $tasks = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
 // avancer / reculer dans le calendrier
 if (isset($_GET['cal'])) {
@@ -277,14 +318,14 @@ $task_dates = fetchTasksForProject($conn, $_SESSION['Groupe_ID'], $projectID);
                         <h2><?php echo htmlspecialchars($nom_groupe); ?></h2>
                     <?php endif; ?>
                     <div class="inputBx">
-                        <span class="material-symbols-outlined searchOpen">
-                            search
-                        </span>
-                        <input type="text" placeholder="Rechercher...">
-                        <span class="material-symbols-outlined searchClose">
-                            close
-                        </span>
-                    </div>
+                    <span class="material-symbols-outlined searchOpen">
+                        search
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Rechercher...">
+                    <span class="material-symbols-outlined searchClose" onclick="clearSearch()">
+                        close
+                    </span>
+                </div>
                 </div>
 
 
@@ -310,15 +351,7 @@ $task_dates = fetchTasksForProject($conn, $_SESSION['Groupe_ID'], $projectID);
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
                             <li><a href="../pages/main_profile.php">Profil</a></li>
-                            <?php
-                                $sql = "SELECT GROUPE.Nom FROM est_membre INNER JOIN GROUPE ON est_membre.GROUPE = GROUPE.Groupe_ID WHERE est_membre.Utilisateur_ID = {$_SESSION['Utilisateur_ID']}";
-                                $result = $conn->query($sql);
-                                if ($result->rowCount() > 0) {
-                                    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                        echo "<li><a href='main.php?groupe={$row['Nom']}'>{$row['Nom']}</a></li>";
-                                    }
-                                }
-                            ?>
+                            <li><a href="../pages/choisir_groupe.php">Choisir son groupe</a></li>
                             <li><a href="#" id="openCreateGroupModal">Créer un groupe</a></li>
                             <li><a href="#" id="openJoinGroupModal">Rejoindre un groupe</a></li>
                             <li><a href="#" id="openManageGroupModalBtn" onclick="openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>, '<?php echo $nom_groupe; ?>', 'Description du groupe', 'Code du groupe')">Gérer le groupe</a></li>
@@ -785,6 +818,36 @@ $task_dates = fetchTasksForProject($conn, $_SESSION['Groupe_ID'], $projectID);
 
     <script>
 document.addEventListener('DOMContentLoaded', function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error') && urlParams.get('error') === 'group_exists') {
+        alert('Ce groupe existe déjà.');
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('searchInput');
+    
+    // Fonction pour exécuter la recherche
+    searchInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            var searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>&search=${encodeURIComponent(searchTerm)}`;
+            }
+        }
+    });
+    
+    // Fonction pour nettoyer la recherche et retourner à la page principale
+    window.clearSearch = function() {
+        searchInput.value = '';
+        window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>`;
+    };
+
+    // Fonction pour basculer le menu utilisateur
+    window.toggleMenu = function() {
+        var menu = document.querySelector('.menu');
+        menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+    };
+
     var createTaskModal = document.getElementById("CreateModalTask");
     var taskDetailModal = document.getElementById("TaskDetailModal");
     var closeCreateModal = document.getElementById("closeModal");
@@ -821,9 +884,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
     var calendarDays = document.querySelectorAll('.days li.has-tasks');
-
     calendarDays.forEach(function(day) {
         day.addEventListener('click', function() {
             var taskIds = this.getAttribute('data-task-ids');
@@ -865,49 +926,30 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error:', error));
     }
-});
 
-
-    function showTaskDetails(taskId) {
-        fetch(`../mysql/get_task_details.php?task_id=${taskId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data.success) {
-                    throw new Error(data.error || 'Error fetching task details');
-                }
-                const taskDetailsElement = document.getElementById("taskDetails");
-                const task = data.task;
-
-                const taskDate = new Date(task.Date_Tache);
-                const currentDate = new Date();
-                const daysRemaining = Math.floor((taskDate - currentDate) / (1000 * 60 * 60 * 24) + 1);
-
-                taskDetailsElement.innerHTML = `
-                    <p>Nom de la tâche: ${task.Texte}</p>
-                    <p>Catégorie: ${task.Categorie}</p>
-                    <p>Date Limite de la Tache: ${task.Date_Tache} (${daysRemaining} J)</p> 
-                    <p>Assignée à: ${task.Pseudo}</p>
-                `;
-                document.getElementById("TaskDetailModal").classList.add("show");
-            })
-            .catch(error => console.error('Error:', error));
-    }
-});
-
-function toggleMenu() {
-    var menu = document.querySelector('.menu');
-    menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
     var manageGroupModal = document.getElementById("ManageGroupModal");
+    var createGroupModal = document.getElementById("CreateGroupModal");
+    var joinGroupModal = document.getElementById("JoinGroupModal");
     var closeManageGroupModal = document.getElementById("closeManageGroupModal");
+    var closeCreateGroupModal = document.getElementById("closeCreateGroupModal");
+    var closeJoinGroupModal = document.getElementById("closeJoinGroupModal");
     var generateGroupCodeBtn = document.getElementById("generateGroupCode");
+
+    document.getElementById('openCreateGroupModal').addEventListener('click', function () {
+        createGroupModal.style.display = 'block';
+    });
+
+    document.getElementById('openJoinGroupModal').addEventListener('click', function () {
+        joinGroupModal.style.display = 'block';
+    });
+
+    closeCreateGroupModal.onclick = function() {
+        createGroupModal.style.display = 'none';
+    };
+
+    closeJoinGroupModal.onclick = function() {
+        joinGroupModal.style.display = 'none';
+    };
 
     window.openManageGroupModal = function(groupID) {
         fetch(`../mysql/get_group_details.php?group_id=${groupID}`)
@@ -934,6 +976,10 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onclick = function(event) {
         if (event.target == manageGroupModal) {
             manageGroupModal.classList.remove("show");
+        } else if (event.target == createGroupModal) {
+            createGroupModal.style.display = 'none';
+        } else if (event.target == joinGroupModal) {
+            joinGroupModal.style.display = 'none';
         }
     };
 
@@ -954,93 +1000,85 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("openManageGroupModalBtn").onclick = function() {
         openManageGroupModal(<?php echo $_SESSION['Groupe_ID']; ?>);
     };
-});
 
+    function toggleTaskCompletion(element) {
+        var taskIcon = element;
+        var taskName = element.parentElement.querySelector('.tasksName');
 
-
-
-function toggleTaskCompletion(element) {
-    var taskIcon = element;
-    var taskName = element.parentElement.querySelector('.tasksName');
-
-    if (taskIcon.classList.contains('notDone')) {
-        taskIcon.classList.remove('notDone');
-        taskIcon.classList.add('done');
-        taskName.classList.remove('notDone');
-        taskName.classList.add('done', 'tasksLine');
-        updateTaskStatus(taskName.getAttribute('data-task-id'), 1);
-    } else if (taskIcon.classList.contains('done')) {
-        taskIcon.classList.remove('done');
-        taskIcon.classList.add('notDone');
-        taskName.classList.remove('done', 'tasksLine');
-        taskName.classList.add('notDone');
-        updateTaskStatus(taskName.getAttribute('data-task-id'), 0);
-    }
-}
-
-function updateTaskStatus(taskId, status) {
-    fetch('../mysql/update_done.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `taskId=${taskId}&task_status=${status}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            console.error('Error updating task status:', data.message);
+        if (taskIcon.classList.contains('notDone')) {
+            taskIcon.classList.remove('notDone');
+            taskIcon.classList.add('done');
+            taskName.classList.remove('notDone');
+            taskName.classList.add('done', 'tasksLine');
+            updateTaskStatus(taskName.getAttribute('data-task-id'), 1);
+        } else if (taskIcon.classList.contains('done')) {
+            taskIcon.classList.remove('done');
+            taskIcon.classList.add('notDone');
+            taskName.classList.remove('done', 'tasksLine');
+            taskName.classList.add('notDone');
+            updateTaskStatus(taskName.getAttribute('data-task-id'), 0);
         }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function toggleStarCompletion(element) {
-    var taskIcon = element;
-    var taskName = element.parentElement.querySelector('.tasksName');
-
-    if (taskIcon.classList.contains('half')) {
-        taskIcon.classList.remove('half');
-        taskIcon.classList.add('full');
-        taskName.classList.remove('half');
-        taskName.classList.add('full', 'tasksLine');
-        updateStarStatus(taskName.getAttribute('data-task-id'), 1);
-    } else if (taskIcon.classList.contains('full')) {
-        taskIcon.classList.remove('full');
-        taskIcon.classList.add('half');
-        taskName.classList.remove('full', 'tasksLine');
-        taskName.classList.add('half');
-        updateStarStatus(taskName.getAttribute('data-task-id'), 0);
     }
-}
 
-function updateStarStatus(taskId, status) {
-    fetch('../mysql/update_stars.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `taskId=${taskId}&task_status=${status}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            console.error('Error updating task status:', data.message);
+    function updateTaskStatus(taskId, status) {
+        fetch('../mysql/update_done.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `taskId=${taskId}&task_status=${status}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Error updating task status:', data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function toggleStarCompletion(element) {
+        var taskIcon = element;
+        var taskName = element.parentElement.querySelector('.tasksName');
+
+        if (taskIcon.classList.contains('half')) {
+            taskIcon.classList.remove('half');
+            taskIcon.classList.add('full');
+            taskName.classList.remove('half');
+            taskName.classList.add('full', 'tasksLine');
+            updateStarStatus(taskName.getAttribute('data-task-id'), 1);
+        } else if (taskIcon.classList.contains('full')) {
+            taskIcon.classList.remove('full');
+            taskIcon.classList.add('half');
+            taskName.classList.remove('full', 'tasksLine');
+            taskName.classList.add('half');
+            updateStarStatus(taskName.getAttribute('data-task-id'), 0);
         }
-    })
-    .catch(error => console.error('Error:', error));
-}
+    }
 
-document.addEventListener('DOMContentLoaded', function() {
+    function updateStarStatus(taskId, status) {
+        fetch('../mysql/update_stars.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `taskId=${taskId}&task_status=${status}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Error updating task status:', data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
     var projectSelect = document.getElementById('projectSelect');
     projectSelect.addEventListener('change', function() {
         var selectedProjectID = this.value;
         window.location.href = `main.php?groupe=<?php echo $_GET['groupe']; ?>&projectID=${selectedProjectID}`;
     });
-});
 
-
-document.addEventListener('DOMContentLoaded', function() {
     var projectDetailModal = document.getElementById('ProjectDetailModal');
     var closeProjectDetailModal = document.getElementById('closeProjectDetailModal');
     var saveProjectMembers = document.getElementById('saveProjectMembers');
@@ -1176,62 +1214,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    var createGroupModal = document.getElementById("CreateGroupModal");
-    var joinGroupModal = document.getElementById("JoinGroupModal");
-    var closeCreateGroupModal = document.getElementById("closeCreateGroupModal");
-    var closeJoinGroupModal = document.getElementById("closeJoinGroupModal");
-
-    document.getElementById("openCreateGroupModal").onclick = function() {
-        createGroupModal.classList.add("show");
-    };
-
-    document.getElementById("openJoinGroupModal").onclick = function() {
-        joinGroupModal.classList.add("show");
-    };
-
-    closeCreateGroupModal.onclick = function() {
-        createGroupModal.classList.remove("show");
-    };
-
-    closeJoinGroupModal.onclick = function() {
-        joinGroupModal.classList.remove("show");
-    };
-
-    window.onclick = function(event) {
-        if (event.target == createGroupModal) {
-            createGroupModal.classList.remove("show");
-        } else if (event.target == joinGroupModal) {
-            joinGroupModal.classList.remove("show");
-        }
-    };
-
-    var createProjectBtn = document.getElementById("createProjectBtn");
-    var createProjectModal = document.getElementById("CreateProjectModal");
-    var closeProjectModal = document.getElementById("closeProjectModal");
-
-    if (createProjectBtn) {
-        createProjectBtn.onclick = function(event) {
-            event.stopPropagation();
-            createProjectModal.classList.add("show");
-        }
-    }
-
-    closeProjectModal.onclick = function() {
-        createProjectModal.classList.remove("show");
-    }
-
-    window.onclick = function(event) {
-        if (event.target == createProjectModal) {
-            createProjectModal.classList.remove("show");
-        }
-    };
-});
-
 setInterval(function () {
     fetch('../mysql/fetch_session.php')
 }, 5000);
+
+
 
 
 

@@ -1,50 +1,46 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once '../mysql/connexion_bdd.php';
 session_start();
 
-header('Content-Type: application/json');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (isset($input['file_id'])) {
+        $fileId = $input['file_id'];
 
-if (!isset($_POST['file_id'])) {
-    echo json_encode(['error' => 'Invalid request: file_id is missing']);
-    exit;
-}
+        // Connexion à la base de données
+        $conn = connexion_bdd();
 
-$file_id = intval($_POST['file_id']);
-$user_id = $_SESSION['Utilisateur_ID'];
+        // Vérification que le fichier appartient bien au groupe de l'utilisateur
+        $sql = "SELECT Adresse FROM FICHIER WHERE Fichier_ID = :file_id AND Groupe_ID = :groupe_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':file_id', $fileId, PDO::PARAM_INT);
+        $stmt->bindParam(':groupe_id', $_SESSION['Groupe_ID'], PDO::PARAM_INT);
+        $stmt->execute();
+        $file = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$conn = connexion_bdd();
+        if ($file) {
+            $filePath = '../uploads/' . $file['Adresse'];
 
-// Check if the file belongs to the logged-in user
-$sql = "SELECT * FROM FICHIER WHERE Fichier_ID = :file_id AND Utilisateur_id = :user_id";
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(':file_id', $file_id, PDO::PARAM_INT);
-$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-$stmt->execute();
+            // Suppression du fichier de la base de données
+            $sql = "DELETE FROM FICHIER WHERE Fichier_ID = :file_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':file_id', $fileId, PDO::PARAM_INT);
+            $stmt->execute();
 
-$file = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Suppression du fichier du serveur
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
 
-if (!$file) {
-    echo json_encode(['error' => 'File not found or you do not have permission to delete this file']);
-    exit;
-}
-
-$filePath = '../uploads/' . $file['Adresse'];
-
-if (file_exists($filePath) && is_writable($filePath)) {
-    unlink($filePath); // Delete the file from the server
+            echo json_encode(['message' => 'Fichier supprimé avec succès.', 'success' => true]);
+        } else {
+            echo json_encode(['message' => 'Fichier non trouvé ou non autorisé.', 'success' => false]);
+        }
+    } else {
+        echo json_encode(['message' => 'ID du fichier manquant.', 'success' => false]);
+    }
 } else {
-    echo json_encode(['error' => 'Cannot delete the file. File does not exist or is not writable.']);
-    exit;
+    echo json_encode(['message' => 'Requête non autorisée.', 'success' => false]);
 }
-
-$sql = "DELETE FROM FICHIER WHERE Fichier_ID = :file_id";
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(':file_id', $file_id, PDO::PARAM_INT);
-$stmt->execute();
-
-echo json_encode(['message' => 'File deleted successfully.', 'success' => true]);
 ?>
