@@ -20,10 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $conn = connexion_bdd();
         
-        // Commencer une transaction
         $conn->beginTransaction();
 
-        // Insertion dans la table PROJET
+        // créer projet
         $sql = "INSERT INTO PROJET (nom, status, priorite, deadline, id_groupe) VALUES (:nom, :status, :priorite, :deadline, :id_groupe)";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':nom', $projectName);
@@ -33,22 +32,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':id_groupe', $groupeID);
         $stmt->execute();
 
-        // Récupérer l'ID du projet nouvellement créé
         $projectID = $conn->lastInsertId();
 
-        // Insertion dans la table est_membre_projet
+        //ajout créateur au projet
         $sql = "INSERT INTO est_membre_projet (Utilisateur_ID, Projet_ID, admin) VALUES (:user_id, :project_id, 1)";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':user_id', $_SESSION['Utilisateur_ID']);
         $stmt->bindParam(':project_id', $projectID);
         $stmt->execute();
 
-        // Valider la transaction
         $conn->commit();
 
         header("Location: ../pages/main.php?groupe={$_SESSION['Groupe']}");
     } catch (PDOException $e) {
-        // Annuler la transaction en cas d'erreur
         $conn->rollBack();
         header("Location: ../pages/main.php?error=db_error");
     }

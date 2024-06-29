@@ -1,0 +1,59 @@
+/* Style de base pour la table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.9em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+th, td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #4c70af;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+/* Boutons Modifier et Supprimer */
+button {
+    cursor: pointer;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+button[onclick*='modification_ticket'] {
+    background-color: #ffa500; /* Orange */
+    color: white;
+}
+
+button[onclick*='suppression_ticket'] {
+    background-color: #f44336; /* Rouge */
+    color: white;
+}
+
+main .ticketBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+    grid-column: 1 / 4;
+}

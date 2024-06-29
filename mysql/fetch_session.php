@@ -5,6 +5,7 @@ include_once 'connexion_bdd.php';
 session_start();
 $conn = connexion_bdd();
 
+//verifie la session sur les pages (tourne tout les 5s)
 $sql_update = $conn->prepare("UPDATE UTILISATEUR SET derniere_connexion = NOW() WHERE Utilisateur_ID = :Utilisateur_ID");
 $sql_update->bindParam(':Utilisateur_ID', $_SESSION['Utilisateur_ID']);
 $sql_update->execute();

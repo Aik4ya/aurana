@@ -9,6 +9,7 @@ if (isset($_GET['project_id']) && isset($_GET['user_id'])) {
     $userID = $_GET['user_id'];
     $conn = connexion_bdd();
 
+    //passage de membre à admin
     $stmt = $conn->prepare("UPDATE est_membre_projet SET admin = 1 WHERE Projet_ID = :projectID AND Utilisateur_ID = :userID");
     $stmt->bindParam(':projectID', $projectID);
     $stmt->bindParam(':userID', $userID);

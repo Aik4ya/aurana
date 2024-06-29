@@ -7,6 +7,7 @@ if (isset($_POST['project_id']) && isset($_POST['projectMembers'])) {
     $conn = connexion_bdd();
     $success = true;
 
+    //parcourir les membres pour ajout
     foreach ($members as $memberID) {
         $stmt = $conn->prepare("INSERT INTO est_membre_projet (Utilisateur_ID, Projet_ID) VALUES (:memberID, :projectID)");
         $stmt->bindParam(':memberID', $memberID);

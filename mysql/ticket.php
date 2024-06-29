@@ -70,7 +70,6 @@ function afficher_tickets($dbh, $uid, $isAdmin)
 
 
 
-// Votre fonction repondre_ticket modifiée avec PHPMailer
 function repondre_ticket($dbh, $ticketId, $reponse)
 {
     try {
@@ -79,28 +78,27 @@ function repondre_ticket($dbh, $ticketId, $reponse)
         $stmt->execute([$ticketId]);
         $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        // Configuration de PHPMailer
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host = 'smtp.example.com'; // Configurez l'hôte SMTP
+        $mail->Host = 'smtp.example.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'your_email@example.com'; // Entrez votre adresse email
-        $mail->Password = 'your_password'; // Entrez votre mot de passe email
+        $mail->Username = 'your_email@example.com';
+        $mail->Password = 'your_password'; 
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        // Envoi de la réponse par email à chaque demandeur de ticket
+        
         foreach ($emails as $email) {
             $mail->setFrom('your_email@example.com', 'Votre Nom');
-            $mail->addAddress($email); // Ajoutez l'adresse email du destinataire
+            $mail->addAddress($email); 
             $mail->Subject = "Réponse à votre ticket";
             $mail->Body = "Votre ticket a reçu une réponse. Veuillez vous connecter pour consulter la réponse.";
 
             $mail->send();
-            $mail->clearAddresses(); // Effacez les adresses email précédentes
+            $mail->clearAddresses(); 
         }
 
-        // Mettre à jour la base de données avec la réponse
+        // Mettre à jour avec la réponse
         $stmt = $dbh->prepare("UPDATE TICKET SET Reponse = ? WHERE Ticket_ID = ?");
         $stmt->execute([$reponse, $ticketId]);
 

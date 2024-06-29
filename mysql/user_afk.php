@@ -17,6 +17,7 @@ require_once '/var/www/html/mysql/connexion_bdd.php';
 
 session_start();
 
+//récup membres inactifs
 function getAllMemberAfk()
 {
     $members = [];
@@ -34,6 +35,7 @@ function getAllMemberAfk()
     return $members;
 }
 
+//envoi mail PHPmailer
 $subject = "Notification d'inactivité";
 $message = "Votre dernière activité date de plus de 90 jours. Nous vous prions de vous connecter avant que votre compte soit supprimé.";
 
@@ -52,6 +54,7 @@ $mail->setFrom('staff.aurana@gmail.com', 'Aurana Staff');
 $mail->isHTML(true);
 $mail->CharSet = 'UTF-8';
 
+//parcourir les membres
 foreach ($members as $member) {
     $email = $member['Email'];
     $mail->addAddress($email);

@@ -8,6 +8,7 @@ if (isset($_GET['project_id']) && isset($_GET['user_id'])) {
     $userID = $_GET['user_id'];
     $conn = connexion_bdd();
 
+    //suppression d'un membre d'un projet
     $stmt = $conn->prepare("DELETE FROM est_membre_projet WHERE Projet_ID = :projectID AND Utilisateur_ID = :userID");
     $stmt->bindParam(':projectID', $projectID);
     $stmt->bindParam(':userID', $userID);

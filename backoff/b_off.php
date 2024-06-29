@@ -18,81 +18,103 @@
 ?>
 
 <!DOCTYPE html>
-<html lang="fr" class="dv">
-
+<html lang="fr">
 <head>
-	<meta charset="UTF-8">
-	<title>Aurana - BackOffice</title>
-	<link rel="stylesheet" href="../css/backoff.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurana - BackOffice</title>
+    <link rel="stylesheet" href="../css/main_profile.css">
+    <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/base_main.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 
 <body>
-  <div class="area"></div>
-  <nav class="main-menu">
-    <ul>
-      <li>
-        <a href="#">
-          <i class="fa fa-home fa-2x"></i>
-          <span class="nav-text">
-            Dashboard
-          </span>
-        </a>
-
-      </li>
-      <li class="has-subnav">
-        <a href="../backoff/utilisateurs.php">
-          <i class="fa fa-laptop fa-2x"></i>
-          <span class="nav-text">
-            Utilisateurs
-          </span>
-        </a>
-
-      </li>
-      <li class="has-subnav">
-        <a href="ticket.php">
-          <i class="fa fa-list fa-2x"></i>
-          <span class="nav-text">
-            Ticket
-          </span>
-        </a>
-
-      </li>
-      <li class="has-subnav">
-        <a href="newsletter.php">
-          <i class="fa fa-folder-open fa-2x"></i>
-          <span class="nav-text">
-            Newsletter
-          </span>
-        </a>
-
-      </li>
-      <li>
-        <a href="#">
-          <i class="fa fa-bar-chart-o fa-2x"></i>
-          <span class="nav-text">
-            Groupes
-          </span>
-        </a>
-      </li>
-      <li>
-        <a href="logs.php">
-          <i class="fa fa-font fa-2x"></i>
-          <span class="nav-text">
-            Logs
-          </span>
-        </a>
-      </li>
-      <li class="has-subnav">
-        <a href="qr_captcha.php">
-          <i class="fa fa-folder-open fa-2x"></i>
-          <span class="nav-text">
-            Captcha
-          </span>
-        </a>
-
-      </li>
-    </ul>
-  </nav>
-
+    <!-- container start -->
+    <div class="container">
+        <!-- left start -->
+        <div class="left">
+            <!-- header start -->
+            <header>
+                <!-- logo start -->
+                <div class="logo">
+                    <a href="b_off.php"><h2>aurana</h2></a>
+                    <div class="close">
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
+                    </div>
+                </div>
+                <!-- nav start -->
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="utilisateurs.php">
+                                <span class="material-symbols-outlined full">
+                                    group
+                                </span>
+                                <span class="title">Gestions des Utilisateurs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="ticket.php">
+                                <span class="material-symbols-outlined full">
+                                    stack
+                                </span>
+                                <span class="title">Tickets</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="qr_cptcha.php">
+                                <span class="material-symbols-outlined full">
+                                    help
+                                </span>
+                                <span class="title">Captcha</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="logs.php">
+                                <span class="material-symbols-outlined full">
+                                    wysiwyg
+                                </span>
+                                <span class="title">Logs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="newsletter.php">
+                                <span class="material-symbols-outlined full">
+                                    mail
+                                </span>
+                                <span class="title">Newsletter</span>
+                            </a>
+                    </ul>
+                </nav>
+                <!-- nav end -->
+            </header>
+            <!-- header end -->
+        </div>
+        <!-- left end -->
+        <!-- right start -->
+        <div class="right">
+            <!-- top start -->
+            <div class="top">
+                <!-- user start -->
+                <div class="user">
+                <?php
+                    session_start();
+                    echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+                    echo "<span>" . ($_SESSION['Droit'] == 1 ? "Administrateur" : "Utilisateur") . "</span></h2>";
+                ?>
+                </div>
+            </div>
+            <main>
+                <div class="">
+                </div>
+            </main>
+        </div>
+    </div>
 </body>
 </html>
+

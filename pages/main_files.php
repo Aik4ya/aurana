@@ -210,6 +210,24 @@ if (isset($_GET['groupe'])) {
 
                 <div class="user">
                     <?php
+                    // Affichage de l'avatar
+                    $sql = "SELECT Avatar FROM UTILISATEUR WHERE Utilisateur_ID = :id";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bindParam(':id', $_SESSION['Utilisateur_ID']);
+                    $stmt->execute();
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $avatar = $row['Avatar'];
+
+                    if ($avatar) {
+                        echo "<div class=\"avatarImg\">";
+                        echo "<img src=\"../uploads/avatars/$avatar\" alt=\"Avatar\">";
+                        echo "</div>";
+                    } else {
+                        echo "<div class=\"avatarImg\">";
+                        echo "<img src=\"../img/aurana_logo.png\" alt=\"Avatar\">";
+                        echo "</div>";
+                    }
+
                     // Affichage groupes + menu déroulant
                     echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
 
@@ -229,6 +247,10 @@ if (isset($_GET['groupe'])) {
                     <div class="menu" style="display: none;">
                         <ul id="menuList">
                             <li><a href="../pages/main_profile.php">Profil</a></li>
+                            <?php if ($_SESSION['droit'] = 1)
+                            {
+                                echo "<li><a href=\"../backoff/b_off.php\">Backoffice</a></li>";    
+                            }?> 
                             <li><a href="../pages/choisir_groupe.php">Choisir son groupe</a></li>
                             <li><a href="#" id="openCreateGroupModal">Créer un groupe</a></li>
                             <li><a href="#" id="openJoinGroupModal">Rejoindre un groupe</a></li>

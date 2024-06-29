@@ -1,59 +1,104 @@
 <?php
+require '../mysql/cookies_uid.php';
+require '../mysql/connexion_bdd.php';
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-require_once 'connexion_bdd.php';  // Assurez-vous que ce chemin est correct
 session_start();
 
-$conn = connexion_bdd();  // Établissez la connexion à la base de données
-
-$utilisateur_id = $_SESSION['Utilisateur_ID'];
-$username = $_POST['username'];
-$email = $_POST['email'];
-
-// Vérification et création du répertoire des avatars
-$avatar_directory = '../uploads/avatars/';
-if (!is_dir($avatar_directory)) {
-    mkdir($avatar_directory, 0755, true);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo 'Invalid request method';
+    exit;
 }
 
-// Vérification et upload de l'avatar
-if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    $file_extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+ecriture_log("main_chat");
+verif_session();
 
-    if (in_array($file_extension, $allowed_extensions)) {
-        $avatar_filename = $utilisateur_id . '.' . $file_extension;
-        $avatar_path = $avatar_directory . $avatar_filename;
-        if (move_uploaded_file($_FILES['avatar']['tmp_name'], $avatar_path)) {
-            // Mise à jour de l'avatar dans la base de données
-            $sql = "UPDATE UTILISATEUR SET Avatar = :avatar WHERE Utilisateur_ID = :id";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':avatar', $avatar_filename);
-            $stmt->bindParam(':id', $utilisateur_id);
-            $stmt->execute();
+// Validation des données reçues
+$username = isset($_POST['username']) ? htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8') : null;
+$email = isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : null;
 
-            // Mise à jour de la session
-            $_SESSION['Avatar'] = $avatar_filename;
-        } else {
-            echo "Erreur lors du téléchargement de l'avatar.";
-            exit;
-        }
-    } else {
-        echo "Extension de fichier non autorisée.";
+if (!$username || !$email) {
+    echo 'Missing required fields';
+    exit;
+}
+
+// Traitement de l'avatar
+$avatar = null;
+if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+    $avatar = basename($_FILES['avatar']['name']);
+    $uploadDir = '../uploads/avatars/';
+    $uploadFile = $uploadDir . $_SESSION['Utilisateur_ID'] . '.' . pathinfo($avatar, PATHINFO_EXTENSION);
+
+    // Vérifiez si le répertoire d'upload est accessible
+    if (!is_writable($uploadDir)) {
+        echo 'Upload directory is not writable.';
         exit;
     }
+
+    // Déplacez le fichier téléchargé
+    if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile)) {
+        echo 'Erreur lors du téléchargement de l\'avatar.';
+        error_log('Erreur lors du déplacement du fichier téléchargé: ' . print_r($_FILES, true));
+        exit;
+    }
+
+    $avatar = $_SESSION['Utilisateur_ID'] . '.' . pathinfo($avatar, PATHINFO_EXTENSION);
+} else if (isset($_FILES['avatar'])) {
+    // Log the error if the file upload fails
+    error_log('Erreur lors du téléchargement de l\'avatar: ' . $_FILES['avatar']['error']);
+    switch ($_FILES['avatar']['error']) {
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+            echo 'Le fichier téléchargé est trop volumineux.';
+            break;
+        case UPLOAD_ERR_PARTIAL:
+            echo 'Le fichier n\'a été que partiellement téléchargé.';
+            break;
+        case UPLOAD_ERR_NO_FILE:
+            echo 'Aucun fichier n\'a été téléchargé.';
+            break;
+        case UPLOAD_ERR_NO_TMP_DIR:
+            echo 'Le dossier temporaire est manquant.';
+            break;
+        case UPLOAD_ERR_CANT_WRITE:
+            echo 'Échec de l\'écriture du fichier sur le disque.';
+            break;
+        case UPLOAD_ERR_EXTENSION:
+            echo 'Une extension PHP a arrêté le téléchargement du fichier.';
+            break;
+        default:
+            echo 'Erreur inconnue lors du téléchargement du fichier.';
+            break;
+    }
+    exit;
 }
 
-// Mise à jour des informations de l'utilisateur
-$sql = "UPDATE UTILISATEUR SET Pseudo = :username, Email = :email WHERE Utilisateur_ID = :id";
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(':username', $username);
-$stmt->bindParam(':email', $email);
-$stmt->bindParam(':id', $utilisateur_id);
-$stmt->execute();
+$conn = connexion_bdd();
 
-header('Location: ../pages/main_profile.php');
+// Mettre à jour les informations de l'utilisateur
+$sql_update = "UPDATE UTILISATEUR SET Pseudo = :username, Email = :email";
+if ($avatar) {
+    $sql_update .= ", Avatar = :avatar";
+}
+$sql_update .= " WHERE Utilisateur_ID = :userID";
+
+$stmt_update = $conn->prepare($sql_update);
+$stmt_update->bindParam(':username', $username);
+$stmt_update->bindParam(':email', $email);
+if ($avatar) {
+    $stmt_update->bindParam(':avatar', $avatar);
+}
+$stmt_update->bindParam(':userID', $_SESSION['Utilisateur_ID'], PDO::PARAM_INT);
+
+if ($stmt_update->execute()) {
+    $_SESSION['Pseudo'] = $username;
+    $_SESSION['Email'] = $email;
+    if ($avatar) {
+        $_SESSION['Avatar'] = $avatar;
+    }
+    header('Location: ../pages/main_profile.php');
+    exit;
+} else {
+    echo 'Error updating profile details';
+    var_dump($stmt_update->errorInfo());
+}
 ?>

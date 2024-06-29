@@ -31,6 +31,7 @@ if (isset($_GET['userId'])) {
     exit("Paramètre userId manquant.");
 }
 
+//acivation + récupération mail
 function reactivateUser($userId) {
     try {
         $dbh = connexion_bdd();
@@ -54,7 +55,7 @@ function reactivateUser($userId) {
     }
 }
 
-
+//envoi mail PHPmailer
 function sendNotificationEmail($email) {
 
     $mail = new PHPMailer(true);

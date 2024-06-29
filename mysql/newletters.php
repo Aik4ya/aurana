@@ -17,6 +17,7 @@ require_once '../mysql/connexion_bdd.php';
 
 session_start();
 
+// récupérer tous les abonnés à la newsletter
 function getAllSubscribers()
 {
     $subscribers = [];
@@ -39,6 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = $_POST['message'];
     
     $subscribers = getAllSubscribers();
+
+
+    //envoi mail PHPmailer à tous les abonnés
 
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';

@@ -3,7 +3,6 @@
 require_once '../mysql/connexion_bdd.php';
 session_start();
 
-// Définir la taille maximale du fichier à 100MB
 $maxFileSize = 100 * 1024 * 1024;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
@@ -25,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
 
     // Déplacer le fichier vers le répertoire uploads
     if (move_uploaded_file($file['tmp_name'], $filePath)) {
-        // Scanner le fichier avec l'API VirusTotal
+        // Scanner le fichier avec VirusTotal
         $apiKey = '6bf815eb330e6e3193f9ccbdb9ba65d691c09bc4c0b81df61e5978f459970512';
         $url = 'https://www.virustotal.com/vtapi/v2/file/scan';
 
@@ -45,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
         $result = json_decode($response, true);
 
         if (isset($result['scan_id'])) {
-            // Sauvegarder les informations du fichier dans la base de données
+            // Sauvegarder les informations du fichier dans la bdd
             $conn = connexion_bdd();
             $sql = "INSERT INTO FICHIER (Adresse, Date_Stock, Groupe_ID, fichier_type, fichier_size, Utilisateur_id) VALUES (:adresse, NOW(), :groupe_id, :fichier_type, :fichier_size, :utilisateur_id)";
             $stmt = $conn->prepare($sql);

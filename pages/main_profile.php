@@ -1,10 +1,21 @@
 <?php
+
+require_once '../mysql/connexion_bdd.php';
 require '../mysql/cookies_uid.php';
+
+session_start();
+
+if (!isset($_SESSION['Utilisateur_ID'])) {
+    header('Location: ../pages/login.php');
+}
+
+$conn = connexion_bdd();
 
 $_SESSION['page_precedente'] = $_SERVER['REQUEST_URI'];
 
 ecriture_log("main_chat");
 verif_session();
+
 ?>
 
 <!DOCTYPE html>
@@ -51,6 +62,11 @@ verif_session();
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+            grid-column: 1 / 4;
+        }
+        .profile:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         .profile .profile-info {
             text-align: center;
@@ -61,17 +77,23 @@ verif_session();
             align-items: center;
         }
         .profile .profile-info .profile-image img {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            border: 3px solid #604caf;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .profile .profile-info .profile-image img:hover {
+            transform: scale(1.05);
+            border-color: #4571a0;
         }
         .profile .profile-details {
             margin-top: 20px;
         }
         .profile .profile-details h3 {
             margin: 0;
-            font-size: 20px;
+            font-size: 22px;
             color: #333;
         }
         .profile .profile-details p {
@@ -83,10 +105,14 @@ verif_session();
             margin: 10px 0;
             text-decoration: none;
             color: #2575fc;
-            transition: color 0.3s;
+            transition: color 0.3s, background-color 0.3s;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #2575fc;
         }
         .profile .profile-actions a:hover {
-            color: #6a11cb;
+            color: #fff;
+            background-color: #2575fc;
         }
         .modal {
             display: none;
@@ -104,7 +130,9 @@ verif_session();
             padding: 20px;
             border-radius: 10px;
             width: 400px;
+            max-width: 90%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-out;
         }
         .modal .modal-content .close {
             float: right;
@@ -128,6 +156,13 @@ verif_session();
             border: 1px solid #ddd;
             border-radius: 5px;
             width: calc(100% - 22px);
+            transition: border-color 0.3s;
+        }
+        .modal .modal-content form input[type="text"]:focus,
+        .modal .modal-content form input[type="email"]:focus,
+        .modal .modal-content form input[type="password"]:focus,
+        .modal .modal-content form input[type="file"]:focus {
+            border-color: #2575fc;
         }
         .modal .modal-content form input[type="submit"] {
             margin-top: 20px;
@@ -168,35 +203,11 @@ verif_session();
                 <nav>
                     <ul>
                         <li>
-                            <a href="main.php">
+                            <a href="../pages/choisir_groupe.php">
                                 <span class="material-symbols-outlined full">
                                     dashboard
                                 </span>
-                                <span class="title">Dashboard</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="main_task.php">
-                                <span class="material-symbols-outlined">
-                                    check_box
-                                </span>
-                                <span class="title">Tâches</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="main_chat.php">
-                                <span class="material-symbols-outlined">
-                                    chat_bubble
-                                </span>
-                                <span class="title">Messages</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="main_files.php">
-                                <span class="material-symbols-outlined">
-                                    account_balance_wallet
-                                </span>
-                                <span class="title">Fichiers</span>
+                                <span class="title">Choisir un groupe</span>
                             </a>
                         </li>
                     </ul>
@@ -217,19 +228,6 @@ verif_session();
                     echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
                     echo "<span>" . ($_SESSION['Droit'] == 1 ? "Administrateur" : "Utilisateur") . "</span></h2>";
                 ?>
-                    <div class="arrow">
-                        <span class="material-symbols-outlined">
-                            expand_more
-                        </span>
-                    </div>
-                    <div class="toggle">
-                        <span class="material-symbols-outlined">
-                            menu
-                        </span>
-                        <span class="material-symbols-outlined">
-                            close
-                        </span>
-                    </div>
                 </div>
             </div>
             <main>
@@ -238,27 +236,40 @@ verif_session();
                         <div class="profileHead">
                             <h2>Profil</h2>
                             <div class="profile-image">
-                                <?php
-                                    $avatarPath = isset($_SESSION['Avatar']) ? "../uploads/avatars/" . $_SESSION['Avatar'] : "../images/profile.png";
+                                <?php 
+                    $sql = "SELECT Avatar FROM UTILISATEUR WHERE Utilisateur_ID = :id";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bindParam(':id', $_SESSION['Utilisateur_ID']);
+                    $stmt->execute();
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $avatar = $row['Avatar'];
+
+                    if ($avatar) {
+                        echo "<div class=\"avatarImg\">";
+                        echo "<a href=\"../pages/main_profile.php\">";
+                        echo "<img src=\"../uploads/avatars/$avatar\" alt=\"Avatar\">";
+                        echo "</a>";
+                        echo "</div>";
+                    } else {
+                        echo "<div class=\"avatarImg\">";
+                        echo "<img src=\"../img/aurana_logo.png\" alt=\"Avatar\">";
+                        echo "</div>";
+                    }
                                 ?>
-                                <img src="<?php echo $avatarPath; ?>" alt="profile">
+
                             </div>
                         </div>
                         <div class="profile-details">
-                            <h3>Username: <?php echo $_SESSION['Pseudo']; ?></h3>
+                            <h3>Nom d'utilisateur: <?php echo $_SESSION['Pseudo']; ?></h3>
                             <p>Email: <?php echo $_SESSION['Email']; ?></p>
-                            <p>Role: <?php echo $_SESSION['Droit'] == 1 ? "Administrateur" : "Utilisateur"; ?></p>
+                            <p>Rôle: <?php echo $_SESSION['Droit'] == 1 ? "Administrateur" : "Utilisateur"; ?></p>
                         </div>
                     </div>
                     <div class="profile-actions">
-                        <a href="#" id="editProfileLink">Editer les informations</a>
-                        <br>
+                        <a href="#" id="editProfileLink">Éditer les informations</a>
                         <a href="#" id="changePasswordLink">Changer le mot de passe</a>
-                        <br>
-                        <a href="../pages/logout.php">Logout</a>
-                        <br>
-                        <a href="oubli.php">Options de Confidentialité</a>
-                        <br>
+                        <a href="../pages/logout.php">Se déconnecter</a>
+                        <a href="../mysql/generatePDF.php">Options de confidentialité</a>
                         <a href="#" id="personnalisation">Personnalisation</a>
                     </div>
                 </div>
@@ -266,9 +277,9 @@ verif_session();
                 <div id="editProfileModal" class="modal">
                     <div class="modal-content">
                         <span class="close" id="closeEditProfileModal">&times;</span>
-                        <h2>Editer les informations</h2>
+                        <h2>Éditer les informations</h2>
                         <form id="editProfileForm" action="../mysql/edit_profile.php" method="POST" enctype="multipart/form-data">
-                            <label for="username">Username:</label><br>
+                            <label for="username">Nom d'utilisateur:</label><br>
                             <input type="text" id="username" name="username" value="<?php echo $_SESSION['Pseudo']; ?>" required><br>
                             <label for="email">Email:</label><br>
                             <input type="email" id="email" name="email" value="<?php echo $_SESSION['Email']; ?>" required><br>
@@ -284,13 +295,13 @@ verif_session();
                         <span class="close" id="closeChangePasswordModal">&times;</span>
                         <h2>Changer le mot de passe</h2>
                         <form id="changePasswordForm" action="../mysql/change_password.php" method="POST">
-                            <label for="currentPassword">Current Password:</label><br>
+                            <label for="currentPassword">Mot de passe actuel:</label><br>
                             <input type="password" id="currentPassword" name="currentPassword" required><br>
-                            <label for="newPassword">New Password:</label><br>
+                            <label for="newPassword">Nouveau mot de passe:</label><br>
                             <input type="password" id="newPassword" name="newPassword" required><br>
-                            <label for="confirmPassword">Confirm New Password:</label><br>
+                            <label for="confirmPassword">Confirmer le nouveau mot de passe:</label><br>
                             <input type="password" id="confirmPassword" name="confirmPassword" required><br>
-                            <input type="submit" value="Change Password">
+                            <input type="submit" value="Changer le mot de passe">
                         </form>
                     </div>
                 </div>
@@ -300,9 +311,9 @@ verif_session();
                         <span class="close" id="closePersonnalisationModal">&times;</span>
                         <h2>Personnalisation</h2>
                         <form id="PersonnalisationForm" action="../mysql/set_parametres.php" method="POST">
-                            <label for="darkMode">Dark Mode:</label><br>
+                            <label for="darkMode">Mode sombre:</label><br>
                             <input type="checkbox" id="darkMode" name="darkMode"><br>
-                            <label for="notifications">Email Notifications:</label><br>
+                            <label for="notifications">Notifications par email:</label><br>
                             <input type="checkbox" id="notifications" name="notifications"><br>
                             <input type="submit" value="Sauvegarder les paramètres">
                         </form>

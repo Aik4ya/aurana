@@ -14,15 +14,16 @@ function creation_tache($dbh) {
         var_dump($_POST);
         echo '</pre>';
         
-        $Texte = $_POST['text'];
-        $Date_Creation = date("Y-m-d"); // Date de création actuelle
-        $Categorie = $_POST['categorie'];
+        $Texte = htmlspecialchars($_POST['text'], ENT_QUOTES, 'UTF-8');
+        $Date_Creation = date("Y-m-d"); 
+        $Categorie = htmlspecialchars($_POST['categorie'], ENT_QUOTES, 'UTF-8');
         $Groupe_ID = $_POST['groupeID'];
         $Date_Tache = isset($_POST['date_tache']) && !empty($_POST['date_tache']) ? $_POST['date_tache'] : null;
+        $Description = htmlspecialchars($_POST['description'], ENT_QUOTES, 'UTF-8');
         $Utilisateur_ID = $_SESSION['Utilisateur_ID'];
-        $Projet_ID = isset($_POST['project']) ? $_POST['project'] : null; // ID du projet sélectionné ou null pour personnel
+        $Projet_ID = isset($_POST['project']) ? $_POST['project'] : null; 
 
-        // Vérifier l'existence du groupe
+
         $groupeCheckSql = $dbh->prepare('SELECT COUNT(*) FROM GROUPE WHERE Groupe_ID = :Groupe_ID');
         $groupeCheckSql->bindParam(':Groupe_ID', $Groupe_ID);
         $groupeCheckSql->execute();
@@ -30,25 +31,26 @@ function creation_tache($dbh) {
             throw new Exception("Le Groupe_ID spécifié n'existe pas.");
         }
 
-        // Insérer la tâche
-        $sql = $dbh->prepare('INSERT INTO TACHE (Texte, Date_Creation, Categorie, Groupe_ID, stars, done, Date_Tache) VALUES (
-            :Texte, :Date_Creation, :Categorie, :Groupe_ID, 0, 0, :Date_Tache)');
+        //créer tache
+        $sql = $dbh->prepare('INSERT INTO TACHE (Texte, Date_Creation, Categorie, Groupe_ID, stars, done, Date_Tache, Description) VALUES (
+            :Texte, :Date_Creation, :Categorie, :Groupe_ID, 0, 0, :Date_Tache, :Description)');
         $sql->bindParam(':Texte', $Texte);
         $sql->bindParam(':Date_Creation', $Date_Creation);
         $sql->bindParam(':Categorie', $Categorie);
         $sql->bindParam(':Groupe_ID', $Groupe_ID);
         $sql->bindParam(':Date_Tache', $Date_Tache);
+        $sql->bindParam(':Description', $Description);
         $sql->execute();
         $Tache_ID = $dbh->lastInsertId();
 
-        // Assigner la tâche à l'utilisateur
+        //assigner au créateur
         $assignerSql = $dbh->prepare('INSERT INTO es_assigner (Utilisateur_ID, Tache_ID) VALUES (:Utilisateur_ID, :Tache_ID)');
         $assignerSql->bindParam(':Utilisateur_ID', $Utilisateur_ID);
         $assignerSql->bindParam(':Tache_ID', $Tache_ID);
         $assignerSql->execute();
 
-        // Lier la tâche au projet si un projet est spécifié
         if (!empty($Projet_ID)) {
+            //si pas de projet mettre en tache personnelle
             $projetAssignSql = $dbh->prepare('INSERT INTO tache_assignee_projet (id_tache, id_projet) VALUES (:Tache_ID, :Projet_ID)');
             $projetAssignSql->bindParam(':Tache_ID', $Tache_ID);
             $projetAssignSql->bindParam(':Projet_ID', $Projet_ID);

@@ -8,6 +8,7 @@ $query = isset($_GET['query']) ? $_GET['query'] : '';
 $groupId = isset($_SESSION['Groupe_ID']) ? $_SESSION['Groupe_ID'] : '';
 
 if ($query !== '' && $groupId !== '') {
+    //recherche message
     $sql = "SELECT MESSAGE.Texte, MESSAGE.Date_Envoi, UTILISATEUR.Pseudo 
             FROM MESSAGE 
             JOIN UTILISATEUR ON MESSAGE.Auteur_ID = UTILISATEUR.Utilisateur_ID 

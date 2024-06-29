@@ -1,10 +1,8 @@
 <?php
-// Activer l'affichage des erreurs pour le débogage
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Inclusion des fichiers nécessaires
 require_once 'connexion_bdd.php';
 require_once 'cookies_uid.php';
 require "../vendor/PHPMailer/src/PHPMailer.php";
@@ -13,7 +11,7 @@ require "../vendor/PHPMailer/src/Exception.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 
-// Fonction pour envoyer l'email de vérification
+//envoi mail PHPmailer
 function sendMail($send_to, $otp, $name) {
     try {
         $mail = new PHPMailer(true);
@@ -30,7 +28,7 @@ function sendMail($send_to, $otp, $name) {
         $mail->Body = "Bonjour, {$name}\nTon compte a été créé ! Rentrez le code suivant pour valider ton inscription : {$otp}.";
         $mail->send();
 
-        // Rediriger vers la page de vérification
+        // page OTP
         header("Location: ../pages/verif.php");
         exit();
     } catch (Exception $e) {
@@ -53,7 +51,6 @@ function store_temp_user($dbh, $username, $email, $password, $otp) {
 
         $sql->execute();
 
-        // Stocker les données dans la session pour une vérification ultérieure
         session_start();
         $_SESSION['temp_user'] = [
             'email' => $email
@@ -65,7 +62,6 @@ function store_temp_user($dbh, $username, $email, $password, $otp) {
     }
 }
 
-// Fonction pour traiter l'inscription
 function process_signup($dbh) {
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $username = htmlspecialchars($_POST['username']);
@@ -73,7 +69,7 @@ function process_signup($dbh) {
         $password = $_POST['password'];
         $otp = random_int(100000, 999999);
 
-        // Vérifier si l'email ou le nom d'utilisateur est déjà utilisé
+        //vérif si email ou pseudo déjà utilisé
         $sql_check = $dbh->prepare('SELECT COUNT(*) AS count FROM UTILISATEUR WHERE Email = :Email OR Pseudo = :Username');
         $sql_check->bindParam(':Email', $email);
         $sql_check->bindParam(':Username', $username);
@@ -81,7 +77,6 @@ function process_signup($dbh) {
         $result = $sql_check->fetch(PDO::FETCH_ASSOC);
 
         if ($result['count'] > 0) {
-            // Vérifier si l'email ou le nom d'utilisateur est déjà utilisé et rediriger avec le bon statut
             $sql_check_email = $dbh->prepare('SELECT COUNT(*) AS count FROM UTILISATEUR WHERE Email = :Email');
             $sql_check_email->bindParam(':Email', $email);
             $sql_check_email->execute();
@@ -103,13 +98,13 @@ function process_signup($dbh) {
         }
 
         // Vérifier la longueur du mot de passe
-        $longueurmdp = 8; // longueur minimale du mot de passe
+        $longueurmdp = 8;
         if (strlen($password) < $longueurmdp) {
             header("Location: ../pages/login.php?statut=$longueurmdp");
             exit();
         }
 
-        // Stocker temporairement l'utilisateur
+        // Stocker temporairement l'utilisateur avant vérification OTP
         store_temp_user($dbh, $username, $email, $password, $otp);
     }
 }

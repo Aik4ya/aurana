@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nouveau_message']) &&
     $groupe_id = $_SESSION['Groupe_ID'];
 
     if (!empty($message)) {
+        //envoi message
         $sql = "INSERT INTO MESSAGE (Texte, Date_Envoi, Auteur_ID, Destinataire_ID) VALUES (:message, NOW(), :auteur_id, :groupe_id)";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':message', $message, PDO::PARAM_STR);

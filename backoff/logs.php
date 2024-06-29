@@ -1,222 +1,200 @@
-<?php
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-$logDirectory = '../mysql/log/';
-$logs = scandir($logDirectory);
-
-$logFiles = [];
-$highlightedLogs = [];
-
-foreach ($logs as $logFile) {
-    if ($logFile === '.' || $logFile === '..') {
-        continue;
-    }
-
-    $logFilePath = $logDirectory. $logFile;
-
-    if (is_file($logFilePath)) {
-        $logContent = file_get_contents($logFilePath);
-        $logDate = date('Y-m-d H:i:s', filemtime($logFilePath));
-
-        $highlighted = isset($_GET['highlight']) && $_GET['highlight'] == $logFile? 'highlighted' : '';
-
-        $logFiles[] = [
-            'name' => $logFile,
-            'content' => $logContent,
-            'date' => $logDate,
-            'highlighted' => $highlighted
-        ];
-    }
-}
 
 
-echo "<table>";
-echo "<thead><tr><th>Nom du Fichier</th><th>Date de Modification</th><th>Action</th></tr></thead>";
-echo "<tbody>";
-foreach ($logFiles as $log) {
-    echo "<tr>";
-    echo "<td>{$log['name']}</td>";
-    echo "<td>{$log['date']}</td>";
-    echo "<td>";
-    echo "<button onclick='showLog(\"{$log['name']}\")'>Voir plus</button>";
-    echo "<button onclick='deleteLog(\"{$log['name']}\")'>Supprimer</button>";
-    echo "<button onclick='highlightLog(\"{$log['name']}\")'>Mettre en avant</button>";
-    echo "</td>";
-    echo "</tr>";
-}
-echo "</tbody>";
-echo "</table>";
-?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurana - BackOffice</title>
+    <link rel="stylesheet" href="../css/main_profile.css">
+    <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/base_main.css">
+    <link rel="stylesheet" href="../css/backoff_logs.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
 
-<div id="logModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeLogModal()">&times;</span>
-        <h2>Informations du log</h2>
-        <pre id="logContent"></pre>
+<body>
+    <!-- container start -->
+    <div class="container">
+        <div id="logModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeLogModal()">&times;</span>
+                <h2>Informations du log</h2>
+                <pre id="logContent"></pre>
+            </div>
+        </div>
+        <div class="left">
+            <!-- header start -->
+            <header>
+                <!-- logo start -->
+                <div class="logo">
+                    <a href="b_off.php"><h2>aurana</h2></a>
+                    <div class="close">
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
+                    </div>
+                </div>
+                <!-- nav start -->
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="utilisateurs.php">
+                                <span class="material-symbols-outlined full">
+                                    group
+                                </span>
+                                <span class="title">Gestions des Utilisateurs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="ticket.php">
+                                <span class="material-symbols-outlined full">
+                                    stack
+                                </span>
+                                <span class="title">Tickets</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="qr_cptcha.php">
+                                <span class="material-symbols-outlined full">
+                                    help
+                                </span>
+                                <span class="title">Captcha</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="logs.php">
+                                <span class="material-symbols-outlined full">
+                                    wysiwyg
+                                </span>
+                                <span class="title">Logs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="newsletter.php">
+                                <span class="material-symbols-outlined full">
+                                    mail
+                                </span>
+                                <span class="title">Newsletter</span>
+                            </a>
+                    </ul>
+                </nav>
+                <!-- nav end -->
+            </header>
+            <!-- header end -->
+        </div>
+        <div class="right">
+            <!-- top start -->
+            <div class="top">
+                <!-- user start -->
+                <div class="user">
+                <?php
+                    session_start();
+                    echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+                    echo "<span>" . ($_SESSION['Droit'] == 1 ? "Administrateur" : "Utilisateur") . "</span></h2>";
+                ?>
+                </div>
+            </div>
+            <main>
+                <div class="logsBox">
+                <?php
+                $logDirectory = '../mysql/log/';
+                $logs = scandir($logDirectory);
+
+                $logFiles = [];
+                $highlightedLogs = [];
+
+                foreach ($logs as $logFile) {
+                    if ($logFile === '.' || $logFile === '..') {
+                        continue;
+                    }
+
+                    $logFilePath = $logDirectory. $logFile;
+
+                    if (is_file($logFilePath)) {
+                        $logContent = file_get_contents($logFilePath);
+                        $logDate = date('Y-m-d H:i:s', filemtime($logFilePath));
+
+                        $highlighted = isset($_GET['highlight']) && $_GET['highlight'] == $logFile? 'highlighted' : '';
+
+                        $logFiles[] = [
+                            'name' => $logFile,
+                            'content' => $logContent,
+                            'date' => $logDate,
+                            'highlighted' => $highlighted
+                        ];
+                    }
+                }
+
+
+                echo "<table>";
+                echo "<thead><tr><th>Nom du Fichier</th><th>Date de Modification</th><th>Action</th></tr></thead>";
+                echo "<tbody>";
+                foreach ($logFiles as $log) {
+                    echo "<tr>";
+                    echo "<td>{$log['name']}</td>";
+                    echo "<td>{$log['date']}</td>";
+                    echo "<td>";
+                    echo "<button onclick='showLog(\"{$log['name']}\")'>Voir plus</button>";
+                    echo "<button onclick='deleteLog(\"{$log['name']}\")'>Supprimer</button>";
+                    echo "<button onclick='highlightLog(\"{$log['name']}\")'>Mettre en avant</button>";
+                    echo "</td>";
+                    echo "</tr>";
+                }
+                echo "</tbody>";
+                echo "</table>";
+                ?>
+                </div>
+            </main>
+        </div>
     </div>
-</div>
-
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
-    color: #333;
-    background-color: #f9f9f9;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0;
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 12px 18px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.highlighted {
-    background-color: #ffc107;
-    font-weight: bold;
-}
-
-
-tr:hover {
-    background-color: #f5f5f5;
-}
-
-button {
-    background-color: #4c59af;
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #93a1ff;
-}
-
-button:active {
-    background-color: #2e6c31;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    overflow: auto;
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.error {
-    color: #red;
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-
-@media screen and (max-width: 600px) {
-    table {
-        font-size: 14px;
-    }
-
-    th, td {
-        padding: 8px 12px;
-    }
-}
-</style>
-
-<script>
-
-function highlightLog(logName) {
-    if (confirm("Voulez-vous vraiment mettre en avant ce fichier de log?")) {
-        window.location.href = '../mysql/logs.php?highlight=' + encodeURIComponent(logName);
-    }
-}
-
-
-    function showLog(logName) {
-        const log = <?php echo json_encode($logFiles); ?>;
-        const logContent = log.find(log => log.name === logName).content;
-        document.getElementById('logContent').innerText = logContent;
-        document.getElementById('logModal').style.display = 'block';
-    }
-
-    function deleteLog(logName) {
-    if (confirm("Voulez-vous vraiment supprimer ce fichier de log?")) {
-        fetch('../mysql/delete_log.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ filename: logName, action: 'delete' }),
-        })
-      .then(response => response.json())
-      .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                throw new Error(data.message);
+    <script>
+        function highlightLog(logName) {
+            if (confirm("Voulez-vous vraiment mettre en avant ce fichier de log?")) {
+                window.location.href = '../mysql/logs.php?highlight=' + encodeURIComponent(logName);
             }
-        })
-      .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur lors de la suppression du fichier de log');
-        });
-    }
-}
+        }
+
+
+            function showLog(logName) {
+                const log = <?php echo json_encode($logFiles); ?>;
+                const logContent = log.find(log => log.name === logName).content;
+                document.getElementById('logContent').innerText = logContent;
+                document.getElementById('logModal').style.display = 'block';
+            }
+
+            function deleteLog(logName) {
+            if (confirm("Voulez-vous vraiment supprimer ce fichier de log?")) {
+                fetch('../mysql/delete_log.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ filename: logName, action: 'delete' }),
+                })
+            .then(response => response.json())
+            .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+            .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la suppression du fichier de log');
+                });
+            }
+        }
 
 
 
-    function closeLogModal() {
-        document.getElementById('logModal').style.display = 'none';
-    }
-</script>
+            function closeLogModal() {
+                document.getElementById('logModal').style.display = 'none';
+            }
+    </script>
+</body>
+</html>

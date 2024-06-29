@@ -10,7 +10,8 @@ if (!isset($_GET['task_id'])) {
 $taskID = $_GET['task_id'];
 $conn = connexion_bdd();
 
-$sql_task = "SELECT TACHE.Tache_ID, TACHE.Texte, TACHE.Categorie, TACHE.Date_Tache, UTILISATEUR.Pseudo 
+//récup tâches + détails
+$sql_task = "SELECT TACHE.Tache_ID, TACHE.Texte, TACHE.Categorie, TACHE.Date_Tache, TACHE.Description, UTILISATEUR.Pseudo 
              FROM TACHE 
              JOIN es_assigner ON TACHE.Tache_ID = es_assigner.Tache_ID 
              JOIN UTILISATEUR ON es_assigner.Utilisateur_ID = UTILISATEUR.Utilisateur_ID 

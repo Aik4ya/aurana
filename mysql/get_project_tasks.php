@@ -7,6 +7,7 @@ if (isset($_GET['project_id'])) {
     $groupeId = $_SESSION['Groupe_ID'];
     $userId = $_SESSION['Utilisateur_ID'];
     
+    //récupérer les tâches du projet
     $sqlTasks = "SELECT TACHE.Tache_ID, TACHE.Texte, TACHE.Date_Tache
                  FROM TACHE
                  JOIN tache_assignee_projet ON TACHE.Tache_ID = tache_assignee_projet.id_tache
@@ -16,6 +17,7 @@ if (isset($_GET['project_id'])) {
     $stmtTasks->execute();
     $tasks = $stmtTasks->fetchAll(PDO::FETCH_ASSOC);
 
+    //récupérer les membres du projet
     $sqlMembers = "SELECT UTILISATEUR.Utilisateur_ID, UTILISATEUR.Pseudo
                    FROM UTILISATEUR
                    JOIN est_membre_projet ON UTILISATEUR.Utilisateur_ID = est_membre_projet.Utilisateur_ID
@@ -25,7 +27,7 @@ if (isset($_GET['project_id'])) {
     $stmtMembers->execute();
     $members = $stmtMembers->fetchAll(PDO::FETCH_ASSOC);
 
-    $isAdmin = false;
+    //vérifier si admin de projet    
     $sqlIsAdmin = "SELECT admin FROM est_membre_projet WHERE Utilisateur_ID = :user_id AND Projet_ID = :project_id";
     $stmtIsAdmin = $conn->prepare($sqlIsAdmin);
     $stmtIsAdmin->bindParam(':user_id', $userId);
@@ -33,6 +35,8 @@ if (isset($_GET['project_id'])) {
     $stmtIsAdmin->execute();
     if ($stmtIsAdmin->fetchColumn() == 1) {
         $isAdmin = true;
+    } else {
+        $isAdmin = false;
     }
 
     echo json_encode([

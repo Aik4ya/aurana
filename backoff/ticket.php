@@ -54,39 +54,130 @@ function affichage_ticket($dbh)
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Ticket</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurana - BackOffice</title>
+    <link rel="stylesheet" href="../css/main_profile.css">
+    <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/base_main.css">
+    <link rel="stylesheet" href="../css/backoff_ticket.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
+
 <body>
-<div id="ticket">
-	<h2 class="header">Ticket</h2>
-	<form id="ticket-form">
-		<input type="text" id="new-ticket" placeholder="Enter ticket...">
-		<button type="button" id="btn-create-ticket">Créer un nouveau ticket</button>
-	</form>
-	<?php
-	affichage_ticket(connexion_bdd());
-	?>
-</div>
-<script>
-	document.getElementById('btn-create-ticket').addEventListener('click', function() {
-		creation_ticket();
-	});
+    <!-- container start -->
+    <div class="container">
+        <!-- left start -->
+        <div class="left">
+            <!-- header start -->
+            <header>
+                <!-- logo start -->
+                <div class="logo">
+                    <a href="b_off.php"><h2>aurana</h2></a>
+                    <div class="close">
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
+                    </div>
+                </div>
+                <!-- nav start -->
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="utilisateurs.php">
+                                <span class="material-symbols-outlined full">
+                                    group
+                                </span>
+                                <span class="title">Gestions des Utilisateurs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="ticket.php">
+                                <span class="material-symbols-outlined full">
+                                    stack
+                                </span>
+                                <span class="title">Tickets</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="qr_cptcha.php">
+                                <span class="material-symbols-outlined full">
+                                    help
+                                </span>
+                                <span class="title">Captcha</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="logs.php">
+                                <span class="material-symbols-outlined full">
+                                    wysiwyg
+                                </span>
+                                <span class="title">Logs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="newsletter.php">
+                                <span class="material-symbols-outlined full">
+                                    mail
+                                </span>
+                                <span class="title">Newsletter</span>
+                            </a>
+                    </ul>
+                </nav>
+                <!-- nav end -->
+            </header>
+            <!-- header end -->
+        </div>
+        <!-- left end -->
+        <!-- right start -->
+        <div class="right">
+            <!-- top start -->
+            <div class="top">
+                <!-- user start -->
+                <div class="user">
+                <?php
+                    session_start();
+                    echo "<h2>" . $_SESSION['Pseudo'] . "<br>";
+                    echo "<span>" . ($_SESSION['Droit'] == 1 ? "Administrateur" : "Utilisateur") . "</span></h2>";
+                ?>
+                </div>
+            </div>
+            <main>
+                <div class="ticketBox">
+					<div id="ticket">
+						<h2 class="header">Ticket</h2>
+						<form id="ticket-form">
+							<input type="text" id="new-ticket" placeholder="Enter ticket...">
+							<button type="button" id="btn-create-ticket">Créer un nouveau ticket</button>
+						</form>
+						<?php
+						affichage_ticket(connexion_bdd());
+						?>
+					</div>
+                </div>
+            </main>
+        </div>
+    </div>
+	<script>
+		document.getElementById('btn-create-ticket').addEventListener('click', function() {
+			creation_ticket();
+		});
 
-	function modification_ticket(id) {
-		alert('Modification du ticket ' + id);
-	}
+		function modification_ticket(id) {
+			alert('Modification du ticket ' + id);
+		}
 
-	function suppression_ticket(id) {
-		alert('Suppression du ticket ' + id);
-	}
+		function suppression_ticket(id) {
+			alert('Suppression du ticket ' + id);
+		}
 
-	function creation_ticket() {
-		alert('Création d\'un nouveau ticket');
-	}
-</script>
+		function creation_ticket() {
+			alert('Création d\'un nouveau ticket');
+		}
+	</script>
 </body>
 </html>

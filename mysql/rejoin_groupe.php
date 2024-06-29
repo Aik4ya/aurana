@@ -10,6 +10,7 @@ if (!isset($_POST['groupCode']) || empty($_POST['groupCode'])) {
 $groupCode = $_POST['groupCode'];
 $conn = connexion_bdd();
 
+//vérifie si le code correspond à un groupe
 $sql = "SELECT Groupe_ID, Nom FROM GROUPE WHERE Code = :groupCode";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':groupCode', $groupCode);
@@ -21,6 +22,7 @@ if ($group) {
     $groupId = $group['Groupe_ID'];
     $groupName = $group['Nom'];
     
+    //si condition ok ajouter l'utilisateur au groupe
     $sql = "INSERT INTO est_membre (Utilisateur_ID, GROUPE, droit) VALUES (:userId, :groupId, 0)";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':userId', $_SESSION['Utilisateur_ID']);

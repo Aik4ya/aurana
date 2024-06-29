@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     chatMessages.appendChild(messageElement);
                 });
+                // Scroll to the bottom of the chat container
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             })
             .catch(error => console.error('Error fetching messages:', error));
     }

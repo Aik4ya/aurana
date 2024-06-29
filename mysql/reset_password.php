@@ -11,6 +11,7 @@ require "../vendor/PHPMailer/src/Exception.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+//mdp aléatoire
 function generate_password($length = 3) {
     $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     $str = '';
@@ -30,6 +31,7 @@ if (!$userId) {
 }
 
 $dbh = connexion_bdd();
+//récupération mail
 $sql = $dbh->prepare("SELECT Email FROM UTILISATEUR WHERE Utilisateur_ID = :userId");
 $sql->bindParam(':userId', $userId, PDO::PARAM_INT);
 $sql->execute();
@@ -39,13 +41,12 @@ if (!$result) {
     die("Utilisateur non trouvé.");
 }
 
-// Générer le nouveau mot de passe
 $newPassword = generate_password();
 
 // Hacher le nouveau mot de passe
 $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-// Mise à jour du mot de passe dans la base de données
+//mise à jour mdp
 $updateSql = $dbh->prepare("UPDATE UTILISATEUR SET Mot_de_passe = :hashedPassword WHERE Utilisateur_ID = :userId");
 $updateSql->bindParam(':hashedPassword', $hashedPassword, PDO::PARAM_STR);
 $updateSql->bindParam(':userId', $userId, PDO::PARAM_INT);
@@ -53,12 +54,13 @@ $updateSql->execute();
 
 $mail = new PHPMailer(true);
 
+//envoi mail PHPmailer
 try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
     $mail->Username = "staff.aurana@gmail.com";
-    $mail->Password = "bphm shjn sdpq erno"; // Assurez-vous que ceci est le mot de passe d'application généré
+    $mail->Password = "bphm shjn sdpq erno";
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
     $mail->SMTPDebug = 2;

@@ -1,19 +1,18 @@
 <?php
 session_start();
-require '../mysql/connexion_bdd.php'; // This should include your PDO connection setup.
+require '../mysql/connexion_bdd.php'; 
 
 if (!isset($_SESSION['Utilisateur_ID']) || !$_SESSION['expiration'] > time()) {
-    // User is not logged in or session has expired.
     echo json_encode(['error' => 'Authentication required']);
     exit;
 }
 
-// Function to fetch calendar data.
+
 function getCalendarData($userId, $month, $year) {
     global $pdo;
     $response = [];
 
-    // Fetch tasks
+
     $tasksStmt = $pdo->prepare("
         SELECT t.Tache_ID, t.Texte, t.Date_Tache 
         FROM TACHE t
@@ -23,7 +22,7 @@ function getCalendarData($userId, $month, $year) {
     $tasksStmt->execute(['userId' => $userId, 'month' => $month, 'year' => $year]);
     $response['tasks'] = $tasksStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Fetch projects
+
     $projectsStmt = $pdo->prepare("
         SELECT p.ID, p.nom, p.deadline
         FROM PROJET p
@@ -36,7 +35,6 @@ function getCalendarData($userId, $month, $year) {
     return $response;
 }
 
-// Handle API request.
 if (isset($_GET['month']) && isset($_GET['year'])) {
     $data = getCalendarData($_SESSION['Utilisateur_ID'], $_GET['month'], $_GET['year']);
     echo json_encode($data);

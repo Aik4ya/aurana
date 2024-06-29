@@ -8,96 +8,17 @@
     grid-template-rows: repeat(6, 1fr);
     gap: 20px;
 }
-/* projectCard start */
-.container .right main .projectCard {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-    border-radius: 20px;
-    box-shadow: rgba(255, 255, 255, 0.5) 35px 35px 68px 0px,
-        inset rgba(255, 255, 255, 0.6) -8px -8px 16px 0px,
-        inset rgb(255, 255, 255) 0px 11px 28px 0px;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    grid-row: 1 / 7;
-}
-.container .right main .projectCard .projectTop {
-    width: 100%;
-    height: 100%;
-}
-.container .right main .projectCard .projectTop h2 {
-    color: #000;
-    font-size: 1.2em;
-    line-height: 18px;
-    cursor: pointer;
-}
-.container .right main .projectCard .projectTop h2 span {
-    color: #999;
-    font-size: 0.8em;
-}
 
-.container .right main .projectCard .projectTop .profile {
-    height: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-}
-
-.container .right main .projectCard .projectTop .profile img {
-    width: 50px;
-    height: 50px;
+.container .right main .profile .profile-image {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    margin-right: 10px;
 }
 
-.container .right main .projectCard .projectTop .profile-info {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    /* margin: 10px 0; */
-    gap: 10px;
-    flex-direction: column;
+.container .right main .profile-info .profileHead img {
     width: 100%;
-}
-
-.container .right main .projectCard .projectTop .profile-info .profileHead {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    margin-bottom: 40px;
-}
-
-.container .right main .projectCard .profile-actions {
-    display: flex;
-    justify-content: space-evenly;
-    margin: 20px 0;
-    align-content: space-around;
-    flex-direction: column;
-    align-items: flex-start;
-    background-color: transparent;
-}
-.container .right main .projectCard .profile-actions a {
-    text-decoration: none;
-    color: #000000;
-    padding: 10px 15px;
-    border: 1px solid #9c9c9c;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-.container .right main .projectCard .profile-actions a:hover {
-    background-color: #007BFF;
-    color: #fff;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Responsive */
@@ -229,7 +150,6 @@
     overflow: auto; /* Permet le défilement si nécessaire */
     background-color: rgb(0,0,0); /* Couleur de fond semi-opaque */
     background-color: rgba(0,0,0,0.4); /* Couleur de fond semi-opaque */
-    display: flex;
     align-items: center;
     justify-content: center;
     align-content: center;

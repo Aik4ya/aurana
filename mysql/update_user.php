@@ -14,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $dbh = connexion_bdd();
 
+        //maj données utitlisateur
         $sql = $dbh->prepare("UPDATE UTILISATEUR SET Pseudo = :pseudo, Email = :email, Droit =:droit WHERE Utilisateur_ID = :userId");
 
         $sql->bindParam(':pseudo', $username);

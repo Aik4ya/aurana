@@ -8,10 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($input['file_id'])) {
         $fileId = $input['file_id'];
 
-        // Connexion à la base de données
         $conn = connexion_bdd();
 
-        // Vérification que le fichier appartient bien au groupe de l'utilisateur
+        //vérif si fichier existe
         $sql = "SELECT Adresse FROM FICHIER WHERE Fichier_ID = :file_id AND Groupe_ID = :groupe_id";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':file_id', $fileId, PDO::PARAM_INT);
@@ -22,13 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($file) {
             $filePath = '../uploads/' . $file['Adresse'];
 
-            // Suppression du fichier de la base de données
+            //si condition ok supprimer
             $sql = "DELETE FROM FICHIER WHERE Fichier_ID = :file_id";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':file_id', $fileId, PDO::PARAM_INT);
             $stmt->execute();
 
-            // Suppression du fichier du serveur
             if (file_exists($filePath)) {
                 unlink($filePath);
             }

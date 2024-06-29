@@ -30,7 +30,7 @@ if (isset($_GET['userId'])) {
     http_response_code(400);
     exit("Paramètre userId manquant.");
 }
-
+//suspendre un utilisateur
 function suspendUser($userId) {
     try {
         $dbh = connexion_bdd();
@@ -38,7 +38,7 @@ function suspendUser($userId) {
         $stmt_suspend->bindParam(':userId', $userId);
         $stmt_suspend->execute();
 
-        
+        //recup email
         $stmt_email = $dbh->prepare("SELECT Email FROM UTILISATEUR WHERE Utilisateur_ID = :userId");
         $stmt_email->bindParam(':userId', $userId);
         $stmt_email->execute();
@@ -55,6 +55,7 @@ function suspendUser($userId) {
     }
 }
 
+//envoi mail PHPmailer
 function sendNotificationEmail($email) {
 
     $mail = new PHPMailer(true);

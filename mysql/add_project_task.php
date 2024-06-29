@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $taskDate = $_POST['taskDate'];
     $taskAssignee = $_POST['taskAssignee'];
 
+    //ajout tache
     $sqlTask = "INSERT INTO TACHE (Texte, Date_Creation, Date_Tache, Groupe_ID) VALUES (:text, NOW(), :date, :groupe_id)";
     $stmtTask = $conn->prepare($sqlTask);
     $stmtTask->bindParam(':text', $taskName);
@@ -16,12 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmtTask->execute();
     $taskId = $conn->lastInsertId();
 
+    //assigner tache
     $sqlAssignTask = "INSERT INTO es_assigner (Utilisateur_ID, Tache_ID) VALUES (:user_id, :task_id)";
     $stmtAssignTask = $conn->prepare($sqlAssignTask);
     $stmtAssignTask->bindParam(':user_id', $taskAssignee);
     $stmtAssignTask->bindParam(':task_id', $taskId);
     $stmtAssignTask->execute();
 
+    //lier tache à projet
     $sqlProjectTask = "INSERT INTO tache_assignee_projet (id_tache, id_projet) VALUES (:task_id, :project_id)";
     $stmtProjectTask = $conn->prepare($sqlProjectTask);
     $stmtProjectTask->bindParam(':task_id', $taskId);
